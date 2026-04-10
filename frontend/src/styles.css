@@ -1,0 +1,266 @@
+:root {
+  font-family: "Segoe UI", sans-serif;
+  color: #18212b;
+  background:
+    radial-gradient(circle at top left, rgba(140, 198, 255, 0.45), transparent 30%),
+    linear-gradient(135deg, #f5efe4 0%, #edf4f7 50%, #f3f7ed 100%);
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  background: #1d6b57;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.8rem 1.2rem;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #c3d3d1;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.9rem 1rem;
+}
+
+.container {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 3rem 0 4rem;
+}
+
+.hero {
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: #1d6b57;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  max-width: 14ch;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 0.98;
+}
+
+.lead {
+  max-width: 60ch;
+  font-size: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card {
+  border: 1px solid rgba(24, 33, 43, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 22px 60px rgba(55, 75, 87, 0.08);
+  padding: 1.4rem;
+}
+
+.database-path {
+  overflow-wrap: anywhere;
+  color: #4a5d6b;
+}
+
+.entry-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.entries {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.entry {
+  border-radius: 22px;
+  background: rgba(237, 244, 247, 0.95);
+  padding: 1rem;
+}
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.entry-meta span {
+  border-radius: 999px;
+  background: #d6ebe4;
+  color: #1d6b57;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.error {
+  color: #a62d2d;
+}
+
+@media (max-width: 720px) {
+  .container {
+    width: min(100% - 1rem, 1100px);
+    padding-top: 1rem;
+  }
+
+  .section-header,
+  .entry-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Subida de Archivos */
+.upload-card {
+  margin-top: 24px;
+  padding: 32px 24px;
+  border: 1px dashed #d0d5dd;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.upload-card h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.upload-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 12px 24px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.custom-file-upload:hover {
+  background-color: #0056b3;
+}
+
+.file-list-container {
+  text-align: left;
+  margin-top: 24px;
+  border-top: 1px solid #e4e7ec;
+  padding-top: 16px;
+}
+
+.file-list-container h3 {
+  margin-bottom: 12px;
+  font-size: 1.1em;
+}
+
+.file-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background-color: #f9fafb;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #344054;
+}
+
+.file-meta {
+  font-size: 0.85em;
+  color: #667085;
+  margin-top: 4px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-uploaded {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-processing {
+  background-color: #cce5ff;
+  color: #004085;
+}
