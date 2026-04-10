@@ -3,21 +3,14 @@ import { FormEvent, useEffect, useState } from "react";
 type ApiHealth = {
   status: string;
   service: string;
-  database: string;
 };
 
-type Entry = {
-  id: number;
-  title: string;
-  category: string;
-  description: string;
-  created_at: string;
-};
+type FileStatus = "pending" | "uploaded" | "processing"; // Pools listos para el futuro
 
-type EntryForm = {
-  title: string;
-  category: string;
-  description: string;
+export type UploadedFile = {
+  file: File;
+  uploadDate: Date;
+  status: FileStatus;
 };
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
@@ -33,167 +26,75 @@ export default function App() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [form, setForm] = useState<EntryForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const loadData = async () => {
-    setLoading(true);
-
-    try {
-      const [healthRes, entriesRes] = await Promise.all([
-        fetch(`${apiUrl}/health`),
-        fetch(`${apiUrl}/api/entries`),
-      ]);
-
-      if (!healthRes.ok) {
-        throw new Error(`Health HTTP ${healthRes.status}`);
-      }
-
-      if (!entriesRes.ok) {
-        throw new Error(`Entries HTTP ${entriesRes.status}`);
-      }
-
-      const [healthData, entriesData] = await Promise.all([
-        healthRes.json() as Promise<ApiHealth>,
-        entriesRes.json() as Promise<Entry[]>,
-      ]);
-
-      setHealth(healthData);
-      setEntries(entriesData);
-      setError(null);
-    } catch (err) {
-      setHealth(null);
-      setEntries([]);
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [files, setFiles] = useState<UploadedFile[]>([]);
 
   useEffect(() => {
     void loadData();
   }, []);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSaving(true);
-
-    try {
-      const response = await fetch(`${apiUrl}/api/entries`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Create HTTP ${response.status}`);
-      }
-
-      const createdEntry = (await response.json()) as Entry;
-      setEntries((currentEntries) => [createdEntry, ...currentEntries]);
-      setForm(initialForm);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setSaving(false);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newDocs: UploadedFile[] = Array.from(event.target.files).map((file) => ({
+        file: file,
+        uploadDate: new Date(),
+        status: "pending",
+      }));
+      setFiles((prevFiles) => [...prevFiles, ...newDocs]);
     }
   };
 
   return (
     <main className="container">
-      <section className="hero">
-        <p className="eyebrow">CAMELIA local stack</p>
-        <h1>Frontend y backend ya pueden leer y escribir en una base local.</h1>
-        <p className="lead">
-          La API usa PostgreSQL local y DBeaver puede conectarse con los datos
-          que el backend expone en el health check.
-        </p>
-      </section>
+      <h1>CAMELIA Monorepo</h1>
+      <p>Frontend: React + TypeScript</p>
+      <p>Backend: FastAPI + Pipenv</p>
+      <p>API URL: {apiUrl}</p>
 
-      <section className="grid">
-        <article className="card">
-          <h2>Estado de conexión</h2>
-          <p>API URL: {apiUrl}</p>
-          {health && (
-            <>
-              <p>
-                Backend: <strong>{health.status}</strong>
-              </p>
-              <p className="database-path">{health.database}</p>
-            </>
-          )}
-          {loading && <p>Cargando conexión...</p>}
-          {error && <p className="error">Error: {error}</p>}
-        </article>
-
-        <article className="card">
-          <h2>Crear registro</h2>
-          <form className="entry-form" onSubmit={handleSubmit}>
-            <input
-              placeholder="Título"
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, title: event.target.value }))
-              }
-              required
-            />
-            <input
-              placeholder="Categoría"
-              value={form.category}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  category: event.target.value,
-                }))
-              }
-              required
-            />
-            <textarea
-              placeholder="Descripción"
-              value={form.description}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
-              }
-              required
-              rows={4}
-            />
-            <button type="submit" disabled={saving}>
-              {saving ? "Guardando..." : "Guardar en PostgreSQL"}
-            </button>
-          </form>
-        </article>
-      </section>
-
-      <section className="card">
-        <div className="section-header">
-          <h2>Datos guardados</h2>
-          <button type="button" onClick={() => void loadData()} disabled={loading}>
-            Recargar
-          </button>
-        </div>
-
-        {!loading && entries.length === 0 && (
-          <p>No hay registros todavía. Crea uno desde el formulario.</p>
+      <section className="status-card">
+        <h2>Health check del backend</h2>
+        {health && (
+          <p>
+            {health.service}: <strong>{health.status}</strong>
+          </p>
         )}
+        {error && <p className="error">Error conectando con backend: {error}</p>}
+        {!health && !error && <p>Comprobando estado...</p>}
+      </section>
 
-        <div className="entries">
-          {entries.map((entry) => (
-            <article className="entry" key={entry.id}>
-              <div className="entry-meta">
-                <strong>{entry.title}</strong>
-                <span>{entry.category}</span>
-              </div>
-              <p>{entry.description}</p>
-              <small>{new Date(entry.created_at).toLocaleString()}</small>
-            </article>
-          ))}
+      <section className="upload-card">
+        <h2>Subir Archivos</h2>
+        <div className="upload-container">
+          <label htmlFor="file-upload" className="custom-file-upload">
+            Seleccionar documentos
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            multiple
+            onChange={handleFileUpload}
+          />
         </div>
+
+        {files.length > 0 && (
+          <div className="file-list-container">
+            <h3>Archivos subidos ({files.length}):</h3>
+            <ul className="file-list">
+              {files.map((doc, index) => (
+                <li key={index} className="file-item">
+                  <div className="file-info">
+                    <span className="file-name">{doc.file.name}</span>
+                    <span className="file-meta">
+                      {(doc.file.size / 1024).toFixed(2)} KB • {doc.uploadDate.toLocaleString()}
+                    </span>
+                  </div>
+                  <span className={`status-badge status-${doc.status}`}>
+                    {doc.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
     </main>
   );
