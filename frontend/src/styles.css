@@ -264,3 +264,52 @@ input[type="file"] {
   background-color: #cce5ff;
   color: #004085;
 }
+
+/* FASTA Input */
+.preset-selector {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.preset-btn {
+  padding: 8px 16px;
+  border: 1px solid #d0d5dd;
+  background-color: #ffffff;
+  color: #344054;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.preset-btn:hover {
+  background-color: #f9fafb;
+}
+
+.preset-btn.active {
+  background-color: #007bff;
+  color: #ffffff;
+  border-color: #007bff;
+}
+
+.fasta-input {
+  width: 100%;
+  min-height: 150px;
+  padding: 16px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95em;
+  resize: vertical;
+  background-color: #f9fafb;
+  color: #101828;
+}
+
+.fasta-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
