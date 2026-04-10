@@ -20,7 +20,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -39,7 +40,8 @@ button:disabled {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid #c3d3d1;
   border-radius: 16px;
@@ -102,6 +104,13 @@ textarea {
 .entry-form {
   display: grid;
   gap: 0.85rem;
+}
+
+.entry-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: #374151;
+  font-weight: 600;
 }
 
 .section-header {
