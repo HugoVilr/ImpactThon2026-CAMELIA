@@ -1,13 +1,22 @@
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 type ApiHealth = {
   status: string;
   service: string;
+  database: string;
 };
 
-type FileStatus = "pending" | "uploaded" | "processing"; // Pools listos para el futuro
+type Entry = {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  created_at: string;
+};
 
-export type UploadedFile = {
+type FileStatus = "pending" | "uploaded" | "processing";
+
+type UploadedFile = {
   file: File;
   uploadDate: Date;
   status: FileStatus;
@@ -15,16 +24,9 @@ export type UploadedFile = {
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
-const initialForm: EntryForm = {
-  title: "",
-  category: "",
-  description: "",
-};
-
 export default function App() {
   const [health, setHealth] = useState<ApiHealth | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [form, setForm] = useState<EntryForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
 
@@ -32,15 +34,48 @@ export default function App() {
     void loadData();
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newDocs: UploadedFile[] = Array.from(event.target.files).map((file) => ({
-        file: file,
-        uploadDate: new Date(),
-        status: "pending",
-      }));
-      setFiles((prevFiles) => [...prevFiles, ...newDocs]);
+  const loadData = async () => {
+    try {
+      const [healthRes, entriesRes] = await Promise.all([
+        fetch(`${apiUrl}/health`),
+        fetch(`${apiUrl}/api/entries`),
+      ]);
+
+      if (!healthRes.ok) {
+        throw new Error(`Health HTTP ${healthRes.status}`);
+      }
+
+      if (!entriesRes.ok) {
+        throw new Error(`Entries HTTP ${entriesRes.status}`);
+      }
+
+      const [healthData, entriesData] = await Promise.all([
+        healthRes.json() as Promise<ApiHealth>,
+        entriesRes.json() as Promise<Entry[]>,
+      ]);
+
+      setHealth(healthData);
+      setEntries(entriesData);
+      setError(null);
+    } catch (err) {
+      setHealth(null);
+      setEntries([]);
+      setError(err instanceof Error ? err.message : "Unknown error");
     }
+  };
+
+  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files) {
+      return;
+    }
+
+    const newDocs: UploadedFile[] = Array.from(event.target.files).map((file) => ({
+      file,
+      uploadDate: new Date(),
+      status: "pending",
+    }));
+
+    setFiles((currentFiles) => [...currentFiles, ...newDocs]);
   };
 
   return (
@@ -50,41 +85,40 @@ export default function App() {
       <p>Backend: FastAPI + Pipenv</p>
       <p>API URL: {apiUrl}</p>
 
-      <section className="status-card">
+      <section className="status-card card">
         <h2>Health check del backend</h2>
         {health && (
-          <p>
-            {health.service}: <strong>{health.status}</strong>
-          </p>
+          <>
+            <p>
+              {health.service}: <strong>{health.status}</strong>
+            </p>
+            <p className="database-path">{health.database}</p>
+          </>
         )}
         {error && <p className="error">Error conectando con backend: {error}</p>}
         {!health && !error && <p>Comprobando estado...</p>}
       </section>
 
       <section className="upload-card">
-        <h2>Subir Archivos</h2>
+        <h2>Subir archivos</h2>
         <div className="upload-container">
           <label htmlFor="file-upload" className="custom-file-upload">
             Seleccionar documentos
           </label>
-          <input
-            id="file-upload"
-            type="file"
-            multiple
-            onChange={handleFileUpload}
-          />
+          <input id="file-upload" type="file" multiple onChange={handleFileUpload} />
         </div>
 
         {files.length > 0 && (
           <div className="file-list-container">
-            <h3>Archivos subidos ({files.length}):</h3>
+            <h3>Archivos subidos ({files.length})</h3>
             <ul className="file-list">
               {files.map((doc, index) => (
-                <li key={index} className="file-item">
+                <li key={`${doc.file.name}-${index}`} className="file-item">
                   <div className="file-info">
                     <span className="file-name">{doc.file.name}</span>
                     <span className="file-meta">
-                      {(doc.file.size / 1024).toFixed(2)} KB • {doc.uploadDate.toLocaleString()}
+                      {(doc.file.size / 1024).toFixed(2)} KB •{" "}
+                      {doc.uploadDate.toLocaleString()}
                     </span>
                   </div>
                   <span className={`status-badge status-${doc.status}`}>
@@ -93,6 +127,26 @@ export default function App() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+      </section>
+
+      <section className="card">
+        <h2>Registros en base de datos</h2>
+        {entries.length === 0 ? (
+          <p>No hay registros todavía.</p>
+        ) : (
+          <div className="entries">
+            {entries.map((entry) => (
+              <article key={entry.id} className="entry">
+                <div className="entry-meta">
+                  <strong>{entry.title}</strong>
+                  <span>{entry.category}</span>
+                </div>
+                <p>{entry.description}</p>
+                <small>{new Date(entry.created_at).toLocaleString()}</small>
+              </article>
+            ))}
           </div>
         )}
       </section>
