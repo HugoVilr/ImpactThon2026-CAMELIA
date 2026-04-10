@@ -83,6 +83,11 @@ export default function App() {
   const [samples, setSamples] = useState<ProteinSample[]>([]);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [fastaSequence, setFastaSequence] = useState("");
+  const [preset, setPreset] = useState("Estándar");
 
   const [fastaSequence, setFastaSequence] = useState("");
   const [fastaFilename, setFastaFilename] = useState("sequence.fasta");
@@ -274,6 +279,36 @@ export default function App() {
           <button type="button" onClick={() => void loadDashboard()} disabled={loading}>
             Recargar datos
           </button>
+      <section className="upload-card">
+        <h2>Análisis FASTA</h2>
+        
+        <div className="preset-selector">
+          {["Vista rápida", "Estándar", "Alta precisión"].map((option) => (
+            <button
+              key={option}
+              className={`preset-btn ${preset === option ? "active" : ""}`}
+              onClick={() => setPreset(option)}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          className="fasta-input"
+          placeholder="Pega aquí tu secuencia FASTA (ej. >MiProteina\nMASNDYT...)"
+          value={fastaSequence}
+          onChange={(e) => setFastaSequence(e.target.value)}
+        />
+      </section>
+
+      <section className="upload-card">
+        <h2>Subir Archivos</h2>
+        <div className="upload-container">
+          <label htmlFor="file-upload" className="custom-file-upload">
+            Seleccionar documentos
+          </label>
+          <input id="file-upload" type="file" multiple onChange={handleFileUpload} />
         </div>
 
         <form className="entry-form" onSubmit={(event) => void handleSubmitJob(event)}>
