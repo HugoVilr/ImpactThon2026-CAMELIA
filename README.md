@@ -67,15 +67,9 @@ source ~/.bashrc
 
 ## Setup del proyecto
 
-### 1) Instalar dependencias del frontend
-
-Desde la raíz del repo:
-
 ```bash
 npm install
 ```
-
-### 2) Configurar backend con Pipenv
 
 ```bash
 cd backend
@@ -84,53 +78,23 @@ pipenv install --dev
 pipenv lock
 ```
 
-Si tu sistema no tiene Python 3.11 disponible:
-
 ```bash
-cd backend
-pipenv --python "$(which python)"
-pipenv install --dev
-pipenv lock
-```
-
-### 3) Variables de entorno (opcional, recomendado)
-
-```bash
-cp frontend/.env.example frontend/.env
 cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+docker compose up -d
 ```
 
 ## Ejecución
 
-### Base de datos
-
-Desde la raíz:
-
-```bash
-docker compose up -d
-```
-
-PostgreSQL quedará disponible en `localhost:5432`.
-
-### Backend
-
 ```bash
 cd backend
-cp .env.example .env
 pipenv run start
 ```
 
-API por defecto: `http://localhost:8000`
-
-### Frontend
-
-En otra terminal, desde la raíz:
-
 ```bash
+cd ..
 npm run dev:frontend
 ```
-
-App por defecto: `http://localhost:5173`
 
 ## Base de datos local
 
