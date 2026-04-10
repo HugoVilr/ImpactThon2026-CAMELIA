@@ -19,6 +19,8 @@ export default function App() {
   const [health, setHealth] = useState<ApiHealth | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [fastaSequence, setFastaSequence] = useState("");
+  const [preset, setPreset] = useState("Estándar");
 
   useEffect(() => {
     fetch(`${apiUrl}/health`)
@@ -65,6 +67,29 @@ export default function App() {
         )}
         {error && <p className="error">Error conectando con backend: {error}</p>}
         {!health && !error && <p>Comprobando estado...</p>}
+      </section>
+
+      <section className="upload-card">
+        <h2>Análisis FASTA</h2>
+        
+        <div className="preset-selector">
+          {["Vista rápida", "Estándar", "Alta precisión"].map((option) => (
+            <button
+              key={option}
+              className={`preset-btn ${preset === option ? "active" : ""}`}
+              onClick={() => setPreset(option)}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          className="fasta-input"
+          placeholder="Pega aquí tu secuencia FASTA (ej. >MiProteina\nMASNDYT...)"
+          value={fastaSequence}
+          onChange={(e) => setFastaSequence(e.target.value)}
+        />
       </section>
 
       <section className="upload-card">
