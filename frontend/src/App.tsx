@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type ApiHealth = {
   status: string;
@@ -15,27 +15,21 @@ export type UploadedFile = {
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
+const initialForm: EntryForm = {
+  title: "",
+  category: "",
+  description: "",
+};
+
 export default function App() {
   const [health, setHealth] = useState<ApiHealth | null>(null);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [form, setForm] = useState<EntryForm>(initialForm);
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<UploadedFile[]>([]);
 
   useEffect(() => {
-    fetch(`${apiUrl}/health`)
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        return (await res.json()) as ApiHealth;
-      })
-      .then((data) => {
-        setHealth(data);
-        setError(null);
-      })
-      .catch((err) => {
-        setHealth(null);
-        setError(err instanceof Error ? err.message : "Unknown error");
-      });
+    void loadData();
   }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

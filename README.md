@@ -9,6 +9,7 @@ Monorepo base con:
 
 - Frontend: React + TypeScript + Vite
 - Backend: FastAPI + Uvicorn
+- Base de datos local: PostgreSQL 16 con Docker Compose
 - Gestión de entorno Python: Pipenv (`Pipfile` + `Pipfile.lock`)
 
 ## Requisitos del sistema
@@ -17,6 +18,7 @@ Monorepo base con:
 - Node.js 20+ y npm
 - Python 3.11+ (recomendado 3.11)
 - Pipenv
+- Docker + Docker Compose
 
 ### Arch Linux
 
@@ -65,15 +67,9 @@ source ~/.bashrc
 
 ## Setup del proyecto
 
-### 1) Instalar dependencias del frontend
-
-Desde la raíz del repo:
-
 ```bash
 npm install
 ```
-
-### 2) Configurar backend con Pipenv
 
 ```bash
 cd backend
@@ -82,42 +78,49 @@ pipenv install --dev
 pipenv lock
 ```
 
-Si tu sistema no tiene Python 3.11 disponible:
-
 ```bash
-cd backend
-pipenv --python "$(which python)"
-pipenv install --dev
-pipenv lock
-```
-
-### 3) Variables de entorno (opcional, recomendado)
-
-```bash
-cp frontend/.env.example frontend/.env
 cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+docker compose up -d
 ```
 
 ## Ejecución
-
-### Backend
 
 ```bash
 cd backend
 pipenv run start
 ```
 
-API por defecto: `http://localhost:8000`
-
-### Frontend
-
-En otra terminal, desde la raíz:
-
 ```bash
+cd ..
 npm run dev:frontend
 ```
 
-App por defecto: `http://localhost:5173`
+## Base de datos local
+
+El backend usa PostgreSQL local con esta configuración por defecto:
+
+```text
+Host: localhost
+Puerto: 5432
+Base de datos: camelia
+Usuario: camelia
+Password: camelia
+```
+
+La API expone:
+
+- `GET /health`: devuelve estado y referencia de conexión a PostgreSQL
+- `GET /api/entries`: lista los registros
+- `POST /api/entries`: crea un registro
+
+### Abrir la base en DBeaver
+
+1. Crear una nueva conexión `PostgreSQL`.
+2. Usar host `localhost`, puerto `5432`, base `camelia`, usuario `camelia`, password `camelia`.
+3. Abrir la tabla `entries` en el esquema `public`.
+
+La tabla `entries` se crea automáticamente cuando arranca el backend.
 
 ## Validación rápida
 
