@@ -84,6 +84,22 @@ cp frontend/.env.example frontend/.env
 docker compose up -d
 ```
 
+## Frontend contra API remota (CESGA mock)
+
+El frontend está preparado para consumir por defecto:
+
+```text
+https://api-mock-cesga.onrender.com
+```
+
+Lo controla `frontend/.env` con `VITE_API_URL`.
+
+Si quieres apuntar al backend local de este repo, cambia:
+
+```text
+VITE_API_URL=http://localhost:8000
+```
+
 ## Ejecución
 
 ```bash
