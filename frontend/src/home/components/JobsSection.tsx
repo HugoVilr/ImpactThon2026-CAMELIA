@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
 import { cn } from "../../lib/utils";
@@ -68,14 +69,26 @@ export function JobsSection({
       ) : null}
 
       <div className="surface-shadow overflow-hidden rounded-lg border border-border bg-card">
-        <Table>
+        <Table
+          className="table-fixed"
+          style={{ "--jobs-actions-width": "20rem", "--jobs-action-button-width": "8.75rem" } as CSSProperties}
+        >
+          <colgroup>
+            <col style={{ width: "calc((100% - var(--jobs-actions-width)) / 4)" }} />
+            <col style={{ width: "calc((100% - var(--jobs-actions-width)) / 4)" }} />
+            <col style={{ width: "calc((100% - var(--jobs-actions-width)) / 4)" }} />
+            <col style={{ width: "calc((100% - var(--jobs-actions-width)) / 4)" }} />
+            <col style={{ width: "var(--jobs-actions-width)" }} />
+          </colgroup>
           <TableHeader className="bg-muted/45">
             <TableRow>
-              <TableHead>{t("jobs.columns.jobName")}</TableHead>
+              <TableHead className="pl-10">{t("jobs.columns.jobName")}</TableHead>
               <TableHead>{t("jobs.columns.status")}</TableHead>
               <TableHead>{t("jobs.columns.timestamp")}</TableHead>
               <TableHead>{t("jobs.columns.resource")}</TableHead>
-              <TableHead className="text-right">{t("jobs.columns.actions")}</TableHead>
+              <TableHead className="pr-10 text-right">
+                <span className="inline-block w-[var(--jobs-action-button-width)] text-left">{t("jobs.columns.actions")}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -89,7 +102,7 @@ export function JobsSection({
             ) : (
               filteredJobs.map((job) => (
                 <TableRow key={job.job_id}>
-                  <TableCell>
+                  <TableCell className="pl-10">
                     <a
                       href={`/jobs/${encodeURIComponent(job.job_id)}/logs`}
                       className="text-xs font-semibold text-slate-800 transition hover:text-primary"
@@ -120,22 +133,39 @@ export function JobsSection({
                     </span>
                   </TableCell>
 
-                  <TableCell className="text-right">
+                  <TableCell className="pr-10 text-right">
                     {job.status === "RUNNING" || job.status === "PENDING" ? (
-                      <div className="ml-auto flex w-[220px] items-center justify-end gap-3">
-                        <div className="w-24">
-                          <JobProgressBar job={job} />
+                      <div className="ml-auto flex w-full items-center">
+                        <div className="flex flex-1 justify-center">
+                          <div className="w-24 shrink-0 -translate-x-12">
+                            <JobProgressBar job={job} />
+                          </div>
                         </div>
-                        <Button type="button" size="sm" variant="outline" className="h-8 text-[11px]" disabled>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-[var(--jobs-action-button-width)] shrink-0 text-[11px]"
+                          disabled
+                        >
                           {t("jobs.actions.inProgress")}
                         </Button>
                       </div>
                     ) : job.status === "COMPLETED" ? (
-                      <Button type="button" size="sm" className="h-8 rounded-md px-4 text-[11px] font-bold">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-8 w-[var(--jobs-action-button-width)] rounded-md px-4 text-[11px] font-bold"
+                      >
                         {t("jobs.actions.viewResults")}
                       </Button>
                     ) : (
-                      <Button type="button" size="sm" variant="outline" className="h-8 text-[11px]">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-[var(--jobs-action-button-width)] text-[11px]"
+                      >
                         {t("jobs.actions.details")}
                       </Button>
                     )}
