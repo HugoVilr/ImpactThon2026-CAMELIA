@@ -30,29 +30,40 @@ DATABASE_LABEL = (
     f"{os.getenv('POSTGRES_DB', 'camelia')}"
 )
 
+# Variable global para controlar si hay base de datos disponible
+DB_ACTIVE = True
 
 def get_connection() -> psycopg.Connection:
     return psycopg.connect(DATABASE_URL, row_factory=dict_row)
 
 
 def init_db() -> None:
-    with get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS entries (
-                    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    title VARCHAR(120) NOT NULL,
-                    category VARCHAR(50) NOT NULL,
-                    description VARCHAR(500) NOT NULL,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    global DB_ACTIVE
+    try:
+        with get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS entries (
+                        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        title VARCHAR(120) NOT NULL,
+                        category VARCHAR(50) NOT NULL,
+                        description VARCHAR(500) NOT NULL,
+                        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                    """
                 )
-                """
-            )
-        connection.commit()
+            connection.commit()
+        DB_ACTIVE = True
+    except Exception as e:
+        print(f"⚠️ Alerta: No hay base de datos: {e}. Entrando en modo funcional limitado.")
+        DB_ACTIVE = False
 
 
 def list_entries() -> list[dict[str, Any]]:
+    if not DB_ACTIVE:
+        return [] # O devolver datos de prueba/mock
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
@@ -68,6 +79,9 @@ def list_entries() -> list[dict[str, Any]]:
 
 
 def create_entry(title: str, category: str, description: str) -> dict[str, Any]:
+    if not DB_ACTIVE:
+        raise RuntimeError("No Database Connection Available. Operación en modo limitado.")
+
     with get_connection() as connection:
         with connection.cursor() as cursor:
             cursor.execute(
