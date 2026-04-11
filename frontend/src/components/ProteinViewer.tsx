@@ -15,6 +15,9 @@ interface ProteinViewerProps {
 
 export interface ProteinViewerHandle {
   requestXrSession: (mode: "immersive-ar" | "immersive-vr") => Promise<void>;
+  highlightResidues: (startResidue: number, endResidue: number) => void;
+  clearHighlight: () => void;
+  focusResidues: (startResidue: number, endResidue: number) => void;
 }
 
 type SubscriptionLike = {
@@ -81,6 +84,46 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
   }, [isReady, onReadyChange]);
 
   useImperativeHandle(ref, () => ({
+    highlightResidues(startResidue, endResidue) {
+      const instance = pluginInstanceRef.current as any;
+      if (instance && typeof instance.visual?.highlight === "function") {
+        instance.visual.clearHighlight();
+        instance.visual.highlight({
+          data: [{
+            start_residue_number: startResidue,
+            end_residue_number: endResidue
+          }]
+        });
+      } else if (instance && typeof instance.visual?.select === "function") {
+        // Fallback if highlight is not available for some reason
+        instance.visual.clearSelection();
+        instance.visual.select({
+          data: [{
+            start_residue_number: startResidue,
+            end_residue_number: endResidue,
+            color: { r: 15, g: 118, b: 110 } 
+          }]
+        });
+      }
+    },
+    clearHighlight() {
+      const instance = pluginInstanceRef.current as any;
+      if (instance && typeof instance.visual?.clearHighlight === "function") {
+        instance.visual.clearHighlight();
+      }
+      if (instance && typeof instance.visual?.clearSelection === "function") {
+        instance.visual.clearSelection();
+      }
+    },
+    focusResidues(startResidue, endResidue) {
+      const instance = pluginInstanceRef.current as any;
+      if (instance && typeof instance.visual?.focus === "function") {
+        instance.visual.focus([{
+          start_residue_number: startResidue,
+          end_residue_number: endResidue
+        }]);
+      }
+    },
     async requestXrSession(mode) {
       const pluginInstance = pluginInstanceRef.current;
       const plugin = pluginInstance?.plugin;

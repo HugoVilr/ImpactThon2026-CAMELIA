@@ -57,6 +57,7 @@ export type SequenceProperties = {
   negative_charges: number;
   cysteine_residues: number;
   aromatic_residues: number;
+  hydrophobicity?: number;
 };
 
 export type BiologicalDataOutput = {
