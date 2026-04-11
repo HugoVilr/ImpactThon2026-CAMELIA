@@ -1,168 +1,248 @@
 {
-  "language": {
-    "label": "Idioma",
-    "es": "ES",
-    "en": "EN",
-    "gl": "GL"
-  },
-  "nav": {
-    "dashboard": "Dashboard",
-    "analytics": "Analítica",
-    "protocol": "Protocolo",
-    "registry": "Registro"
-  },
-  "hero": {
-    "kicker": "LABORATORY WORKSPACE",
-    "title": "Biohack Localfold",
-    "description": "Prepara tus secuencias de aminoácidos para el plegamiento. Selecciona la intensidad de recursos según la resolución objetivo y requisitos de pLDDT."
-  },
-  "sequence": {
-    "title": "Entrada y configuración",
-    "api": "API: {{api}}",
-    "service": "Servicio: {{service}} · {{status}} · v{{version}}",
-    "serviceNoVersion": "Servicio: {{service}} · {{status}}",
-    "serviceChecking": "Servicio: comprobando estado...",
-    "useSample": "Usar muestra FASTA",
-    "samplePlaceholder": "Selecciona una muestra",
-    "filename": "Nombre de archivo FASTA",
-    "filenamePlaceholder": "proteina.fasta",
-    "input": "Secuencia",
-    "inputPlaceholder": ">nombre_proteina\\nMKT...",
-    "uploadButton": "Subir archivo",
-    "runButton": "Ejecutar Plegamiento",
-    "submittingButton": "Enviando Job..."
-  },
-  "presets": {
-    "title": "Perfiles de Recursos",
-    "badge": "RECOMENDADO",
-    "draft": {
-      "name": "Vistazo Rápido",
-      "subtitle": "Resultados inmediatos",
-      "description": "Ideal para revisar rápidamente la forma básica de proteínas pequeñas con un tiempo de espera mínimo."
+    "language": {
+        "label": "Idioma",
+        "es": "ES",
+        "en": "EN",
+        "gl": "GL"
     },
-    "standard": {
-      "name": "Calidad de Publicación",
-      "subtitle": "El estándar científico",
-      "description": "La opción recomendada para obtener estructuras fiables y detalladas con un buen equilibrio entre precisión y tiempo."
+    "nav": {
+        "dashboard": "Dashboard",
+        "analytics": "Analítica",
+        "protocol": "Protocolo",
+        "registry": "Registro"
     },
-    "precision": {
-      "name": "Máximo Detalle",
-      "subtitle": "Para proteínas complejas",
-      "description": "Pensado para proteínas largas o complejas cuando necesitas el análisis más exhaustivo posible."
-    }
-  },
-  "jobs": {
-    "title": "Trabajos Recientes",
-    "filterAll": "Todos",
-    "filterRunning": "En ejecución",
-    "filterCompleted": "Completados",
-    "filtersAria": "Filtros de trabajos",
-    "loading": "Cargando trabajos...",
-    "empty": "No hay trabajos para este filtro.",
-    "columns": {
-      "jobName": "Trabajo",
-      "status": "Estado",
-      "timestamp": "Fecha",
-      "resource": "Recurso",
-      "actions": "Acciones"
+    "hero": {
+        "kicker": "LABORATORY WORKSPACE",
+        "title": "Biohack Localfold",
+        "description": "Prepara tus secuencias de aminoácidos para el plegamiento. Selecciona la intensidad de recursos según la resolución objetivo y requisitos de pLDDT."
     },
-    "actions": {
-      "viewResults": "Ver Resultados",
-      "inProgress": "En Progreso",
-      "details": "Detalles"
+    "sequence": {
+        "title": "Entrada y configuración",
+        "api": "API: {{api}}",
+        "service": "Servicio: {{service}} · {{status}} · v{{version}}",
+        "serviceNoVersion": "Servicio: {{service}} · {{status}}",
+        "serviceChecking": "Servicio: comprobando estado...",
+        "useSample": "Usar muestra FASTA",
+        "samplePlaceholder": "Selecciona una muestra",
+        "filename": "Nombre de archivo FASTA",
+        "filenamePlaceholder": "proteina.fasta",
+        "input": "Secuencia",
+        "inputPlaceholder": "\u003enombre_proteina\\nMKT...",
+        "uploadButton": "Subir archivo",
+        "runButton": "Ejecutar Plegamiento",
+        "submittingButton": "Enviando Job..."
     },
-    "progressAria": "Progreso del job {{name}}"
-  },
-  "jobLogs": {
-    "kicker": "Proyecto Activo",
-    "jobId": "Job {{id}}",
-    "tabs": {
-      "viewer": "Visor",
-      "logs": "Logs",
-      "extras": "Extras"
+    "presets": {
+        "title": "Perfiles de Recursos",
+        "badge": "RECOMENDADO",
+        "draft": {
+            "name": "Vistazo Rápido",
+            "subtitle": "Resultados inmediatos",
+            "description": "Ideal para revisar rápidamente la forma básica de proteínas pequeñas con un tiempo de espera mínimo."
+        },
+        "standard": {
+            "name": "Calidad de Publicación",
+            "subtitle": "El estándar científico",
+            "description": "La opción recomendada para obtener estructuras fiables y detalladas con un buen equilibrio entre precisión y tiempo."
+        },
+        "precision": {
+            "name": "Máximo Detalle",
+            "subtitle": "Para proteínas complejas",
+            "description": "Pensado para proteínas largas o complejas cuando necesitas el análisis más exhaustivo posible."
+        }
     },
-    "progress": {
-      "loadingTitle": "Cargando estado del job...",
-      "pendingTitle": "Job en cola en el clúster CESGA...",
-      "runningTitle": "Calculando estructura en el clúster CESGA...",
-      "completedTitle": "Ejecución completada. Outputs disponibles.",
-      "failedTitle": "La ejecución finalizó con error.",
-      "cancelledTitle": "El job fue cancelado.",
-      "step": "STEP {{current}}/{{total}} · {{phase}}",
-      "phases": {
-        "init": "INIT",
-        "queue": "QUEUE",
-        "msa": "MSA",
-        "features": "FEATURES",
-        "folding": "FOLDING",
-        "complete": "COMPLETE",
-        "failed": "FAILED",
-        "cancelled": "CANCELLED"
-      }
+    "jobs": {
+        "title": "Trabajos Recientes",
+        "filterAll": "Todos",
+        "filterRunning": "En ejecución",
+        "filterCompleted": "Completados",
+        "filtersAria": "Filtros de trabajos",
+        "loading": "Cargando trabajos...",
+        "empty": "No hay trabajos para este filtro.",
+        "columns": {
+            "jobName": "Trabajo",
+            "status": "Estado",
+            "timestamp": "Fecha",
+            "resource": "Recurso",
+            "actions": "Acciones"
+        },
+        "actions": {
+            "viewResults": "Ver Resultados",
+            "inProgress": "En Progreso",
+            "details": "Detalles"
+        },
+        "progressAria": "Progreso del job {{name}}"
     },
-    "stream": {
-      "title": "Scientific Job Logs",
-      "live": "Live Stream",
-      "snapshot": "Snapshot",
-      "empty": "Sin eventos de log todavía."
+    "jobLogs": {
+        "kicker": "Proyecto Activo",
+        "jobId": "Job {{id}}",
+        "tabs": {
+            "viewer": "Visor",
+            "logs": "Logs",
+            "extras": "Extras"
+        },
+        "progress": {
+            "loadingTitle": "Cargando estado del job...",
+            "pendingTitle": "Job en cola en el clúster CESGA...",
+            "runningTitle": "Calculando estructura en el clúster CESGA...",
+            "completedTitle": "Ejecución completada. Outputs disponibles.",
+            "failedTitle": "La ejecución finalizó con error.",
+            "cancelledTitle": "El job fue cancelado.",
+            "step": "STEP {{current}}/{{total}} · {{phase}}",
+            "phases": {
+                "init": "INIT",
+                "queue": "QUEUE",
+                "msa": "MSA",
+                "features": "FEATURES",
+                "folding": "FOLDING",
+                "complete": "COMPLETE",
+                "failed": "FAILED",
+                "cancelled": "CANCELLED"
+            }
+        },
+        "stream": {
+            "title": "Scientific Job Logs",
+            "live": "Live Stream",
+            "snapshot": "Snapshot",
+            "empty": "Sin eventos de log todavía."
+        },
+        "download": "Descargar Logs Técnicos Completos",
+        "errors": {
+            "load": "No se pudieron cargar los logs del job. {{detail}}"
+        },
+        "details": {
+            "too_charges": "Recuento de aminoácidos positivos frente a negativos. Determina la carga eléctrica neta, clave para la reactividad y unión a otras moléculas.",
+            "activity": "Actividad",
+            "helix": "Hélice",
+            "uniprot": "Uniprot ID",
+            "plddt": "Global pLDDT Avg",
+            "meta": "Metadatos moleculares",
+            "ramTime": "Horas Memory GB",
+            "strand": "Lámina",
+            "unknownMethod": "Método desconocido",
+            "mw": "Peso molecular",
+            "high": "Alta \u003e90",
+            "cys": "Cisteínas",
+            "too_solubility": "Estimación de la probabilidad de que la proteína sea soluble en agua. Valores \u003e50 indican una proteína soluble, mientras que valores \u003c30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.",
+            "noStructure": "La estructura no está disponible aún para este job.",
+            "too_mw": "Masa total de la proteína en kiloDaltons (kDa). Es esencial para identificar la molécula en experimentos de laboratorio como el Western Blot.",
+            "unknownStruct": "Estructura desconocida",
+            "pae": "Mapa de calor PAE interactivo",
+            "gpuTime": "Horas de GPU",
+            "cpuTime": "Horas de CPU",
+            "annotations": "Anotaciones y estructuras conocidas",
+            "alertsFound": "{{count}} alertas de seguridad",
+            "proteinCat": "Contexto Catálogo de Proteínas",
+            "too_arom": "Número de aminoácidos con anillos aromáticos (Fenilalanina, Tirosina y Triptófano). Estos residuos tienden a agruparse en el núcleo interno de la proteína para evitar el contacto con el agua, ayudando al plegamiento.",
+            "noAlerts": "Sin alertas de seguridad",
+            "publicationUnavail": "Publicación no disponible",
+            "too_stability": "Clasificación basada en el Índice de Inestabilidad. Se considera \"Estable\" si el índice es inferior a 40, lo que predice una vida media más larga de la molécula sintetizada.",
+            "instability": "Índice de inestabilidad",
+            "coil": "Espiral",
+            "arom": "Recuento aromático",
+            "category": "Categoría",
+            "paeUnavail": "PAE no disponible",
+            "hydro": "Hidrofobicidad",
+            "too_cys": "Recuento total de aminoácidos de cisteína en la secuencia. Estos residuos son críticos porque permiten la formación de puentes disulfuro, los cuales actúan como \"remaches\" que estabilizan la estructura tridimensional.",
+            "export": "Exportar",
+            "solubility": "Solubilidad",
+            "source": "Fuente",
+            "bioInsights": "Datos biológicos",
+            "function": "Función",
+            "cpuOnly": "Solo CPU",
+            "wallTime": "Tiempo total (Wall Time)",
+            "viewVr": "Ver en VR",
+            "too_source": "Indica de dónde provienen los resultados estructurales. \u0027Synthetic Prediction\u0027 significa que, al no coincidir con las 22 proteínas del catálogo real, el sistema ha generado una estructura y datos biológicos mediante algoritmos de simulación.",
+            "noTags": "No hay etiquetas disponibles.",
+            "too_hydro": "Tendencia de la proteína a evitar el agua. Valores negativos indican que la proteína es soluble y prefiere entornos acuosos.",
+            "veryLow": "Muy baja \u003c50",
+            "noStructs": "El catálogo no proporciona estructuras.",
+            "too_instability": "Medida que estima la estabilidad de la proteína en un tubo de ensayo basada en su composición de aminoácidos. Los valores inferiores a 40 son el umbral estándar para considerar que una proteína es estable.",
+            "cellular": "Ubicación celular",
+            "stability": "Estabilidad",
+            "too_plddt": "Medida de confianza de AlphaFold. Un valor \u003e70 indica un plegamiento fiable, mientras que \u003e90 refleja una precisión alta a nivel atómico.",
+            "aiDiscovery": "Descubrimiento IA",
+            "secStruct": "Desglose de estructura secundaria",
+            "too_uniprot": "Identificador universal de la proteína. Permite consultar funciones biológicas e investigaciones previas en bases de datos mundiales.",
+            "charges": "Cargas netas",
+            "too_pae": "Error de posición relativo entre aminoácidos. Las zonas verdes/oscuras indican una orientación segura entre los diferentes dominios de la proteína.",
+            "confDist": "Distribución de confianza",
+            "viewAr": "Ver en AR"
+        }
     },
-    "download": "Descargar Logs Técnicos Completos",
+    "status": {
+        "pending": "Pendiente",
+        "running": "En ejecución",
+        "completed": "Completado",
+        "failed": "Fallido",
+        "cancelled": "Cancelado"
+    },
+    "resource": {
+        "draft": "BORRADOR",
+        "standard": "ESTÁNDAR",
+        "highPrecision": "ALTA PRECISIÓN"
+    },
+    "footer": {
+        "brand": "BioHack",
+        "copy": "© 2026 OSG",
+        "privacy": "Privacidad",
+        "terms": "Términos",
+        "systemStatus": "Estado del Sistema"
+    },
+    "modal": {
+        "title": "Subir Archivo de Secuencia",
+        "description": "Selecciona o arrastra tus archivos .fasta o .txt.",
+        "dragDrop": "Arrastra y suelta archivos aquí",
+        "orSelect": "o selecciónalos desde tu equipo",
+        "browse": "Buscar Archivos Locales",
+        "supported": "FORMATOS SOPORTADOS: .FASTA, .FA, .FAA, .TXT",
+        "cancel": "Cancelar",
+        "fileInputLabel": "Seleccionar archivo FASTA",
+        "ariaLabel": "Subir archivo de secuencia"
+    },
+    "safetyModal": {
+        "title": "Resultados del análisis de seguridad",
+        "ariaLabel": "Resultados del análisis de seguridad",
+        "close": "Cerrar modal",
+        "sections": {
+            "toxicity": "Alertas de toxicidad",
+            "allergenicity": "Alertas de alergenicidad"
+        },
+        "noIssuesTitle": "No se detectaron incidencias",
+        "noIssuesDescription": "La secuencia superó todos los protocolos estándar de cribado de alergenicidad de la OMS y la EFSA."
+    },
+    "messages": {
+        "sampleLoaded": "Muestra cargada: {{name}}",
+        "fileLoaded": "Archivo cargado: {{name}}",
+        "jobSubmitted": "Job enviado: {{id}}"
+    },
     "errors": {
-      "load": "No se pudieron cargar los logs del job. {{detail}}"
-    }
-  },
-  "status": {
-    "pending": "Pendiente",
-    "running": "En ejecución",
-    "completed": "Completado",
-    "failed": "Fallido",
-    "cancelled": "Cancelado"
-  },
-  "resource": {
-    "draft": "BORRADOR",
-    "standard": "ESTÁNDAR",
-    "highPrecision": "ALTA PRECISIÓN"
-  },
-  "footer": {
-    "brand": "BioHack",
-    "copy": "© 2026 OSG",
-    "privacy": "Privacidad",
-    "terms": "Términos",
-    "systemStatus": "Estado del Sistema"
-  },
-  "modal": {
-    "title": "Subir Archivo de Secuencia",
-    "description": "Selecciona o arrastra tus archivos .fasta o .txt.",
-    "dragDrop": "Arrastra y suelta archivos aquí",
-    "orSelect": "o selecciónalos desde tu equipo",
-    "browse": "Buscar Archivos Locales",
-    "supported": "FORMATOS SOPORTADOS: .FASTA, .FA, .FAA, .TXT",
-    "cancel": "Cancelar",
-    "fileInputLabel": "Seleccionar archivo FASTA",
-    "ariaLabel": "Subir archivo de secuencia"
-  },
-  "safetyModal": {
-    "title": "Resultados del análisis de seguridad",
-    "ariaLabel": "Resultados del análisis de seguridad",
-    "close": "Cerrar modal",
-    "sections": {
-      "toxicity": "Alertas de toxicidad",
-      "allergenicity": "Alertas de alergenicidad"
+        "dashboardLoad": "No se pudieron cargar los datos del panel. {{detail}}",
+        "uploadRead": "No se pudo leer el archivo.",
+        "uploadEmpty": "El archivo está vacío.",
+        "fileFormat": "Formato de archivo no compatible.",
+        "invalidFasta": "La secuencia FASTA debe empezar por \"\u003e\".",
+        "jobSubmit": "No se pudo enviar el job. {{detail}}"
     },
-    "noIssuesTitle": "No se detectaron incidencias",
-    "noIssuesDescription": "La secuencia superó todos los protocolos estándar de cribado de alergenicidad de la OMS y la EFSA."
-  },
-  "messages": {
-    "sampleLoaded": "Muestra cargada: {{name}}",
-    "fileLoaded": "Archivo cargado: {{name}}",
-    "jobSubmitted": "Job enviado: {{id}}"
-  },
-  "errors": {
-    "dashboardLoad": "No se pudieron cargar los datos del panel. {{detail}}",
-    "uploadRead": "No se pudo leer el archivo.",
-    "uploadEmpty": "El archivo está vacío.",
-    "fileFormat": "Formato de archivo no compatible.",
-    "invalidFasta": "La secuencia FASTA debe empezar por \">\".",
-    "jobSubmit": "No se pudo enviar el job. {{detail}}"
-  }
+    "exportModal": {
+        "downloadAll": "Download All Assets (.zip)",
+        "pdf": {
+            "desc": "Un documento generado automáticamente que incluya la imagen de la proteína, el gráfico de pLDDT y la tabla de Biological Insights.",
+            "title": "Exportar Reporte (PDF)"
+        },
+        "close": "Cerrar modal",
+        "cif": {
+            "desc": "Archivo de alta precisión para estructuras complejas.",
+            "title": "Full Model (mmCIF)"
+        },
+        "pdb": {
+            "desc": "Formato estándar para visualización 3D.",
+            "title": "Structure (PDB)"
+        },
+        "title": "Descargar Resultados",
+        "json": {
+            "desc": "Valores brutos de pLDDT y matriz de error PAE.",
+            "title": "Confidence Data (JSON)"
+        }
+    }
 }
