@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { AlertTriangle, CheckCircle2, OctagonAlert, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimeModal, useAnimePressables } from "../animations";
 import { Button } from "./ui";
 import { cn } from "../../lib/utils";
 
@@ -35,6 +36,8 @@ const sectionOrder: SafetyFindingCategory[] = ["toxicity", "allergenicity"];
 
 export function SafetyFindingsModal({ isOpen, findings, onClose }: SafetyFindingsModalProps) {
   const { t } = useTranslation();
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -64,12 +67,19 @@ export function SafetyFindingsModal({ isOpen, findings, onClose }: SafetyFinding
     return grouped;
   }, [findings]);
 
+  useAnimeModal(isOpen, overlayRef, panelRef);
+  useAnimePressables(panelRef, {
+    selector: "button, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: isOpen,
+  });
+
   if (!isOpen) {
     return null;
   }
 
   return (
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-[90] grid place-items-center bg-slate-900/25 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
@@ -77,7 +87,8 @@ export function SafetyFindingsModal({ isOpen, findings, onClose }: SafetyFinding
       onClick={onClose}
     >
       <section
-        className="modal-enter surface-shadow-strong w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card"
+        ref={panelRef}
+        className="surface-shadow-strong w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card"
         onClick={(event) => event.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-4 border-b border-border/70 bg-slate-50/70 px-6 py-4">

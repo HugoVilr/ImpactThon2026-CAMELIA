@@ -1,6 +1,7 @@
-import { type ChangeEvent, type DragEvent, type RefObject } from "react";
+import { type ChangeEvent, type DragEvent, type RefObject, useRef } from "react";
 import { Search, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimeModal, useAnimePressables } from "../../commons/animations";
 import { Button } from "../../commons/components/ui";
 import { cn } from "../../lib/utils";
 
@@ -22,6 +23,11 @@ export function UploadModal({
   onSelectFile,
 }: UploadModalProps) {
   const { t } = useTranslation();
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  useAnimeModal(isOpen, overlayRef, panelRef);
+  useAnimePressables(panelRef, { selector: "button, .anime-pressable, [data-anime='pressable']", dependencyKey: isOpen });
 
   if (!isOpen) {
     return null;
@@ -50,8 +56,8 @@ export function UploadModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[80] grid place-items-center bg-slate-800/40 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={t("modal.ariaLabel")}>
-      <div className="modal-enter surface-shadow-strong w-full max-w-xl rounded-xl border border-border bg-card p-5">
+    <div ref={overlayRef} className="fixed inset-0 z-[80] grid place-items-center bg-slate-800/40 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={t("modal.ariaLabel")}>
+      <div ref={panelRef} className="surface-shadow-strong w-full max-w-xl rounded-xl border border-border bg-card p-5">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
             <h3 className="text-base font-semibold text-slate-900">{t("modal.title")}</h3>

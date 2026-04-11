@@ -1,6 +1,7 @@
-import type { ComponentType } from "react";
+import { type ComponentType, useMemo, useRef } from "react";
 import { Activity, AlertTriangle, CircleAlert, Info, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimeReveal } from "../../commons/animations";
 import { cn } from "../../lib/utils";
 import type { JobLogEntry, JobLogLevel } from "../types";
 
@@ -39,9 +40,24 @@ const levelLabelByType: Record<JobLogLevel, string> = {
 
 export function JobLogStreamPanel({ entries, isLive }: JobLogStreamPanelProps) {
   const { t } = useTranslation();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const entriesAnimationKey = useMemo(
+    () => entries.map((entry) => `${entry.id}-${entry.level}`).join("|"),
+    [entries]
+  );
+
+  useAnimeReveal(listRef, {
+    selector: ":scope > [data-anime='log-entry']",
+    dependencyKey: entriesAnimationKey,
+    delayStep: 32,
+    duration: 340,
+    translateY: 8,
+    startScale: 0.998,
+  });
 
   return (
-    <section className="surface-shadow overflow-hidden rounded-xl border border-border/50 bg-card/95">
+    <section ref={sectionRef} className="surface-shadow overflow-hidden rounded-xl border border-border/50 bg-card/95">
       <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
         <h2 className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("jobLogs.stream.title")}
@@ -52,7 +68,7 @@ export function JobLogStreamPanel({ entries, isLive }: JobLogStreamPanelProps) {
         </div>
       </div>
 
-      <div className="space-y-1 p-4 font-mono text-xs">
+      <div ref={listRef} className="space-y-1 p-4 font-mono text-xs">
         {entries.length === 0 ? (
           <p className="rounded-lg px-4 py-5 text-center text-muted-foreground">{t("jobLogs.stream.empty")}</p>
         ) : (
@@ -62,6 +78,7 @@ export function JobLogStreamPanel({ entries, isLive }: JobLogStreamPanelProps) {
             return (
               <div
                 key={entry.id}
+                data-anime="log-entry"
                 className={cn(
                   "flex items-start gap-2 rounded-lg px-4 py-2 transition-colors",
                   rowClassesByLevel[entry.level]

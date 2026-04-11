@@ -1,3 +1,4 @@
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 import type { JobDetailsTab } from "../jobResultsUtils";
@@ -10,9 +11,49 @@ type JobLogsTabsProps = {
 };
 
 const tabStyles = "pb-3 text-[15px] font-bold transition-colors";
+const tabOrder: JobDetailsTab[] = ["viewer", "logs", "extras"];
+
+const tabRefMap = () => ({
+  viewer: null as HTMLButtonElement | null,
+  logs: null as HTMLButtonElement | null,
+  extras: null as HTMLButtonElement | null,
+});
 
 export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: JobLogsTabsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navRef = useRef<HTMLElement | null>(null);
+  const tabRefs = useRef(tabRefMap());
+  const [tabIndicator, setTabIndicator] = useState({
+    left: 0,
+    width: 0,
+    ready: false,
+  });
+
+  const updateTabIndicator = useCallback(() => {
+    const nav = navRef.current;
+    const activeTabButton = tabRefs.current[activeTab];
+    if (!nav || !activeTabButton) {
+      return;
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    const tabRect = activeTabButton.getBoundingClientRect();
+
+    setTabIndicator({
+      left: tabRect.left - navRect.left,
+      width: tabRect.width,
+      ready: true,
+    });
+  }, [activeTab]);
+
+  useLayoutEffect(() => {
+    updateTabIndicator();
+    window.addEventListener("resize", updateTabIndicator);
+
+    return () => {
+      window.removeEventListener("resize", updateTabIndicator);
+    };
+  }, [updateTabIndicator, i18n.resolvedLanguage, showMeta]);
 
   return (
     <section className="space-y-3">
@@ -22,43 +63,34 @@ export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: 
         </p>
       ) : null}
 
-      <nav className="flex items-center gap-7 border-b border-border/60">
-        <button
-          type="button"
-          onClick={() => onTabChange("viewer")}
+      <nav ref={navRef} className="relative flex items-center gap-7 border-b border-border/60">
+        <span
+          aria-hidden="true"
           className={cn(
-            tabStyles,
-            activeTab === "viewer"
-              ? "border-b-2 border-primary text-primary"
-              : "text-muted-foreground hover:text-foreground"
+            "pointer-events-none absolute bottom-0 h-0.5 bg-primary transition-[transform,width] duration-300 ease-out",
+            tabIndicator.ready ? "opacity-100" : "opacity-0"
           )}
-        >
-          {t("jobLogs.tabs.viewer")}
-        </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("logs")}
-          className={cn(
-            tabStyles,
-            activeTab === "logs"
-              ? "border-b-2 border-primary text-primary"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {t("jobLogs.tabs.logs")}
-        </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("extras")}
-          className={cn(
-            tabStyles,
-            activeTab === "extras"
-              ? "border-b-2 border-primary text-primary"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {t("jobLogs.tabs.extras")}
-        </button>
+          style={{
+            width: `${tabIndicator.width}px`,
+            transform: `translateX(${tabIndicator.left}px)`,
+          }}
+        />
+        {tabOrder.map((tab) => (
+          <button
+            key={tab}
+            ref={(element) => {
+              tabRefs.current[tab] = element;
+            }}
+            type="button"
+            onClick={() => onTabChange(tab)}
+            className={cn(
+              tabStyles,
+              activeTab === tab ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {t(`jobLogs.tabs.${tab}`)}
+          </button>
+        ))}
       </nav>
 
       {showMeta ? (
