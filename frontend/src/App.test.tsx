@@ -211,6 +211,7 @@ const renderApp = () => {
 };
 
 beforeEach(async () => {
+  window.history.replaceState({}, "", "/");
   mockState = defaultMockState();
   submitRequests = [];
   submittedJobStatus = null;
@@ -226,6 +227,15 @@ afterEach(() => {
 });
 
 describe("App Home", () => {
+  it("renders dedicated job logs page route", async () => {
+    window.history.replaceState({}, "", "/jobs/job_running_002/logs");
+    renderApp();
+
+    expect(await screen.findByText(/scientific job logs/i)).toBeInTheDocument();
+    expect(await screen.findByText(/proyecto activo/i)).toBeInTheDocument();
+    expect(screen.queryByText(/entrada de secuencia/i)).not.toBeInTheDocument();
+  });
+
   it("renders home layout and jobs table", async () => {
     renderApp();
 
