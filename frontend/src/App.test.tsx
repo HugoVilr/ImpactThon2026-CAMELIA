@@ -5,8 +5,16 @@ import App from "./App";
 import i18n from "./i18n";
 import { setupStore } from "./store";
 
-const { mockRequestXrSession } = vi.hoisted(() => ({
+const {
+  mockRequestXrSession,
+  mockHighlightResidues,
+  mockClearHighlight,
+  mockFocusResidues,
+} = vi.hoisted(() => ({
   mockRequestXrSession: vi.fn(),
+  mockHighlightResidues: vi.fn(),
+  mockClearHighlight: vi.fn(),
+  mockFocusResidues: vi.fn(),
 }));
 
 vi.mock("./components/ProteinViewer", async () => {
@@ -14,7 +22,12 @@ vi.mock("./components/ProteinViewer", async () => {
 
   return {
     ProteinViewer: React.forwardRef<
-      { requestXrSession: (mode: "immersive-ar" | "immersive-vr") => Promise<void> },
+      {
+        requestXrSession: (mode: "immersive-ar" | "immersive-vr") => Promise<void>;
+        highlightResidues: (startResidue: number, endResidue: number) => void;
+        clearHighlight: () => void;
+        focusResidues: (startResidue: number, endResidue: number) => void;
+      },
       { structureData: string | null; onReadyChange?: (isReady: boolean) => void }
     >(function MockProteinViewer({ structureData, onReadyChange }, ref) {
       React.useEffect(() => {
@@ -23,9 +36,14 @@ vi.mock("./components/ProteinViewer", async () => {
 
       React.useImperativeHandle(ref, () => ({
         requestXrSession: mockRequestXrSession,
+        highlightResidues: (startResidue: number, endResidue: number) =>
+          mockHighlightResidues(structureData, startResidue, endResidue),
+        clearHighlight: () => mockClearHighlight(structureData),
+        focusResidues: (startResidue: number, endResidue: number) =>
+          mockFocusResidues(structureData, startResidue, endResidue),
       }));
 
-      return <div data-testid="protein-viewer">{structureData ?? "viewer-empty"}</div>;
+      return <div data-structure={structureData ?? "viewer-empty"} data-testid="protein-viewer">{structureData ?? "viewer-empty"}</div>;
     }),
   };
 });
@@ -233,6 +251,10 @@ const defaultMockState = (): MockState => ({
             high: 41,
             very_high: 18,
           },
+          pae_matrix: [
+            [7, 8],
+            [9, 10],
+          ],
         },
       },
       biological_data: {
@@ -578,6 +600,9 @@ beforeEach(async () => {
   submittedJobPollCount = 0;
   mockRequestXrSession.mockReset();
   mockRequestXrSession.mockResolvedValue(undefined);
+  mockHighlightResidues.mockReset();
+  mockClearHighlight.mockReset();
+  mockFocusResidues.mockReset();
   vi.stubGlobal("fetch", mockFetch);
   Object.defineProperty(window.navigator, "xr", {
     configurable: true,
@@ -598,7 +623,7 @@ describe("App Home", () => {
     renderApp();
 
     expect(await screen.findByText(/scientific job logs/i)).toBeInTheDocument();
-    expect(await screen.findByText(/active project/i)).toBeInTheDocument();
+    expect(await screen.findByText(/proyecto activo/i)).toBeInTheDocument();
     expect(screen.queryByText(/entrada de secuencia/i)).not.toBeInTheDocument();
   });
 
@@ -617,14 +642,14 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("button", { name: /visor/i })).toBeInTheDocument();
     expect(await screen.findByText(/global plddt avg/i)).toBeInTheDocument();
-    expect(await screen.findByText(/molecular metadata/i)).toBeInTheDocument();
+    expect(await screen.findByText(/metadatos moleculares/i)).toBeInTheDocument();
   });
 
   it("renders the compare subpage and loads the job history on the right column", async () => {
     window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
     renderApp();
 
-    expect(await screen.findByText(/selecciona un job para comparar/i)).toBeInTheDocument();
+    expect(await screen.findByText(/comparación de proteínas/i)).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /comparar spike/i })).toBeInTheDocument();
   });
 
@@ -647,6 +672,28 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("heading", { name: /calmodulin/i })).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
+  });
+
+  it("highlights residues in the matching comparison viewer when hovering each compare heatmap", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar calmodulin/i }));
+
+    const leftHeatmapCell = await screen.findByTitle(/residuos 1-1 vs 1-1: error esperado de 1/i);
+    const rightHeatmapCell = await screen.findByTitle(/residuos 1-1 vs 1-1: error esperado de 7/i);
+
+    fireEvent.mouseEnter(leftHeatmapCell);
+    expect(mockHighlightResidues).toHaveBeenCalledWith("data_demo_ubiquitin\n#\n", 1, 1);
+
+    fireEvent.mouseLeave(leftHeatmapCell);
+    expect(mockClearHighlight).toHaveBeenCalledWith("data_demo_ubiquitin\n#\n");
+
+    fireEvent.mouseEnter(rightHeatmapCell);
+    expect(mockHighlightResidues).toHaveBeenCalledWith("data_demo_calmodulin\n#\n", 1, 1);
+
+    fireEvent.click(rightHeatmapCell);
+    expect(mockFocusResidues).toHaveBeenCalledWith("data_demo_calmodulin\n#\n", 1, 1);
   });
 
   it("uses the resolved protein name in the dashboard job list when outputs differ from the fasta filename", async () => {
