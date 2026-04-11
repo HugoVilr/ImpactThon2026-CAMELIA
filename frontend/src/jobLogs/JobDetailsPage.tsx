@@ -423,7 +423,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                           <div className="h-1.5 rounded-full bg-gradient-to-r from-orange-400 via-amber-400 to-blue-700" />
                           <div className="flex items-center justify-between text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500">
                             <span>Very Low &lt;50</span>
-                            <span>High &gt;90</span>
+                            <span>Very High &gt;90</span>
                           </div>
                         </div>
                       </div>

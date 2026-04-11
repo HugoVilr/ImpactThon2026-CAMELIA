@@ -31,9 +31,9 @@ export const resolveConfidenceBuckets = (outputs: JobOutputsPayload | null): Con
   const histogram = outputs?.structural_data.confidence.plddt_histogram ?? {};
 
   return [
-    { key: "low", label: "Low", value: histogram.low ?? 0, toneClass: "bg-orange-500/50" },
-    { key: "medium", label: "Medium", value: histogram.medium ?? 0, toneClass: "bg-amber-400" },
-    { key: "high", label: "High", value: histogram.high ?? 0, toneClass: "bg-sky-400" },
+    { key: "low", label: "Very Low", value: histogram.low ?? 0, toneClass: "bg-orange-500" },
+    { key: "medium", label: "Low", value: histogram.medium ?? 0, toneClass: "bg-amber-400" },
+    { key: "high", label: "Confident", value: histogram.high ?? 0, toneClass: "bg-sky-400" },
     { key: "very_high", label: "Very High", value: histogram.very_high ?? 0, toneClass: "bg-blue-700" },
   ];
 };
