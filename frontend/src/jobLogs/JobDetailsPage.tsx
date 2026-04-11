@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
   BrainCircuit,
@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { HomeFooter, StatusBanners, TopBar } from "../commons/components";
+import { HomeFooter, SafetyFindingsModal, StatusBanners, TopBar, type SafetyFinding } from "../commons/components";
 import { Badge, Button, Card, CardContent } from "../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../components/ProteinViewer";
 import { resolveLanguage } from "../home/homeUtils";
@@ -71,11 +71,11 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const [proteinDetail, setProteinDetail] = useState<ProteinCatalogDetail | null>(null);
   const [logEntries, setLogEntries] = useState<JobLogEntry[]>([]);
   const [rawLogs, setRawLogs] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<FeedbackMessage | null>(null);
   const [viewerReady, setViewerReady] = useState(false);
   const [xrSupport, setXrSupport] = useState<XrSupport>({ ar: false, vr: false });
   const [xrError, setXrError] = useState<string | null>(null);
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
 
   const activeLanguage = resolveLanguage(i18n.resolvedLanguage ?? i18n.language);
   useEffect(() => {
@@ -172,10 +172,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
             },
           });
         }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
       }
     };
 
@@ -268,6 +264,28 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const proteinMetadata = outputs?.protein_metadata;
   const safetyAlerts = countSafetyAlerts(outputs);
   const confidenceTotal = confidenceBuckets.reduce((sum, bucket) => sum + bucket.value, 0);
+  const safetyFindings = useMemo<SafetyFinding[]>(() => {
+    const toxicityFindings =
+      biologicalData?.toxicity_alerts?.map((alert, index) => ({
+        id: `toxicity-${index}`,
+        category: "toxicity" as const,
+        severity: "warning" as const,
+        title: alert,
+        description: "",
+      })) ?? [];
+
+    const allergenicityFindings =
+      biologicalData?.allergenicity_alerts?.map((alert, index) => ({
+        id: `allergenicity-${index}`,
+        category: "allergenicity" as const,
+        severity: "warning" as const,
+        title: alert,
+        description: "",
+      })) ?? [];
+
+    return [...toxicityFindings, ...allergenicityFindings];
+  }, [biologicalData?.allergenicity_alerts, biologicalData?.toxicity_alerts]);
+  const hasSafetyData = Boolean(biologicalData);
 
 
   return (
@@ -478,7 +496,12 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                         </span>
                       </div>
 
-                      <div className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-[12px]">
+                      <button
+                        type="button"
+                        className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-[12px] text-left transition hover:bg-amber-100/60 disabled:cursor-not-allowed disabled:opacity-60"
+                        onClick={() => setIsSafetyModalOpen(true)}
+                        disabled={!hasSafetyData}
+                      >
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3 text-amber-800">
                             <AlertTriangle className="h-4 w-4" />
@@ -488,7 +511,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                           </div>
                           <span className="text-amber-500">›</span>
                         </div>
-                      </div>
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -736,6 +759,12 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         <HomeFooter />
         <StatusBanners errorMessage={errorMessage} successMessage={null} />
       </main>
+
+      <SafetyFindingsModal
+        isOpen={isSafetyModalOpen}
+        findings={safetyFindings}
+        onClose={() => setIsSafetyModalOpen(false)}
+      />
     </>
   );
 }
