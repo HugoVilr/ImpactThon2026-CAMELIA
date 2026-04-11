@@ -14,7 +14,7 @@ import {
   setSelectedPresetId,
 } from "../store/slices";
 import type { LanguageCode } from "../types/domain";
-import { localeForLanguage, resolveLanguage } from "./homeUtils";
+import { isValidFasta, localeForLanguage, resolveLanguage } from "./homeUtils";
 
 export function HomePage() {
   const dispatch = useAppDispatch();
@@ -92,7 +92,7 @@ export function HomePage() {
     void i18n.changeLanguage(language);
   };
 
-  const isFastaSequenceValid = fastaSequence.trim().startsWith(">");
+  const isFastaSequenceValid = isValidFasta(fastaSequence);
 
   const handleRunFolding = async () => {
     const result = await dispatch(

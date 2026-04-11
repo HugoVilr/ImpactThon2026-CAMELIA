@@ -49,3 +49,19 @@ export const resolveLanguage = (value: string | undefined): LanguageCode => {
 export const localeForLanguage = (language: LanguageCode): string => {
   return localeByLanguage[language];
 };
+
+export const FASTA_VALID_SEQ_REGEX = /^[ACDEFGHIKLMNPQRSTVWXYacdefghiklmnpqrstvwxy\s\*\-]+$/;
+
+export const isValidFasta = (fasta: string): boolean => {
+  const lines = fasta.trim().split("\n");
+  if (lines.length === 0 || !lines[0].startsWith(">")) {
+    return false;
+  }
+
+  const sequence = lines.slice(1).join("").trim();
+  if (sequence.length === 0) {
+    return false;
+  }
+
+  return FASTA_VALID_SEQ_REGEX.test(sequence);
+};

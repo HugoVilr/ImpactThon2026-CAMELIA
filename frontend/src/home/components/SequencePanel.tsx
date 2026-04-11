@@ -1,6 +1,7 @@
 import { Loader2, Rocket, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader } from "../../commons/components/ui";
+import { FastaEditor } from "./FastaEditor";
 
 type SequencePanelProps = {
   fastaSequence: string;
@@ -39,14 +40,12 @@ export function SequencePanel({
       <CardContent className="bg-card p-4">
         <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
           <label htmlFor="fasta-sequence" className="block">
-            <textarea
+            <FastaEditor
               id="fasta-sequence"
               aria-label={t("sequence.input")}
               value={fastaSequence}
-              onChange={(event) => onSequenceChange(event.target.value)}
+              onChange={onSequenceChange}
               placeholder={t("sequence.inputPlaceholder")}
-              rows={8}
-              className="block min-h-[220px] w-full resize-y rounded-none border border-border bg-white p-4 font-mono text-xs leading-relaxed text-slate-700 outline-none transition focus:ring-2 focus:ring-primary/30"
             />
           </label>
 
