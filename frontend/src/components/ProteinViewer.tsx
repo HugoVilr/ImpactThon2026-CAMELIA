@@ -17,15 +17,32 @@ export interface ProteinViewerHandle {
   requestXrSession: (mode: "immersive-ar" | "immersive-vr") => Promise<void>;
 }
 
+type SubscriptionLike = {
+  unsubscribe: () => void;
+};
+
 type PDBeMolstarPluginInstance = {
   render: (target: HTMLElement, options: unknown) => Promise<void>;
   clear?: () => Promise<void> | void;
   plugin?: {
     clear?: () => Promise<void> | void;
+    animationLoop?: {
+      start: (options?: { immediate?: boolean }) => void;
+      stop: (options?: { noDraw?: boolean }) => void;
+    };
     canvas3d?: {
+      animate: () => void;
+      pause: (noDraw?: boolean) => void;
+      xr?: {
+        request: () => Promise<void>;
+        isPresenting?: {
+          value: boolean;
+          subscribe: (listener: (isPresenting: boolean) => void) => SubscriptionLike;
+        };
+        end: () => Promise<void>;
+      };
       webgl?: {
         xr: {
-          set: (session: XRSession | undefined, options?: { resolutionScale?: number }) => Promise<void>;
           end: () => Promise<void>;
           session?: XRSession;
         };
@@ -34,7 +51,6 @@ type PDBeMolstarPluginInstance = {
     canvas3dContext?: {
       webgl?: {
         xr: {
-          set: (session: XRSession | undefined, options?: { resolutionScale?: number }) => Promise<void>;
           end: () => Promise<void>;
           session?: XRSession;
         };
@@ -55,6 +71,7 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
 ) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const pluginInstanceRef = useRef<PDBeMolstarPluginInstance | null>(null);
+  const xrLoopRestoreRef = useRef<(() => void) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -66,10 +83,11 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
   useImperativeHandle(ref, () => ({
     async requestXrSession(mode) {
       const pluginInstance = pluginInstanceRef.current;
-      const webgl =
-        pluginInstance?.plugin?.canvas3d?.webgl ?? pluginInstance?.plugin?.canvas3dContext?.webgl;
+      const plugin = pluginInstance?.plugin;
+      const canvas3d = plugin?.canvas3d;
+      const canvasXr = canvas3d?.xr;
 
-      if (!pluginInstance || !webgl) {
+      if (!pluginInstance || !plugin || !canvas3d || !canvasXr) {
         throw new Error("Protein viewer is not ready for XR.");
       }
 
@@ -82,11 +100,40 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
         throw new Error(`${mode === "immersive-ar" ? "AR" : "VR"} is not supported in this browser.`);
       }
 
-      const session = await navigator.xr.requestSession(mode, {
-        optionalFeatures: ["local-floor", "bounded-floor"],
-      });
+      const originalIsSessionSupported = navigator.xr.isSessionSupported.bind(navigator.xr);
+      navigator.xr.isSessionSupported = async (requestedMode) =>
+        requestedMode === mode ? originalIsSessionSupported(requestedMode) : false;
 
-      await webgl.xr.set(session, { resolutionScale: 1 });
+      try {
+        xrLoopRestoreRef.current?.();
+        plugin.animationLoop?.stop({ noDraw: true });
+
+        await canvasXr.request();
+
+        if (!canvas3d.xr?.isPresenting?.value) {
+          plugin.animationLoop?.start({ immediate: true });
+          throw new Error("XR session did not start.");
+        }
+
+        canvas3d.animate();
+
+        const presentationSubscription = canvas3d.xr?.isPresenting?.subscribe((isPresenting) => {
+          if (!isPresenting) {
+            presentationSubscription?.unsubscribe();
+            xrLoopRestoreRef.current = null;
+            canvas3d.pause();
+            plugin.animationLoop?.start({ immediate: true });
+          }
+        });
+
+        xrLoopRestoreRef.current = () => {
+          presentationSubscription?.unsubscribe();
+          canvas3d.pause();
+          plugin.animationLoop?.start({ immediate: true });
+        };
+      } finally {
+        navigator.xr.isSessionSupported = originalIsSessionSupported;
+      }
     },
   }), []);
 
@@ -96,6 +143,8 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
 
     const teardown = async () => {
       const currentInstance = pluginInstanceRef.current;
+      xrLoopRestoreRef.current?.();
+      xrLoopRestoreRef.current = null;
       const webgl =
         currentInstance?.plugin?.canvas3d?.webgl ?? currentInstance?.plugin?.canvas3dContext?.webgl;
 
