@@ -17,8 +17,4 @@ RUN pipenv install --system --deploy --clear
 # Copiar el código fuente de la aplicación
 COPY app/ ./app/
 
-# Exponer el puerto de Uvicorn/FastAPI
-EXPOSE 8000
-
-# Ejecutar el servidor para el contenedor, sin flag de reload ya que es para subirse (producción)
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import ,{ useEffect, useRef, useState } from "react";
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 
 interface ProteinViewerProps {
