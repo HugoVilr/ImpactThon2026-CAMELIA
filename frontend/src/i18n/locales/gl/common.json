@@ -141,6 +141,17 @@
     "fileInputLabel": "Seleccionar ficheiro FASTA",
     "ariaLabel": "Subir ficheiro de secuencia"
   },
+  "safetyModal": {
+    "title": "Resultados da análise de seguridade",
+    "ariaLabel": "Resultados da análise de seguridade",
+    "close": "Pechar modal",
+    "sections": {
+      "toxicity": "Alertas de toxicidade",
+      "allergenicity": "Alertas de alerxenicidade"
+    },
+    "noIssuesTitle": "Sen incidencias detectadas",
+    "noIssuesDescription": "A secuencia superou os protocolos estándar de cribado de alerxenicidade da OMS e da EFSA."
+  },
   "messages": {
     "sampleLoaded": "Mostra cargada: {{name}}",
     "fileLoaded": "Ficheiro cargado: {{name}}",
