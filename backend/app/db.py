@@ -56,7 +56,7 @@ def init_db() -> None:
             connection.commit()
         DB_ACTIVE = True
     except Exception as e:
-        print(f"⚠️ Alerta: No hay base de datos: {e}. Entrando en modo funcional limitado.")
+        print(f"Alerta: No hay base de datos: {e}. Entrando en modo funcional limitado.")
         DB_ACTIVE = False
 
 
