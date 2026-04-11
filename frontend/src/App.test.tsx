@@ -665,15 +665,3 @@ describe("Test XR Route", () => {
     expect(screen.getByText(/returned no pdb or cif structure/i)).toBeInTheDocument();
   }, 10000);
 });
-
-describe("Test Safety Modal Route", () => {
-  it("loads findings from outputs API and opens the safety modal", async () => {
-    renderApp("/test-safety-modal");
-
-    expect(await screen.findByRole("heading", { name: /safety modal test/i })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /load findings from api/i }));
-
-    expect(await screen.findByRole("dialog", { name: /resultados del análisis de seguridad/i })).toBeInTheDocument();
-    expect((await screen.findAllByText(/no se detectaron incidencias/i)).length).toBeGreaterThan(0);
-  });
-});

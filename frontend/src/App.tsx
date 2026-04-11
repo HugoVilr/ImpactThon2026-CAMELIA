@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { HomePage } from "./home";
 import { JobLogsPage } from "./jobLogs";
-import { TestSafetyModalPage } from "./test-safety-modal/TestSafetyModalPage";
 import { TestXrPage } from "./test-xr/TestXrPage";
 
 function JobLogsRoute() {
@@ -19,7 +18,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/jobs/:jobId/logs" element={<JobLogsRoute />} />
-        <Route path="/test-safety-modal" element={<TestSafetyModalPage />} />
         <Route path="/test-xr" element={<TestXrPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
