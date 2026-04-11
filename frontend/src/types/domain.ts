@@ -17,6 +17,7 @@ export type Job = {
   memory_gb: number;
   max_runtime_seconds: number;
   fasta_filename: string;
+  display_name?: string | null;
   error_message: string | null;
 };
 

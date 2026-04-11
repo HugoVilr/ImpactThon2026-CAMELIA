@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { shouldSkipAnimation, useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
+import { fetchJobOutputs } from "../../jobLogs/logsApi";
+import { resolveProteinNameFromOutputs } from "../../jobLogs/jobNameResolver";
 import { cn } from "../../lib/utils";
 import { displayJobName, resourceKeyForJob, statusTranslationKey } from "../homeUtils";
 import type { Job, JobFilter } from "../../types/domain";
@@ -34,6 +36,14 @@ const filterRefMap = () => ({
   completed: null as HTMLButtonElement | null,
 });
 
+const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): string => {
+  if (resolvedNames[job.job_id]) {
+    return resolvedNames[job.job_id];
+  }
+
+  return displayJobName(job);
+};
+
 export function JobsSection({
   locale,
   loading,
@@ -52,6 +62,7 @@ export function JobsSection({
     width: 0,
     ready: false,
   });
+  const [resolvedJobNames, setResolvedJobNames] = useState<Record<string, string>>({});
   const rowsAnimationKey = useMemo(() => filteredJobs.map((job) => job.job_id).join("|"), [filteredJobs]);
 
   useAnimeReveal(tableBodyRef, {
@@ -129,6 +140,47 @@ export function JobsSection({
     };
   }, [rowsAnimationKey]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateCompletedJobNames = async () => {
+      const unresolvedCompletedJobs = filteredJobs.filter(
+        (job) => job.status === "COMPLETED" && !resolvedJobNames[job.job_id]
+      );
+
+      if (unresolvedCompletedJobs.length === 0) {
+        return;
+      }
+
+      const resolvedEntries = await Promise.all(
+        unresolvedCompletedJobs.map(async (job) => {
+          try {
+            const outputs = await fetchJobOutputs(job.job_id);
+            const resolvedName = resolveProteinNameFromOutputs(outputs);
+            return resolvedName ? ([job.job_id, resolvedName] as const) : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setResolvedJobNames((current) => ({
+          ...current,
+          ...Object.fromEntries(
+            resolvedEntries.filter((entry): entry is readonly [string, string] => entry !== null)
+          ),
+        }));
+      }
+    };
+
+    void hydrateCompletedJobNames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filteredJobs, resolvedJobNames]);
+
   return (
     <section ref={sectionRef} className="space-y-3">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
@@ -145,7 +197,7 @@ export function JobsSection({
           <span
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute left-0 inset-y-1 rounded bg-white shadow transition-[transform,width] duration-300 ease-out",
+              "pointer-events-none absolute inset-y-1 left-0 rounded bg-white shadow transition-[transform,width] duration-300 ease-out",
               filterIndicator.ready ? "opacity-100" : "opacity-0"
             )}
             style={{
@@ -224,7 +276,7 @@ export function JobsSection({
                       }
                       className="text-xs font-semibold text-slate-800 transition hover:text-primary"
                     >
-                      {displayJobName(job)}
+                      {resolveJobLabel(job, resolvedJobNames)}
                     </Link>
                   </TableCell>
 

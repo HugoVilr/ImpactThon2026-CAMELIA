@@ -68,6 +68,36 @@ type MolstarWindow = Window & {
   PDBeMolstarPlugin?: PDBeMolstarPluginConstructor;
 };
 
+const MOLSTAR_DUPLICATE_SYMBOL_WARNING = "already added. Call removeSymbol/removeCustomProps re-adding the symbol.";
+
+let activeMolstarWarningFilters = 0;
+let originalConsoleWarn: typeof console.warn | null = null;
+
+const installMolstarWarningFilter = (): (() => void) => {
+  if (activeMolstarWarningFilters === 0) {
+    originalConsoleWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      const [firstArg] = args;
+      if (typeof firstArg === "string" && firstArg.includes(MOLSTAR_DUPLICATE_SYMBOL_WARNING)) {
+        return;
+      }
+
+      originalConsoleWarn?.(...args);
+    };
+  }
+
+  activeMolstarWarningFilters += 1;
+
+  return () => {
+    activeMolstarWarningFilters = Math.max(0, activeMolstarWarningFilters - 1);
+
+    if (activeMolstarWarningFilters === 0 && originalConsoleWarn) {
+      console.warn = originalConsoleWarn;
+      originalConsoleWarn = null;
+    }
+  };
+};
+
 export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>(function ProteinViewer(
   { structureData, onReadyChange },
   ref
@@ -267,7 +297,12 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
           ]
         };
 
-        await currentInstance.render(viewerRef.current, options);
+        const restoreConsoleWarn = installMolstarWarningFilter();
+        try {
+          await currentInstance.render(viewerRef.current, options);
+        } finally {
+          restoreConsoleWarn();
+        }
 
         if (!isMounted) {
           return;

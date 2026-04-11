@@ -11,10 +11,11 @@ type JobLogsTabsProps = {
 };
 
 const tabStyles = "pb-3 text-[15px] font-bold transition-colors";
-const tabOrder: JobDetailsTab[] = ["viewer", "logs", "extras"];
+const tabOrder: JobDetailsTab[] = ["viewer", "compare", "logs", "extras"];
 
 const tabRefMap = () => ({
   viewer: null as HTMLButtonElement | null,
+  compare: null as HTMLButtonElement | null,
   logs: null as HTMLButtonElement | null,
   extras: null as HTMLButtonElement | null,
 });
@@ -36,22 +37,40 @@ export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: 
       return;
     }
 
-    const navRect = nav.getBoundingClientRect();
-    const tabRect = activeTabButton.getBoundingClientRect();
-
     setTabIndicator({
-      left: tabRect.left - navRect.left,
-      width: tabRect.width,
+      left: activeTabButton.offsetLeft,
+      width: activeTabButton.offsetWidth,
       ready: true,
     });
   }, [activeTab]);
 
   useLayoutEffect(() => {
     updateTabIndicator();
+    const rafId = window.requestAnimationFrame(updateTabIndicator);
     window.addEventListener("resize", updateTabIndicator);
+    const canUseResizeObserver = typeof ResizeObserver !== "undefined";
+    const resizeObserver = canUseResizeObserver
+      ? new ResizeObserver(() => {
+          updateTabIndicator();
+        })
+      : null;
+
+    if (resizeObserver && navRef.current) {
+      resizeObserver.observe(navRef.current);
+    }
+    if (resizeObserver) {
+      tabOrder.forEach((tab) => {
+        const button = tabRefs.current[tab];
+        if (button) {
+          resizeObserver.observe(button);
+        }
+      });
+    }
 
     return () => {
+      window.cancelAnimationFrame(rafId);
       window.removeEventListener("resize", updateTabIndicator);
+      resizeObserver?.disconnect();
     };
   }, [updateTabIndicator, i18n.resolvedLanguage, showMeta]);
 
@@ -67,7 +86,7 @@ export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: 
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute bottom-0 h-0.5 bg-primary transition-[transform,width] duration-300 ease-out",
+            "pointer-events-none absolute bottom-0 left-0 h-0.5 bg-primary transition-[transform,width] duration-300 ease-out",
             tabIndicator.ready ? "opacity-100" : "opacity-0"
           )}
           style={{

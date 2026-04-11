@@ -76,14 +76,26 @@
     "jobLogs":  {
                     "kicker":  "Proxecto Activo",
                     "jobId":  "Job {{id}}",
-                    "tabs":  {
-                                 "viewer":  "Visor",
-                                 "logs":  "Logs",
-                                 "extras":  "Extras"
-                             },
-                    "progress":  {
-                                     "loadingTitle":  "Cargando estado do job...",
-                                     "pendingTitle":  "Job en cola no clúster CESGA...",
+        "tabs":  {
+                         "viewer":  "Visor",
+                         "compare":  "Comparar",
+                         "logs":  "Logs",
+                         "extras":  "Extras"
+                     },
+        "compare":  {
+                        "currentProtein":  "Proteína actual",
+                        "comparedProtein":  "Proteína comparada",
+                        "changeSelection":  "Cambiar proteína",
+                        "selectTitle":  "Comparación de proteínas",
+                        "selectDescription":  "Selecciona un job completado para cargar unha segunda proteína en paralelo.",
+                        "loadingSelection":  "Cargando proteína seleccionada...",
+                        "loadingJobs":  "Cargando historial de jobs...",
+                        "empty":  "Non hai outros jobs dispoñibles para comparar.",
+                        "compareAction":  "Comparar"
+                    },
+        "progress":  {
+                         "loadingTitle":  "Cargando estado do job...",
+                         "pendingTitle":  "Job en cola no clúster CESGA...",
                                      "runningTitle":  "Calculando estrutura no clúster CESGA...",
                                      "completedTitle":  "Execución completada. Outputs dispoñibles.",
                                      "failedTitle":  "A execución rematou con erro.",
@@ -227,16 +239,16 @@
     "exportModal":  {
                         "downloadAll":  "Download All Assets (.zip)",
                         "pdf":  {
-                                    "desc":  "Un documento xerado automaticamente que incl�a a imaxe da prote�na, o gr�fico de pLDDT e a t�boa de Biological Insights.",
+                                    "desc":  "Un documento xerado automaticamente que incl�a a imaxe da prote�na, o gr�fico de pLDDT e a t�boa de Biological Insights.",
                                     "title":  "Exportar Reporte (PDF)"
                                 },
                         "close":  "Pechar modal",
                         "cif":  {
-                                    "desc":  "Ficheiro de alta precisi�n para estruturas complexas.",
+                                    "desc":  "Ficheiro de alta precisi�n para estruturas complexas.",
                                     "title":  "Full Model (mmCIF)"
                                 },
                         "pdb":  {
-                                    "desc":  "Formato est�ndar para visualizaci�n 3D.",
+                                    "desc":  "Formato est�ndar para visualizaci�n 3D.",
                                     "title":  "Structure (PDB)"
                                 },
                         "title":  "Descargar Resultados",
