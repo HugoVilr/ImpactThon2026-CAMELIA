@@ -42,9 +42,35 @@ type MockState = {
   submittedJobTerminalStatus: "COMPLETED" | "FAILED" | "CANCELLED";
   submittedJobErrorMessage: string | null;
   jobOutputs: {
+    job_id?: string;
+    status?: "COMPLETED";
+    protein_metadata?: {
+      identified_protein?: string | null;
+      uniprot_id?: string | null;
+      pdb_id?: string | null;
+      protein_name?: string | null;
+      organism?: string | null;
+      description?: string | null;
+    };
     structural_data: {
       pdb_file: string | null;
       cif_file: string | null;
+      confidence?: Record<string, unknown>;
+    };
+    biological_data?: Record<string, unknown>;
+    logs?: string;
+  };
+  jobAccounting: {
+    job_id: string;
+    status: "COMPLETED";
+    accounting: {
+      cpu_hours: number;
+      gpu_hours: number;
+      memory_gb_hours: number;
+      total_wall_time_seconds: number;
+      cpu_efficiency_percent: number;
+      memory_efficiency_percent: number;
+      gpu_efficiency_percent: number | null;
     };
   };
   jobs: Array<{
@@ -81,12 +107,86 @@ const defaultMockState = (): MockState => ({
   submittedJobTerminalStatus: "COMPLETED",
   submittedJobErrorMessage: null,
   jobOutputs: {
+    job_id: "job_completed_003",
+    status: "COMPLETED",
+    protein_metadata: {
+      identified_protein: "ubiquitin",
+      uniprot_id: "P0CG47",
+      pdb_id: "1UBQ",
+      protein_name: "Ubiquitin",
+      organism: "Homo sapiens",
+      description: "Small regulatory protein involved in protein degradation.",
+    },
     structural_data: {
       pdb_file: null,
       cif_file: "data_demo_ubiquitin\n#\n",
+      confidence: {
+        plddt_histogram: {
+          low: 10,
+          medium: 22,
+          high: 30,
+          very_high: 14,
+        },
+        pae_matrix: [
+          [1, 2, 3, 4],
+          [2, 1, 5, 6],
+          [3, 5, 1, 2],
+          [4, 6, 2, 1],
+        ],
+        mean_pae: 3.34,
+        plddt_mean: 72.1,
+      },
+    },
+    biological_data: {
+      solubility_score: 76.0,
+      instability_index: 24.88,
+      stability_status: "stable",
+      toxicity_alerts: ["Potential signal peptide detected"],
+      allergenicity_alerts: [],
+      secondary_structure_prediction: {
+        helix_percent: 23.7,
+        strand_percent: 14.5,
+        coil_percent: 61.8,
+      },
+      sequence_properties: {
+        length: 76,
+        molecular_weight_kda: 8.4,
+        positive_charges: 11,
+        negative_charges: 11,
+        cysteine_residues: 0,
+        aromatic_residues: 3,
+      },
+      source: "synthetic_prediction",
+    },
+    logs: "[INFO] Model evaluation complete",
+  },
+  jobAccounting: {
+    job_id: "job_completed_003",
+    status: "COMPLETED",
+    accounting: {
+      cpu_hours: 0.006,
+      gpu_hours: 0.001,
+      memory_gb_hours: 0.031,
+      total_wall_time_seconds: 5,
+      cpu_efficiency_percent: 56.3,
+      memory_efficiency_percent: 70.1,
+      gpu_efficiency_percent: 89.7,
     },
   },
   jobs: [
+    {
+      job_id: "job_completed_003",
+      status: "COMPLETED",
+      created_at: "2026-04-10T18:10:12.232598",
+      started_at: "2026-04-10T18:11:17.237785",
+      completed_at: "2026-04-10T18:19:10.237785",
+      gpus: 1,
+      cpus: 8,
+      memory_gb: 32,
+      max_runtime_seconds: 3600,
+      fasta_filename: "ubiquitin.fasta",
+      error_message: null,
+    },
     {
       job_id: "job_failed_001",
       status: "FAILED",
@@ -249,8 +349,14 @@ const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => 
         json: async () => ({
           job_id: existingJob.job_id,
           status: existingJob.status,
+          created_at: existingJob.created_at,
           started_at: existingJob.started_at,
           completed_at: existingJob.completed_at,
+          gpus: existingJob.gpus,
+          cpus: existingJob.cpus,
+          memory_gb: existingJob.memory_gb,
+          max_runtime_seconds: existingJob.max_runtime_seconds,
+          fasta_filename: existingJob.fasta_filename,
           error_message: existingJob.error_message,
         }),
       } as Response;
@@ -275,6 +381,20 @@ const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => 
     return {
       ok: true,
       json: async () => mockState.jobOutputs,
+    } as Response;
+  }
+
+  if (url.endsWith("/jobs/job_completed_003/outputs")) {
+    return {
+      ok: true,
+      json: async () => mockState.jobOutputs,
+    } as Response;
+  }
+
+  if (url.endsWith("/jobs/job_completed_003/accounting")) {
+    return {
+      ok: true,
+      json: async () => mockState.jobAccounting,
     } as Response;
   }
 
@@ -362,20 +482,29 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("heading", { name: /entrada y configuración/i })).toBeInTheDocument();
     expect(await screen.findByText(/trabajos recientes/i)).toBeInTheDocument();
-    expect(await screen.findByText(/ubiquitin/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/ubiquitin/i)).length).toBeGreaterThan(0);
     expect(await screen.findByText(/spike/i)).toBeInTheDocument();
+  });
+
+  it("renders completed job results page route", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003");
+    renderApp();
+
+    expect(await screen.findByText(/3d structure viewer/i)).toBeInTheDocument();
+    expect(await screen.findByText(/global plddt avg/i)).toBeInTheDocument();
+    expect(await screen.findByText(/molecular metadata/i)).toBeInTheDocument();
   });
 
   it("filters jobs by running status", async () => {
     renderApp();
-    await screen.findByText(/ubiquitin/i);
+    await screen.findAllByText(/ubiquitin/i);
 
     fireEvent.click(screen.getByRole("button", { name: /en ejecución/i }));
     expect(await screen.findByText(/spike/i)).toBeInTheDocument();
-    expect(screen.queryByText(/ubiquitin/i)).not.toBeInTheDocument();
+    expect(screen.queryAllByText(/ubiquitin/i)).toHaveLength(0);
 
     fireEvent.click(screen.getByRole("button", { name: /todos/i }));
-    expect(await screen.findByText(/ubiquitin/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/ubiquitin/i)).length).toBeGreaterThan(0);
     expect(await screen.findByText(/spike/i)).toBeInTheDocument();
   });
 
@@ -388,29 +517,16 @@ describe("App Home", () => {
     expect(screen.getByRole("button", { name: /en progreso/i })).toBeInTheDocument();
   });
 
-  it("does not render completed jobs from API mock", async () => {
-    mockState.jobs = [
-      ...mockState.jobs,
-      {
-        job_id: "job_completed_mock",
-        status: "COMPLETED",
-        created_at: "2026-04-10T21:10:12.232598",
-        started_at: "2026-04-10T21:11:17.237785",
-        completed_at: "2026-04-10T21:19:10.237785",
-        gpus: 1,
-        cpus: 8,
-        memory_gb: 32,
-        max_runtime_seconds: 3600,
-        fasta_filename: "mock.fasta",
-        error_message: null,
-      },
-    ];
-
+  it("renders completed jobs from API mock and exposes results navigation", async () => {
     renderApp();
     await screen.findByText(/trabajos recientes/i);
 
-    expect(screen.queryByText(/job_completed_mock/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /completados/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ubiquitin/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /completados/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ver resultados/i })).toHaveAttribute(
+      "href",
+      "/jobs/job_completed_003"
+    );
   });
 
   it("does not render sample or filename fields", async () => {

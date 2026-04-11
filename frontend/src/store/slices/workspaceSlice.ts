@@ -107,7 +107,7 @@ const workspaceSlice = createSlice({
               ...jobsMap.get(fetchedJob.job_id)!,
               ...fetchedJob,
             });
-          } else if (fetchedJob.status !== "COMPLETED") {
+          } else {
             jobsMap.set(fetchedJob.job_id, fetchedJob);
           }
         });

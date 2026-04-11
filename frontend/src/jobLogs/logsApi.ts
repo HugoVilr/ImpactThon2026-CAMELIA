@@ -1,5 +1,5 @@
 import { apiUrl } from "../store/actions";
-import type { JobStatusPayload, JobOutputsPayload } from "./types";
+import type { JobAccountingPayload, JobOutputsPayload, JobStatusPayload } from "./types";
 
 const parseHttpError = async (response: Response): Promise<string> => {
   try {
@@ -30,4 +30,22 @@ export const fetchJobOutputs = async (jobId: string): Promise<JobOutputsPayload 
   }
 
   return (await response.json()) as JobOutputsPayload;
+};
+
+export const fetchJobAccounting = async (jobId: string): Promise<JobAccountingPayload | null> => {
+  const response = await fetch(`${apiUrl}/jobs/${encodeURIComponent(jobId)}/accounting`);
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as JobAccountingPayload;
+};
+
+export const fetchProteinDetail = async (proteinId: string): Promise<Record<string, unknown> | null> => {
+  const response = await fetch(`${apiUrl}/proteins/${encodeURIComponent(proteinId)}`);
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as Record<string, unknown>;
 };
