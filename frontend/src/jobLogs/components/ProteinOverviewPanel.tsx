@@ -13,6 +13,7 @@ import {
   Search,
 } from "lucide-react";
 import { SafetyFindingsModal, type SafetyFinding } from "../../commons/components";
+import { useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Badge, Button, Card, CardContent } from "../../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../../components/ProteinViewer";
 import { displayJobName } from "../../home/homeUtils";
@@ -91,6 +92,7 @@ export function ProteinOverviewPanel({
   panelLabel,
   toolbar,
 }: ProteinOverviewPanelProps) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
   const [viewerReady, setViewerReady] = useState(false);
   const [xrSupport, setXrSupport] = useState<XrSupport>({ ar: false, vr: false });
@@ -155,11 +157,29 @@ export function ProteinOverviewPanel({
     proteinMetadata?.protein_name?.trim() ||
     proteinMetadata?.identified_protein?.trim() ||
     (job ? displayJobName(job) : jobId);
+  const animationKey = `${jobId}|${compact ? "compact" : "full"}|${panelLabel ?? "panel"}`;
+
+  useAnimeReveal(panelRef, {
+    selector: "[data-anime='overview-reveal']",
+    dependencyKey: animationKey,
+    delayStep: 65,
+    duration: 500,
+    translateY: 12,
+    startScale: 0.996,
+  });
+
+  useAnimePressables(panelRef, {
+    selector: "button, a, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: animationKey,
+  });
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-white/85 px-4 py-4 shadow-[0_14px_34px_rgba(15,23,34,0.06)]">
+      <div ref={panelRef} className="space-y-4">
+        <div
+          data-anime="overview-reveal"
+          className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-white/85 px-4 py-4 shadow-[0_14px_34px_rgba(15,23,34,0.06)]"
+        >
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
               {panelLabel ? (
@@ -191,9 +211,12 @@ export function ProteinOverviewPanel({
           </div>
         </div>
 
-        <div className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}>
-          <section className="flex min-w-0 flex-col space-y-4">
-            <Card className="surface-shadow-strong overflow-hidden rounded-2xl border-border/40 bg-white/95">
+        <div
+          data-anime="overview-reveal"
+          className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}
+        >
+          <section data-anime="overview-reveal" className="flex min-w-0 flex-col space-y-4">
+            <Card data-anime="overview-reveal" className="surface-shadow-strong overflow-hidden rounded-2xl border-border/40 bg-white/95">
               <CardContent className="p-0">
                 <div
                   className={cn(
@@ -252,14 +275,14 @@ export function ProteinOverviewPanel({
             </Card>
 
             {xrError ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div data-anime="overview-reveal" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 {xrError}
               </div>
             ) : null}
           </section>
 
-          <aside className="min-w-0">
-            <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
+          <aside data-anime="overview-reveal" className="min-w-0">
+            <Card data-anime="overview-reveal" className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
               <CardContent className="space-y-3 p-4">
                 <div className="flex items-start justify-between">
                   <div>
@@ -335,9 +358,15 @@ export function ProteinOverviewPanel({
           </aside>
         </div>
 
-        <div className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}>
-          <div className={cn("grid gap-4 min-w-0", compact ? "grid-cols-1" : "lg:grid-cols-[220px_minmax(0,1fr)]")}>
-            <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
+        <div
+          data-anime="overview-reveal"
+          className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}
+        >
+          <div
+            data-anime="overview-reveal"
+            className={cn("grid gap-4 min-w-0", compact ? "grid-cols-1" : "lg:grid-cols-[220px_minmax(0,1fr)]")}
+          >
+            <Card data-anime="overview-reveal" className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
               <CardContent className="flex flex-1 flex-col gap-3 p-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Biological Insights</p>
 
@@ -401,7 +430,7 @@ export function ProteinOverviewPanel({
               </CardContent>
             </Card>
 
-            <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
+            <Card data-anime="overview-reveal" className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
               <CardContent className="flex flex-1 flex-col p-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Secondary Structure Breakdown</p>
 
@@ -485,8 +514,8 @@ export function ProteinOverviewPanel({
             </Card>
           </div>
 
-          <div className="min-w-0 self-start space-y-4">
-            <Card className="surface-shadow rounded-2xl border-border/40 bg-white/95">
+          <div data-anime="overview-reveal" className="min-w-0 self-start space-y-4">
+            <Card data-anime="overview-reveal" className="surface-shadow rounded-2xl border-border/40 bg-white/95">
               <CardContent className="space-y-3 p-4">
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Molecular Metadata</p>
 
@@ -516,7 +545,7 @@ export function ProteinOverviewPanel({
               </CardContent>
             </Card>
 
-            <Card className="surface-shadow border-border/50 bg-card/95">
+            <Card data-anime="overview-reveal" className="surface-shadow border-border/50 bg-card/95">
               <CardContent className="space-y-4 p-5">
                 <div className="flex items-center gap-3">
                   <ScanSearch className="h-5 w-5 text-primary" />
@@ -543,7 +572,7 @@ export function ProteinOverviewPanel({
               </CardContent>
             </Card>
 
-            <Card className="surface-shadow border-border/50 bg-card/95">
+            <Card data-anime="overview-reveal" className="surface-shadow border-border/50 bg-card/95">
               <CardContent className="space-y-4 p-5">
                 <div className="flex items-center gap-3">
                   <Dna className="h-5 w-5 text-primary" />
@@ -587,7 +616,10 @@ export function ProteinOverviewPanel({
           </div>
         </div>
 
-        <div className={cn("grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]", compact ? "grid-cols-1" : "md:grid-cols-4")}>
+        <div
+          data-anime="overview-reveal"
+          className={cn("grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]", compact ? "grid-cols-1" : "md:grid-cols-4")}
+        >
           <div className="flex items-center gap-3">
             <Cpu className="h-4 w-4 text-muted-foreground" />
             <div>
