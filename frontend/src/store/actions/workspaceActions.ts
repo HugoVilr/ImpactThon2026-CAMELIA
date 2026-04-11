@@ -11,7 +11,8 @@ import type {
 } from "../../types/domain";
 
 export const apiUrl = (
-  import.meta.env.VITE_API_URL ?? "https://api-mock-cesga.onrender.com"
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? "/api" : "https://api-mock-cesga.onrender.com")
 ).replace(/\/$/, "");
 
 const allowedExtensions = [".fasta", ".fa", ".faa", ".txt"];

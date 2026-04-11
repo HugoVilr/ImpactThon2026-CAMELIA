@@ -76,14 +76,26 @@
     "jobLogs":  {
                     "kicker":  "Active Project",
                     "jobId":  "Job {{id}}",
-                    "tabs":  {
-                                 "viewer":  "Viewer",
-                                 "logs":  "Logs",
-                                 "extras":  "Extras"
-                             },
-                    "progress":  {
-                                     "loadingTitle":  "Loading job status...",
-                                     "pendingTitle":  "Job queued in CESGA cluster...",
+        "tabs":  {
+                     "viewer":  "Viewer",
+                     "compare":  "Compare",
+                     "logs":  "Logs",
+                     "extras":  "Extras"
+                 },
+        "compare":  {
+                        "currentProtein":  "Current Protein",
+                        "comparedProtein":  "Compared Protein",
+                        "changeSelection":  "Change Protein",
+                        "selectTitle":  "Protein Comparison",
+                        "selectDescription":  "Select a completed job to load a second protein side by side.",
+                        "loadingSelection":  "Loading selected protein...",
+                        "loadingJobs":  "Loading job history...",
+                        "empty":  "There are no other jobs available for comparison.",
+                        "compareAction":  "Compare"
+                    },
+        "progress":  {
+                         "loadingTitle":  "Loading job status...",
+                         "pendingTitle":  "Job queued in CESGA cluster...",
                                      "runningTitle":  "Calculating structure in CESGA cluster...",
                                      "completedTitle":  "Execution completed. Outputs available.",
                                      "failedTitle":  "Execution finished with an error.",

@@ -9,6 +9,21 @@ export type JobLogEntry = {
   level: JobLogLevel;
 };
 
+export type ProteinCatalogDetail = {
+  protein_id?: string;
+  category?: string;
+  function?: string;
+  cellular_location?: string;
+  activity?: string;
+  tags?: string[];
+  known_structures?: Array<{
+    pdb_id?: string;
+    method?: string;
+    resolution?: number | null;
+    publication?: string;
+  }>;
+};
+
 export type JobOutputsPayload = {
   job_id: string;
   status: JobStatus;
@@ -84,6 +99,15 @@ export type JobAccountingPayload = {
     memory_efficiency_percent: number;
     gpu_efficiency_percent?: number | null;
   };
+};
+
+export type JobDetailSnapshot = {
+  job: JobStatusPayload | null;
+  outputs: JobOutputsPayload | null;
+  accounting: JobAccountingPayload | null;
+  proteinDetail: ProteinCatalogDetail | null;
+  logEntries: JobLogEntry[];
+  rawLogs: string | null;
 };
 
 export type JobProgressPhase =

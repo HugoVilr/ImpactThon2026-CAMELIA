@@ -175,6 +175,7 @@ const workspaceSlice = createSlice({
           memory_gb: preset.memoryGb,
           max_runtime_seconds: preset.maxRuntimeSeconds,
           fasta_filename: fastaFilename,
+          display_name: null,
           error_message: null,
         };
 

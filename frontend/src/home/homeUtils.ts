@@ -29,6 +29,11 @@ export const resourceKeyForJob = (job: Job): string => {
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const displayJobName = (job: Job): string => {
+  const resolvedName = job.display_name?.trim();
+  if (resolvedName) {
+    return resolvedName;
+  }
+
   const withoutExtension = job.fasta_filename.replace(/\.(fasta|fa|faa|txt)$/i, "").trim();
   if (!withoutExtension) {
     return "sequence";
