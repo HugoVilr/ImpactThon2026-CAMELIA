@@ -255,6 +255,8 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const confidenceBuckets = resolveConfidenceBuckets(outputs);
   const bucketMax = Math.max(...confidenceBuckets.map((bucket) => bucket.value), 1);
   const paeGrid = downsamplePaeMatrix(outputs?.structural_data.confidence.pae_matrix);
+  const paeOriginalSize = outputs?.structural_data.confidence.pae_matrix?.length ?? 1;
+  const paeStep = Math.max(1, Math.ceil(paeOriginalSize / 24));
   const biologicalData = outputs?.biological_data;
   const secondaryStructure = biologicalData?.secondary_structure_prediction;
   const sequenceProperties = biologicalData?.sequence_properties;
@@ -427,14 +429,24 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                         >
                           {paeGrid.length > 0 ? (
                             paeGrid.flatMap((row, rowIndex) =>
-                              row.map((value, colIndex) => (
-                                <div
-                                  key={`${rowIndex}-${colIndex}`}
-                                  className="min-h-0 min-w-0"
-                                  style={{ backgroundColor: resolvePaeCellColor(value) }}
-                                  title={`PAE ${formatCompactNumber(value, 2)}`}
-                                />
-                              ))
+                              row.map((value, colIndex) => {
+                                const startX = rowIndex * paeStep + 1;
+                                const endX = Math.min((rowIndex + 1) * paeStep, paeOriginalSize);
+                                const startY = colIndex * paeStep + 1;
+                                const endY = Math.min((colIndex + 1) * paeStep, paeOriginalSize);
+                                
+                                return (
+                                  <div
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className="min-h-0 min-w-0 hover:ring-2 hover:ring-white hover:scale-[1.3] origin-center transition-all cursor-crosshair z-10 hover:z-20 relative"
+                                    style={{ backgroundColor: resolvePaeCellColor(value) }}
+                                    title={`Residuos ${startX}-${endX} vs ${startY}-${endY}: Error esperado de ${formatCompactNumber(value, 2)}Å`}
+                                    onMouseEnter={() => viewerRef.current?.highlightResidues(startX, endX)}
+                                    onMouseLeave={() => viewerRef.current?.clearHighlight()}
+                                    onClick={() => viewerRef.current?.focusResidues(startX, endX)}
+                                  />
+                                );
+                              })
                             )
                           ) : (
                             <div className="col-span-full grid place-items-center text-sm text-muted-foreground">{t("jobLogs.details.paeUnavail")}</div>
