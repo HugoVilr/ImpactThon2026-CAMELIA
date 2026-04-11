@@ -33,7 +33,7 @@ export function TopBar({ activeLanguage, onLanguageChange, hideLanguageSelector 
 
   return (
     <header ref={headerRef} className="surface-shadow-soft h-16 border-b border-border/50 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-full w-full max-w-[1160px] items-center justify-between px-4 md:px-6">
+      <div className="flex h-full w-full items-center justify-between px-3 sm:px-5 md:px-7 xl:px-10">
         <div className="flex items-center gap-6 md:gap-8">
           <Link
             to="/"
