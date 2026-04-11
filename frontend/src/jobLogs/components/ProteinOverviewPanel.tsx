@@ -195,7 +195,7 @@ export function ProteinOverviewPanel({
                 <div
                   className={cn(
                     "relative overflow-hidden bg-[radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.96),rgba(246,248,248,0.92)_42%,rgba(235,240,238,0.9)_100%)]",
-                    compact ? "h-[320px]" : "h-[480px] xl:h-[550px]"
+                    compact ? "h-[420px]" : "h-[480px] xl:h-[550px]"
                   )}
                 >
                   {structureData ? (

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent } from "../../commons/components/ui";
 import { displayJobName, localeForLanguage, resolveLanguage, resourceKeyForJob, statusTranslationKey } from "../../home/homeUtils";
 import type { Job } from "../../types/domain";
-import { fetchJobsList } from "../logsApi";
+import { fetchJobOutputs, fetchJobsList } from "../logsApi";
 import { useJobDetailSnapshot } from "../useJobDetailSnapshot";
 import type { JobDetailSnapshot } from "../types";
 import { ProteinOverviewPanel } from "./ProteinOverviewPanel";
@@ -22,14 +22,61 @@ const statusClassByValue = {
   CANCELLED: "bg-red-100 text-red-700",
 } as const;
 
+const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): string => {
+  return resolvedNames[job.job_id] ?? displayJobName(job);
+};
+
 export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const { t, i18n } = useTranslation();
   const locale = localeForLanguage(resolveLanguage(i18n.resolvedLanguage ?? i18n.language));
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [resolvedJobNames, setResolvedJobNames] = useState<Record<string, string>>({});
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const selectedSnapshot = useJobDetailSnapshot(selectedJobId);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateCompletedJobNames = async () => {
+      const completedJobs = jobs.filter((job) => job.status === "COMPLETED");
+      if (completedJobs.length === 0) {
+        return;
+      }
+
+      const resolvedEntries = await Promise.all(
+        completedJobs.map(async (job) => {
+          try {
+            const outputs = await fetchJobOutputs(job.job_id);
+            const resolvedName =
+              outputs?.protein_metadata?.protein_name?.trim() ||
+              outputs?.protein_metadata?.identified_protein?.trim() ||
+              null;
+
+            return resolvedName ? [job.job_id, resolvedName] as const : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setResolvedJobNames((current) => ({
+          ...current,
+          ...Object.fromEntries(
+            resolvedEntries.filter((entry): entry is readonly [string, string] => entry !== null)
+          ),
+        }));
+      }
+    };
+
+    void hydrateCompletedJobNames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [jobs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,13 +126,6 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-border/40 bg-white/85 px-4 py-4 shadow-[0_14px_34px_rgba(15,23,34,0.06)]">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
-          {t("jobLogs.compare.title")}
-        </p>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">{t("jobLogs.compare.description")}</p>
-      </div>
-
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]">
         <div className="min-w-0">
           <ProteinOverviewPanel
@@ -170,7 +210,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate font-semibold text-slate-950">{displayJobName(job)}</p>
+                          <p className="truncate font-semibold text-slate-950">{resolveJobLabel(job, resolvedJobNames)}</p>
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${statusClassByValue[job.status]}`}
                           >
@@ -191,7 +231,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                         type="button"
                         className="gap-2 text-[11px]"
                         onClick={() => setSelectedJobId(job.job_id)}
-                        aria-label={`${t("jobLogs.compare.compareAction")} ${displayJobName(job)}`}
+                        aria-label={`${t("jobLogs.compare.compareAction")} ${resolveJobLabel(job, resolvedJobNames)}`}
                       >
                         <Plus className="h-3.5 w-3.5" />
                         {t("jobLogs.compare.compareAction")}

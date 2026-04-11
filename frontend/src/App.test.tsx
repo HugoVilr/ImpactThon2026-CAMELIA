@@ -73,6 +73,44 @@ type MockState = {
       gpu_efficiency_percent: number | null;
     };
   };
+  compareJobOutputs: Record<
+    string,
+    {
+      job_id?: string;
+      status?: "COMPLETED";
+      protein_metadata?: {
+        identified_protein?: string | null;
+        uniprot_id?: string | null;
+        pdb_id?: string | null;
+        protein_name?: string | null;
+        organism?: string | null;
+        description?: string | null;
+      };
+      structural_data: {
+        pdb_file: string | null;
+        cif_file: string | null;
+        confidence?: Record<string, unknown>;
+      };
+      biological_data?: Record<string, unknown>;
+      logs?: string;
+    }
+  >;
+  compareJobAccounting: Record<
+    string,
+    {
+      job_id: string;
+      status: "COMPLETED";
+      accounting: {
+        cpu_hours: number;
+        gpu_hours: number;
+        memory_gb_hours: number;
+        total_wall_time_seconds: number;
+        cpu_efficiency_percent: number;
+        memory_efficiency_percent: number;
+        gpu_efficiency_percent: number | null;
+      };
+    }
+  >;
   jobs: Array<{
     job_id: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
@@ -173,6 +211,56 @@ const defaultMockState = (): MockState => ({
       gpu_efficiency_percent: 89.7,
     },
   },
+  compareJobOutputs: {
+    job_completed_004: {
+      job_id: "job_completed_004",
+      status: "COMPLETED",
+      protein_metadata: {
+        identified_protein: "calmodulin",
+        uniprot_id: "P62158",
+        pdb_id: "1CLL",
+        protein_name: "Calmodulin",
+        organism: "Homo sapiens",
+        description: "Calcium-binding messenger protein.",
+      },
+      structural_data: {
+        pdb_file: null,
+        cif_file: "data_demo_calmodulin\n#\n",
+        confidence: {
+          plddt_histogram: {
+            low: 6,
+            medium: 12,
+            high: 41,
+            very_high: 18,
+          },
+        },
+      },
+      biological_data: {
+        solubility_score: 81.2,
+        instability_index: 19.8,
+        stability_status: "stable",
+        toxicity_alerts: [],
+        allergenicity_alerts: [],
+        source: "catalog_prediction",
+      },
+      logs: "[INFO] Calmodulin model complete",
+    },
+  },
+  compareJobAccounting: {
+    job_completed_004: {
+      job_id: "job_completed_004",
+      status: "COMPLETED",
+      accounting: {
+        cpu_hours: 0.008,
+        gpu_hours: 0.001,
+        memory_gb_hours: 0.028,
+        total_wall_time_seconds: 6,
+        cpu_efficiency_percent: 61.4,
+        memory_efficiency_percent: 71.2,
+        gpu_efficiency_percent: 90.1,
+      },
+    },
+  },
   jobs: [
     {
       job_id: "job_completed_003",
@@ -211,6 +299,19 @@ const defaultMockState = (): MockState => ({
       memory_gb: 80,
       max_runtime_seconds: 7200,
       fasta_filename: "spike.fasta",
+      error_message: null,
+    },
+    {
+      job_id: "job_completed_004",
+      status: "COMPLETED",
+      created_at: "2026-04-10T21:15:12.232598",
+      started_at: "2026-04-10T21:16:17.237785",
+      completed_at: "2026-04-10T21:22:10.237785",
+      gpus: 1,
+      cpus: 8,
+      memory_gb: 32,
+      max_runtime_seconds: 3600,
+      fasta_filename: "ubiquitin.fasta",
       error_message: null,
     },
   ],
@@ -398,6 +499,30 @@ const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => 
     } as Response;
   }
 
+  const compareOutputsMatch = url.match(/\/jobs\/([^/]+)\/outputs$/);
+  if (compareOutputsMatch) {
+    const jobId = compareOutputsMatch[1];
+    const payload = mockState.compareJobOutputs[jobId];
+    if (payload) {
+      return {
+        ok: true,
+        json: async () => payload,
+      } as Response;
+    }
+  }
+
+  const compareAccountingMatch = url.match(/\/jobs\/([^/]+)\/accounting$/);
+  if (compareAccountingMatch) {
+    const jobId = compareAccountingMatch[1];
+    const payload = mockState.compareJobAccounting[jobId];
+    if (payload) {
+      return {
+        ok: true,
+        json: async () => payload,
+      } as Response;
+    }
+  }
+
   if (url.endsWith("/proteins/samples")) {
     return {
       ok: true,
@@ -515,6 +640,16 @@ describe("App Home", () => {
     expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
   });
 
+  it("uses the identified protein name in the comparison list when it differs from the fasta filename", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar calmodulin/i }));
+
+    expect(await screen.findByRole("heading", { name: /calmodulin/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
+  });
+
   it("filters jobs by running status", async () => {
     renderApp();
     await screen.findAllByText(/ubiquitin/i);
@@ -543,10 +678,8 @@ describe("App Home", () => {
 
     expect(screen.getAllByRole("link", { name: /ubiquitin/i }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: /completados/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /ver resultados/i })).toHaveAttribute(
-      "href",
-      "/jobs/job_completed_003"
-    );
+    const resultLinks = screen.getAllByRole("link", { name: /ver resultados/i });
+    expect(resultLinks.some((link) => link.getAttribute("href") === "/jobs/job_completed_003")).toBe(true);
   });
 
   it("does not render sample or filename fields", async () => {

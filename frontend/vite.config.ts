@@ -7,7 +7,14 @@ export default defineConfig({
     postcss: "./postcss.config.cjs",
   },
   server: {
-    port: 5173
+    port: 5173,
+    proxy: {
+      "/api": {
+        target: "https://api-mock-cesga.onrender.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
   test: {
     globals: true,
