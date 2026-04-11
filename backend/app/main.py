@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -6,7 +7,25 @@ from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from app.db import DATABASE_LABEL, create_entry, init_db, list_entries
+from app import db as app_db
+
+DATABASE_LABEL = app_db.DATABASE_LABEL
+
+
+def init_db() -> None:
+    app_db.init_db()
+
+
+def list_entries() -> list[dict[str, Any]]:
+    return app_db.list_entries()
+
+
+def create_entry(title: str, category: str, description: str) -> dict[str, Any]:
+    return app_db.create_entry(
+        title=title,
+        category=category,
+        description=description,
+    )
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
@@ -28,6 +47,7 @@ class EntryCreate(BaseModel):
     title: str = Field(min_length=1, max_length=120)
     category: str = Field(min_length=1, max_length=50)
     description: str = Field(min_length=1, max_length=500)
+    sequence: str | None = None
 
 
 @app.on_event("startup")
