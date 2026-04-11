@@ -99,19 +99,22 @@ const workspaceSlice = createSlice({
       .addCase(loadDashboard.fulfilled, (state, action) => {
         state.loading = false;
         state.health = action.payload.health;
-        const completedJobIds = new Set(
-          action.payload.jobs
-            .filter((job) => job.status === "COMPLETED")
-            .map((job) => job.job_id)
+        const jobsMap = new Map(state.jobs.map((job) => [job.job_id, job]));
+
+        action.payload.jobs.forEach((fetchedJob) => {
+          if (jobsMap.has(fetchedJob.job_id)) {
+            jobsMap.set(fetchedJob.job_id, {
+              ...jobsMap.get(fetchedJob.job_id)!,
+              ...fetchedJob,
+            });
+          } else if (fetchedJob.status !== "COMPLETED") {
+            jobsMap.set(fetchedJob.job_id, fetchedJob);
+          }
+        });
+
+        state.jobs = Array.from(jobsMap.values()).sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-        const fetchedJobs = action.payload.jobs.filter((job) => job.status !== "COMPLETED");
-        const localActiveJobs = state.jobs.filter(
-          (job) =>
-            (job.status === "PENDING" || job.status === "RUNNING") &&
-            !completedJobIds.has(job.job_id) &&
-            !fetchedJobs.some((fetchedJob) => fetchedJob.job_id === job.job_id)
-        );
-        state.jobs = [...localActiveJobs, ...fetchedJobs];
         state.samples = action.payload.samples;
 
         if (!state.fastaSequence && action.payload.samples.length > 0) {
