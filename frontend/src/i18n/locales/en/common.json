@@ -73,6 +73,44 @@
     },
     "progressAria": "Progress for job {{name}}"
   },
+  "jobLogs": {
+    "kicker": "Active Project",
+    "jobId": "Job {{id}}",
+    "tabs": {
+      "viewer": "Viewer",
+      "logs": "Logs",
+      "extras": "Extras"
+    },
+    "progress": {
+      "loadingTitle": "Loading job status...",
+      "pendingTitle": "Job queued in CESGA cluster...",
+      "runningTitle": "Calculating structure in CESGA cluster...",
+      "completedTitle": "Execution completed. Outputs available.",
+      "failedTitle": "Execution finished with an error.",
+      "cancelledTitle": "Job was cancelled.",
+      "step": "STEP {{current}}/{{total}} · {{phase}}",
+      "phases": {
+        "init": "INIT",
+        "queue": "QUEUE",
+        "msa": "MSA",
+        "features": "FEATURES",
+        "folding": "FOLDING",
+        "complete": "COMPLETE",
+        "failed": "FAILED",
+        "cancelled": "CANCELLED"
+      }
+    },
+    "stream": {
+      "title": "Scientific Job Logs",
+      "live": "Live Stream",
+      "snapshot": "Snapshot",
+      "empty": "No log events yet."
+    },
+    "download": "Download Full Technical Logs",
+    "errors": {
+      "load": "Could not load job logs. {{detail}}"
+    }
+  },
   "status": {
     "pending": "Pending",
     "running": "Running",
