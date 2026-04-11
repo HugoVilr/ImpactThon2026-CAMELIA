@@ -44,12 +44,19 @@ export function PresetPanel({ selectedPresetId, onSelectPreset }: PresetPanelPro
             >
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div className="flex items-start gap-2.5">
-                  <span className="mt-0.5 rounded-md bg-muted p-1.5 text-muted-foreground">
+                  <span
+                    className={cn(
+                      "mt-0.5 rounded-lg p-1.5",
+                      selectedPresetId === preset.id ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    )}
+                  >
                     <Icon className="h-4 w-4" />
                   </span>
                   <div>
                     <h3 className="text-xs font-semibold text-slate-900">{t(preset.nameKey)}</h3>
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">{t(preset.subtitleKey)}</p>
+                    <p className={cn("mt-0.5 text-[10px]", selectedPresetId === preset.id ? "text-primary" : "text-muted-foreground")}>
+                      {t(preset.subtitleKey)}
+                    </p>
                   </div>
                 </div>
                 {preset.badgeKey ? (

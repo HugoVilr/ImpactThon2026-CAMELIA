@@ -4,14 +4,13 @@ export function HeroHeader() {
   const { t } = useTranslation();
 
   return (
-    <section className="space-y-2">
-      <p className="font-headline text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+    <section className="space-y-1">
+      <p className="font-headline text-[13px] font-semibold uppercase tracking-[0.34em] text-primary">
         {t("hero.kicker")}
       </p>
-      <h1 className="font-headline text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
-        {t("hero.title")}
-      </h1>
-      <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">{t("hero.description")}</p>
+      <h2 className="font-headline text-2xl font-bold text-slate-900 md:text-3xl">
+        {t("sequence.title")}
+      </h2>
     </section>
   );
 }

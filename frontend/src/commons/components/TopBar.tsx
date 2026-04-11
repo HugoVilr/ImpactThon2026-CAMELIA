@@ -15,10 +15,10 @@ export function TopBar({ activeLanguage, onLanguageChange }: TopBarProps) {
   const { t } = useTranslation();
 
   return (
-    <header className="surface-shadow-soft fixed inset-x-0 top-0 z-50 h-16 border-b border-border/70 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+    <header className="surface-shadow-soft h-16 border-b border-border/70 bg-white">
       <div className="mx-auto flex h-full w-full max-w-[1320px] items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-6 md:gap-8">
-          <div className="font-headline text-xs font-extrabold uppercase tracking-[0.18em] text-slate-900 md:text-sm">
+          <div className="font-headline text-sm font-extrabold uppercase tracking-[0.18em] text-slate-900 md:text-base">
             BIOHACK LOCALFOLD
           </div>
         </div>

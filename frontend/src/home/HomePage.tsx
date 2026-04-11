@@ -112,7 +112,7 @@ export function HomePage() {
     <>
       <TopBar activeLanguage={activeLanguage} onLanguageChange={handleLanguageChange} />
 
-      <main className="page-enter mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-24 md:px-6">
+      <main className="page-enter mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-8 md:px-6">
         <HeroHeader />
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_360px]">
