@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any
-import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +19,7 @@ def list_entries() -> list[dict[str, Any]]:
     return app_db.list_entries()
 
 
+# Keep this symbol at module level for tests that monkeypatch app.main.create_entry.
 def create_entry(title: str, category: str, description: str) -> dict[str, Any]:
     return app_db.create_entry(
         title=title,
@@ -26,46 +27,40 @@ def create_entry(title: str, category: str, description: str) -> dict[str, Any]:
         description=description,
     )
 
+
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 app = FastAPI(title="CAMELIA API", version="0.1.0")
 
-# CONFIGURACIÓN CORS: Abierto para que el Frontend funcione en Vercel/Netlify
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# SIMULACRO DE BASE DE DATOS (Para evitar el Error 500 en la demo)
-def create_entry_mock(title, category, description, sequence):
-    return {
-        "id": 999, # ID de prueba
-        "title": title,
-        "category": category,
-        "description": description,
-        "sequence": sequence,
-        "status": "Success (Mock Mode)"
-    }
 
-# MODELO DE DATOS: Ahora incluye la secuencia
 class EntryCreate(BaseModel):
     title: str = Field(min_length=1, max_length=120)
     category: str = Field(min_length=1, max_length=50)
     description: str = Field(min_length=1, max_length=500)
+    # Optional for compatibility with older/newer payload shapes.
     sequence: str | None = None
 
 
 @app.on_event("startup")
 def startup() -> None:
-    # init_db()  <-- Comentado para evitar que la app explote sin DB real
-    print("🚀 CAMELIA API cargada en modo Resiliente")
+    init_db()
+
 
 @app.get("/")
 def root() -> dict[str, str]:
     return {"message": "CAMELIA API running"}
+
 
 @app.get("/health")
 def health() -> dict[str, str]:
@@ -75,30 +70,23 @@ def health() -> dict[str, str]:
         "database": DATABASE_LABEL,
     }
 
+
 @app.get("/api/entries")
-def get_entries():
+def get_entries() -> list[dict[str, str | int]]:
     return list_entries()
 
+
 @app.post("/api/entries", status_code=201)
-def post_entry(payload: EntryCreate):
-    # Extraemos los datos limpios
+def post_entry(payload: EntryCreate) -> dict[str, str | int]:
     title = payload.title.strip()
     category = payload.category.strip()
     description = payload.description.strip()
-    sequence = payload.sequence.strip()
 
-    if not title or not category or not description or not sequence:
+    if not title or not category or not description:
         raise HTTPException(status_code=422, detail="Fields cannot be blank")
 
-    # Usamos el simulacro para asegurar que la respuesta sea 201 OK
-    return create_entry_mock(
+    return create_entry(
         title=title,
         category=category,
         description=description,
-        sequence=sequence
     )
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=port)
