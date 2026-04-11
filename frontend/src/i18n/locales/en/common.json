@@ -1,0 +1,115 @@
+{
+  "language": {
+    "label": "Language",
+    "es": "ES",
+    "en": "EN",
+    "gl": "GL"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "protocol": "Protocol",
+    "registry": "Registry"
+  },
+  "hero": {
+    "kicker": "LABORATORY WORKSPACE",
+    "title": "Biohack Localfold",
+    "description": "Prepare your amino acid sequences for folding. Select resource intensity based on your target resolution and pLDDT requirements."
+  },
+  "sequence": {
+    "title": "Sequence Input",
+    "api": "API: {{api}}",
+    "service": "Service: {{service}} · {{status}} · v{{version}}",
+    "serviceNoVersion": "Service: {{service}} · {{status}}",
+    "serviceChecking": "Service: Checking status...",
+    "useSample": "Use FASTA sample",
+    "samplePlaceholder": "Select a sample",
+    "filename": "FASTA filename",
+    "filenamePlaceholder": "protein.fasta",
+    "input": "Sequence",
+    "inputPlaceholder": ">protein_name\\nMKT...",
+    "uploadButton": "Upload .fasta",
+    "uploadOnlyHint": "For now, only file upload is connected.",
+    "runButton": "Run Sequence Folding"
+  },
+  "presets": {
+    "title": "Resource Presets",
+    "badge": "RECOMMENDED",
+    "draft": {
+      "name": "Fast Draft",
+      "subtitle": "Low GPU Usage",
+      "description": "Quick structural sanity checks. Minimal recycling iterations."
+    },
+    "standard": {
+      "name": "Standard Research",
+      "subtitle": "Balanced GPU Cluster",
+      "description": "Full MSA search with multiple recycling stages. High pLDDT accuracy."
+    },
+    "precision": {
+      "name": "High Precision",
+      "subtitle": "Dedicated H100 Node",
+      "description": "Maximum recycling. Ideal for complex protein complexes and novel folds."
+    }
+  },
+  "jobs": {
+    "title": "Recent Jobs",
+    "filterAll": "All Jobs",
+    "filterRunning": "Running",
+    "filterCompleted": "Completed",
+    "filtersAria": "Job filters",
+    "loading": "Loading jobs...",
+    "empty": "No jobs for this filter.",
+    "columns": {
+      "jobName": "Job Name",
+      "status": "Status",
+      "timestamp": "Timestamp",
+      "resource": "Resource",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewResults": "View Results",
+      "inProgress": "In Progress",
+      "details": "Details"
+    }
+  },
+  "status": {
+    "pending": "Pending",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+  "resource": {
+    "draft": "DRAFT",
+    "standard": "STANDARD",
+    "highPrecision": "HIGH PRECISION"
+  },
+  "footer": {
+    "brand": "BioHack",
+    "copy": "© 2026 Genomic Lens Systems.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "systemStatus": "System Status"
+  },
+  "modal": {
+    "title": "Upload Sequence File",
+    "description": "Select or drag and drop your .fasta or .txt files.",
+    "dragDrop": "Drag and drop files here",
+    "orSelect": "or select from your computer",
+    "browse": "Browse Local Files",
+    "supported": "SUPPORTED FORMATS: .FASTA, .FA, .FAA, .TXT",
+    "cancel": "Cancel",
+    "fileInputLabel": "Select FASTA file",
+    "ariaLabel": "Upload sequence file"
+  },
+  "messages": {
+    "sampleLoaded": "Sample loaded: {{name}}",
+    "fileLoaded": "File loaded: {{name}}"
+  },
+  "errors": {
+    "dashboardLoad": "Could not load dashboard data. {{detail}}",
+    "uploadRead": "Could not read the file.",
+    "uploadEmpty": "The file is empty.",
+    "fileFormat": "Unsupported file format."
+  }
+}
