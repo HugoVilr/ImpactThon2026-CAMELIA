@@ -98,7 +98,7 @@ export function JobLogsPage({ jobId }: JobLogsPageProps) {
       <TopBar activeLanguage={activeLanguage} onLanguageChange={handleLanguageChange} />
 
       <main className="page-enter mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-24 md:px-6">
-        <JobLogsTabs jobId={jobId} />
+        <JobLogsTabs jobId={jobId} activeTab="logs" onTabChange={() => undefined} />
         <JobLogsProgressCard job={job} loading={isLoading} />
         <JobLogStreamPanel entries={effectiveEntries} isLive={isJobActive(job)} />
         <JobLogDownloadAction jobId={jobId} rawLogs={rawLogs} entries={effectiveEntries} />

@@ -141,6 +141,17 @@
     "fileInputLabel": "Select FASTA file",
     "ariaLabel": "Upload sequence file"
   },
+  "safetyModal": {
+    "title": "Safety Analysis Findings",
+    "ariaLabel": "Safety analysis findings",
+    "close": "Close modal",
+    "sections": {
+      "toxicity": "Toxicity Alerts",
+      "allergenicity": "Allergenicity Alerts"
+    },
+    "noIssuesTitle": "No issues detected",
+    "noIssuesDescription": "Sequence passed all standard WHO and EFSA allergenicity screening protocols."
+  },
   "messages": {
     "sampleLoaded": "Sample loaded: {{name}}",
     "fileLoaded": "File loaded: {{name}}",

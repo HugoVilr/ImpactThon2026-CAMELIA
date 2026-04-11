@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
 import { cn } from "../../lib/utils";
 import { displayJobName, resourceKeyForJob, statusTranslationKey } from "../homeUtils";
@@ -58,6 +59,16 @@ export function JobsSection({
           >
             {t("jobs.filterRunning")}
           </button>
+          <button
+            className={cn(
+              "rounded px-3 py-1.5 text-[11px] font-bold transition",
+              jobFilter === "completed" ? "bg-white text-slate-900 shadow" : "text-slate-500"
+            )}
+            onClick={() => onFilterChange("completed")}
+            type="button"
+          >
+            {t("jobs.filterCompleted")}
+          </button>
         </div>
       </div>
 
@@ -103,12 +114,16 @@ export function JobsSection({
               filteredJobs.map((job) => (
                 <TableRow key={job.job_id}>
                   <TableCell className="pl-10">
-                    <a
-                      href={`/jobs/${encodeURIComponent(job.job_id)}/logs`}
+                    <Link
+                      to={
+                        job.status === "COMPLETED"
+                          ? `/jobs/${encodeURIComponent(job.job_id)}`
+                          : `/jobs/${encodeURIComponent(job.job_id)}/logs`
+                      }
                       className="text-xs font-semibold text-slate-800 transition hover:text-primary"
                     >
                       {displayJobName(job)}
-                    </a>
+                    </Link>
                   </TableCell>
 
                   <TableCell>
@@ -153,20 +168,22 @@ export function JobsSection({
                       </div>
                     ) : job.status === "COMPLETED" ? (
                       <Button
+                        asChild
                         type="button"
                         size="sm"
                         className="h-8 w-[var(--jobs-action-button-width)] rounded-md px-4 text-[11px] font-bold"
                       >
-                        {t("jobs.actions.viewResults")}
+                        <Link to={`/jobs/${encodeURIComponent(job.job_id)}`}>{t("jobs.actions.viewResults")}</Link>
                       </Button>
                     ) : (
                       <Button
+                        asChild
                         type="button"
                         size="sm"
                         variant="outline"
                         className="h-8 w-[var(--jobs-action-button-width)] text-[11px]"
                       >
-                        {t("jobs.actions.details")}
+                        <Link to={`/jobs/${encodeURIComponent(job.job_id)}/logs`}>{t("jobs.actions.details")}</Link>
                       </Button>
                     )}
                   </TableCell>
