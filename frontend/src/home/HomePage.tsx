@@ -41,7 +41,7 @@ export function HomePage() {
     }
 
     if (jobFilter === "completed") {
-      return [];
+      return jobs.filter((job) => job.status !== "RUNNING" && job.status !== "PENDING");
     }
 
     return jobs;
