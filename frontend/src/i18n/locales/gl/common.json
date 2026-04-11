@@ -78,8 +78,22 @@
     "jobId": "Job {{id}}",
     "tabs": {
       "viewer": "Visor",
+      "compare": "Comparar",
       "logs": "Logs",
       "extras": "Extras"
+    },
+    "compare": {
+      "title": "Comparación de proteínas",
+      "description": "Mantén a proteína actual á esquerda e usa o historial para cargar unha segunda proteína en paralelo.",
+      "currentProtein": "Proteína actual",
+      "comparedProtein": "Proteína comparada",
+      "selectTitle": "Selecciona un job para comparar",
+      "selectDescription": "Cada entrada do historial pode abrirse na columna dereita para revisar estrutura, métricas e metadatos lado a lado.",
+      "compareAction": "Comparar",
+      "changeSelection": "Cambiar proteína",
+      "loadingJobs": "Cargando historial de jobs...",
+      "loadingSelection": "Cargando proteína seleccionada...",
+      "empty": "Aínda non hai outros jobs dispoñibles para comparar."
     },
     "progress": {
       "loadingTitle": "Cargando estado do job...",

@@ -280,7 +280,7 @@ const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => 
     } as Response;
   }
 
-  if (url.includes("/jobs/?limit=20")) {
+  if (url.includes("/jobs/?limit=20") || url.includes("/jobs/?limit=50")) {
     if (mockState.failJobs) {
       return {
         ok: false,
@@ -473,7 +473,7 @@ describe("App Home", () => {
     renderApp();
 
     expect(await screen.findByText(/scientific job logs/i)).toBeInTheDocument();
-    expect(await screen.findByText(/proyecto activo/i)).toBeInTheDocument();
+    expect(await screen.findByText(/active project/i)).toBeInTheDocument();
     expect(screen.queryByText(/entrada de secuencia/i)).not.toBeInTheDocument();
   });
 
@@ -490,9 +490,29 @@ describe("App Home", () => {
     window.history.replaceState({}, "", "/jobs/job_completed_003");
     renderApp();
 
-    expect(await screen.findByText(/3d structure viewer/i)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /visor/i })).toBeInTheDocument();
     expect(await screen.findByText(/global plddt avg/i)).toBeInTheDocument();
     expect(await screen.findByText(/molecular metadata/i)).toBeInTheDocument();
+  });
+
+  it("renders the compare subpage and loads the job history on the right column", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    expect(await screen.findByText(/comparación de proteínas/i)).toBeInTheDocument();
+    expect(await screen.findByText(/selecciona un job para comparar/i)).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /comparar spike/i })).toBeInTheDocument();
+  });
+
+  it("loads the selected protein into the right comparison column", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar spike/i }));
+
+    expect(await screen.findByText(/proteína comparada/i)).toBeInTheDocument();
+    expect(await screen.findAllByText(/spike/i)).not.toHaveLength(0);
+    expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
   });
 
   it("filters jobs by running status", async () => {
@@ -521,7 +541,7 @@ describe("App Home", () => {
     renderApp();
     await screen.findByText(/trabajos recientes/i);
 
-    expect(screen.getByRole("link", { name: /ubiquitin/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /ubiquitin/i }).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: /completados/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /ver resultados/i })).toHaveAttribute(
       "href",

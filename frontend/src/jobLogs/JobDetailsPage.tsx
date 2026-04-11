@@ -32,7 +32,7 @@ import {
   type JobDetailsTab,
 } from "./jobResultsUtils";
 import { buildSyntheticLogs, isJobActive, parseRawLogs } from "./jobLogsUtils";
-import { JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
+import { JobCompareTab, JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
 import type { FeedbackMessage, LanguageCode } from "../types/domain";
 import type { JobAccountingPayload, JobLogEntry, JobOutputsPayload, JobStatusPayload } from "./types";
 
@@ -253,6 +253,14 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   };
 
   const effectiveEntries = logEntries.length > 0 ? logEntries : buildSyntheticLogs(job);
+  const currentSnapshot = {
+    job,
+    outputs,
+    accounting,
+    proteinDetail,
+    logEntries,
+    rawLogs,
+  };
   const structureData = resolveStructureFile(outputs);
   const plddtAverage = resolvePlddtAverage(outputs);
   const confidenceBuckets = resolveConfidenceBuckets(outputs);
@@ -646,6 +654,10 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </>
         ) : null}
 
+        {activeTab === "compare" ? (
+          <JobCompareTab baseJobId={jobId} baseSnapshot={currentSnapshot} />
+        ) : null}
+
         {activeTab === "logs" ? (
           <div className="space-y-6">
             <JobLogStreamPanel entries={effectiveEntries} isLive={isJobActive(job)} />
@@ -723,7 +735,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </div>
         ) : null}
 
-        {activeTab !== "viewer" ? (
+        {activeTab !== "viewer" && activeTab !== "compare" ? (
           <div className="grid gap-4 rounded-xl border border-border/60 bg-card/95 px-5 py-4 shadow-sm md:grid-cols-4">
             <div className="flex items-center gap-3">
               <Cpu className="h-4 w-4 text-muted-foreground" />

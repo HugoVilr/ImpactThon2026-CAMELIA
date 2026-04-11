@@ -37,6 +37,18 @@ export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: 
         </button>
         <button
           type="button"
+          onClick={() => onTabChange("compare")}
+          className={cn(
+            tabStyles,
+            activeTab === "compare"
+              ? "border-b-2 border-primary text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          {t("jobLogs.tabs.compare")}
+        </button>
+        <button
+          type="button"
           onClick={() => onTabChange("logs")}
           className={cn(
             tabStyles,
