@@ -603,7 +603,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                         <div className="rounded-xl bg-slate-50 px-3 py-3">
                           <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_source")}>
                             <span>{t("jobLogs.details.source")}</span>
-                            <Info className="h-3.5 w-3.5 cursor-help" />
+                            <Info className="h-3.5 w-3.5 cursor-help flex-shrink-0" />
                           </div>
                           <p className="mt-2 break-words text-[10px] font-extrabold uppercase tracking-[0.04em] text-slate-950">
                             {biologicalData?.source ?? "N/A"}
@@ -643,7 +643,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                           <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
                             <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_charges")}>
                               <span>{t("jobLogs.details.charges")}</span>
-                              <Info className="h-3.5 w-3.5 cursor-help" />
+                              <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
                             </div>
                             <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
                               {sequenceProperties
@@ -652,9 +652,9 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                             </p>
                           </div>
                           <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_hydro")}>
-                              <span>{t("jobLogs.details.hydro")}</span>
-                              <Info className="h-3.5 w-3.5 cursor-help" />
+                            <div className="flex items-center justify-between gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500" title={t("jobLogs.details.too_hydro")}>
+                              <span className="truncate">{t("jobLogs.details.hydro")}</span>
+                              <Info className="h-3.5 w-3.5 text-slate-400 cursor-help flex-shrink-0" />
                             </div>
                             <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
                               {typeof sequenceProperties?.hydrophobicity === "number" ? sequenceProperties.hydrophobicity.toFixed(2) : "N/A"}
@@ -667,6 +667,91 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                 </div>
               </div>
             </div>
+
+            <details className="surface-shadow group overflow-hidden rounded-2xl border border-border/40 bg-white/95 my-4">
+              <summary className="flex cursor-pointer items-center justify-between p-4 px-5 outline-none transition-colors hover:bg-slate-50 font-bold text-[12px] text-slate-800 uppercase tracking-widest">
+                {t("jobLogs.tabs.extras")}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transition-transform group-open:rotate-180 text-slate-400"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div className="p-4 pt-0 border-t border-border/40">
+                <div className="grid gap-4 md:grid-cols-2 mt-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ScanSearch className="h-4 w-4 text-primary" />
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.proteinCat")}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-border/60 bg-slate-50 px-3 py-2.5">
+                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_category")}>
+                          <span>{t("jobLogs.details.category")}</span>
+                          <Info className="h-3 w-3 text-slate-400 cursor-help ml-2" />
+                        </div>
+                        <p className="mt-1 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">{proteinDetail?.category ?? "N/A"}</p>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-slate-50 px-3 py-2.5">
+                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_function")}>
+                          <span>{t("jobLogs.details.function")}</span>
+                          <Info className="h-3 w-3 text-slate-400 cursor-help ml-2" />
+                        </div>
+                        <p className="mt-1 truncate text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950" title={proteinDetail?.function}>{proteinDetail?.function ?? "N/A"}</p>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-slate-50 px-3 py-2.5">
+                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_cellular")}>
+                          <span>{t("jobLogs.details.cellular")}</span>
+                          <Info className="h-3 w-3 text-slate-400 cursor-help ml-2" />
+                        </div>
+                        <p className="mt-1 truncate text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950" title={proteinDetail?.cellular_location}>{proteinDetail?.cellular_location ?? "N/A"}</p>
+                      </div>
+                      <div className="rounded-xl border border-border/60 bg-slate-50 px-3 py-2.5">
+                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_activity")}>
+                          <span>{t("jobLogs.details.activity")}</span>
+                          <Info className="h-3 w-3 text-slate-400 cursor-help ml-2" />
+                        </div>
+                        <p className="mt-1 truncate text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950" title={proteinDetail?.activity}>{proteinDetail?.activity ?? "N/A"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Dna className="h-4 w-4 text-primary" />
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.annotations")}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3 h-[calc(100%-28px)]">
+                      <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
+                        {(proteinDetail?.tags ?? []).length > 0 ? (
+                          proteinDetail?.tags?.map((tag) => (
+                            <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
+                        )}
+                      </div>
+                      <div className="space-y-3">
+                        {(proteinDetail?.known_structures ?? []).length > 0 ? (
+                          proteinDetail?.known_structures?.map((structure, index) => (
+                            <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
+                                <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
+                              </div>
+                              <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
+                                {structure.publication ?? t("jobLogs.details.publicationUnavail")}
+                                {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
 
             <div className="grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]">
               <div className="flex flex-wrap items-center gap-4 text-[12px] text-slate-700">
@@ -698,75 +783,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </div>
         ) : null}
 
-        {activeTab === "extras" ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <ScanSearch className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">{t("jobLogs.details.proteinCat")}</p>
-                </div>
-                <div className="grid gap-3 text-sm">
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.category")}</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.category ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.function")}</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.function ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.cellular")}</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.cellular_location ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.activity")}</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <Dna className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">{t("jobLogs.details.annotations")}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {(proteinDetail?.tags ?? []).length > 0 ? (
-                    proteinDetail?.tags?.map((tag) => (
-                      <Badge key={tag} variant="muted">
-                        {tag}
-                      </Badge>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{t("jobLogs.details.noTags")}</p>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  {(proteinDetail?.known_structures ?? []).length > 0 ? (
-                    proteinDetail?.known_structures?.map((structure, index) => (
-                      <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="font-semibold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
-                          <Badge variant="muted">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
-                        </div>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {structure.publication ?? t("jobLogs.details.publicationUnavail")}
-                          {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{t("jobLogs.details.noStructs")}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : null}
 
         {activeTab !== "viewer" && activeTab !== "compare" ? (
           <div className="grid gap-4 rounded-xl border border-border/60 bg-card/95 px-5 py-4 shadow-sm md:grid-cols-4">
