@@ -1,6 +1,6 @@
 import type { JobOutputsPayload } from "./types";
 
-export type JobDetailsTab = "viewer" | "logs" | "extras" | "compare";
+export type JobDetailsTab = "viewer" | "logs" | "compare";
 
 export type ConfidenceBucket = {
   key: string;
