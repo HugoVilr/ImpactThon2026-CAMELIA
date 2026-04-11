@@ -27,7 +27,7 @@
         "filename": "Nombre de archivo FASTA",
         "filenamePlaceholder": "proteina.fasta",
         "input": "Secuencia",
-        "inputPlaceholder": "\u003enombre_proteina\\nMKT...",
+        "inputPlaceholder": ">nombre_proteina\\nMKT...",
         "uploadButton": "Subir archivo",
         "runButton": "Ejecutar Plegamiento",
         "submittingButton": "Enviando Job..."
@@ -121,9 +121,9 @@
             "strand": "Lámina",
             "unknownMethod": "Método desconocido",
             "mw": "Peso molecular",
-            "high": "Alta \u003e90",
+            "high": "Alta >90",
             "cys": "Cisteínas",
-            "too_solubility": "Estimación de la probabilidad de que la proteína sea soluble en agua. Valores \u003e50 indican una proteína soluble, mientras que valores \u003c30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.",
+            "too_solubility": "Estimación de la probabilidad de que la proteína sea soluble en agua. Valores >50 indican una proteína soluble, mientras que valores <30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.",
             "noStructure": "La estructura no está disponible aún para este job.",
             "too_mw": "Masa total de la proteína en kiloDaltons (kDa). Es esencial para identificar la molécula en experimentos de laboratorio como el Western Blot.",
             "unknownStruct": "Estructura desconocida",
@@ -152,15 +152,15 @@
             "cpuOnly": "Solo CPU",
             "wallTime": "Tiempo total (Wall Time)",
             "viewVr": "Ver en VR",
-            "too_source": "Indica de dónde provienen los resultados estructurales. \u0027Synthetic Prediction\u0027 significa que, al no coincidir con las 22 proteínas del catálogo real, el sistema ha generado una estructura y datos biológicos mediante algoritmos de simulación.",
+            "too_source": "Indica de dónde provienen los resultados estructurales. 'Synthetic Prediction' significa que, al no coincidir con las 22 proteínas del catálogo real, el sistema ha generado una estructura y datos biológicos mediante algoritmos de simulación.",
             "noTags": "No hay etiquetas disponibles.",
             "too_hydro": "Tendencia de la proteína a evitar el agua. Valores negativos indican que la proteína es soluble y prefiere entornos acuosos.",
-            "veryLow": "Muy baja \u003c50",
+            "veryLow": "Muy baja <50",
             "noStructs": "El catálogo no proporciona estructuras.",
             "too_instability": "Medida que estima la estabilidad de la proteína en un tubo de ensayo basada en su composición de aminoácidos. Los valores inferiores a 40 son el umbral estándar para considerar que una proteína es estable.",
             "cellular": "Ubicación celular",
             "stability": "Estabilidad",
-            "too_plddt": "Medida de confianza de AlphaFold. Un valor \u003e70 indica un plegamiento fiable, mientras que \u003e90 refleja una precisión alta a nivel atómico.",
+            "too_plddt": "Medida de confianza de AlphaFold. Un valor >70 indica un plegamiento fiable, mientras que >90 refleja una precisión alta a nivel atómico.",
             "aiDiscovery": "Descubrimiento IA",
             "secStruct": "Desglose de estructura secundaria",
             "too_uniprot": "Identificador universal de la proteína. Permite consultar funciones biológicas e investigaciones previas en bases de datos mundiales.",
@@ -221,7 +221,7 @@
         "uploadRead": "No se pudo leer el archivo.",
         "uploadEmpty": "El archivo está vacío.",
         "fileFormat": "Formato de archivo no compatible.",
-        "invalidFasta": "La secuencia FASTA debe empezar por \"\u003e\".",
+        "invalidFasta": "La secuencia FASTA debe empezar por \">\".",
         "jobSubmit": "No se pudo enviar el job. {{detail}}"
     },
     "exportModal": {
@@ -244,5 +244,15 @@
             "desc": "Valores brutos de pLDDT y matriz de error PAE.",
             "title": "Confidence Data (JSON)"
         }
+    },
+    "accessibility": {
+        "colorblindMode": "Modo Visual",
+        "menuLabel": "Modo Visual",
+        "standard": "Vista Estándar",
+        "deuteranopia": "Deuteranopatía",
+        "protanopia": "Protanopatía",
+        "tritanopia": "Tritanopatía",
+        "achromatopsia": "Acromatopsia",
+        "contrast_loss": "Pérdida de Contraste"
     }
 }
