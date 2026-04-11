@@ -74,6 +74,44 @@
     },
     "progressAria": "Progreso del job {{name}}"
   },
+  "jobLogs": {
+    "kicker": "Proyecto Activo",
+    "jobId": "Job {{id}}",
+    "tabs": {
+      "viewer": "Visor",
+      "logs": "Logs",
+      "extras": "Extras"
+    },
+    "progress": {
+      "loadingTitle": "Cargando estado del job...",
+      "pendingTitle": "Job en cola en el clúster CESGA...",
+      "runningTitle": "Calculando estructura en el clúster CESGA...",
+      "completedTitle": "Ejecución completada. Outputs disponibles.",
+      "failedTitle": "La ejecución finalizó con error.",
+      "cancelledTitle": "El job fue cancelado.",
+      "step": "STEP {{current}}/{{total}} · {{phase}}",
+      "phases": {
+        "init": "INIT",
+        "queue": "QUEUE",
+        "msa": "MSA",
+        "features": "FEATURES",
+        "folding": "FOLDING",
+        "complete": "COMPLETE",
+        "failed": "FAILED",
+        "cancelled": "CANCELLED"
+      }
+    },
+    "stream": {
+      "title": "Scientific Job Logs",
+      "live": "Live Stream",
+      "snapshot": "Snapshot",
+      "empty": "Sin eventos de log todavía."
+    },
+    "download": "Descargar Logs Técnicos Completos",
+    "errors": {
+      "load": "No se pudieron cargar los logs del job. {{detail}}"
+    }
+  },
   "status": {
     "pending": "Pendiente",
     "running": "En ejecución",

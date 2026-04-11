@@ -90,7 +90,12 @@ export function JobsSection({
               filteredJobs.map((job) => (
                 <TableRow key={job.job_id}>
                   <TableCell>
-                    <strong className="text-xs font-semibold text-slate-800">{displayJobName(job)}</strong>
+                    <a
+                      href={`/jobs/${encodeURIComponent(job.job_id)}/logs`}
+                      className="text-xs font-semibold text-slate-800 transition hover:text-primary"
+                    >
+                      {displayJobName(job)}
+                    </a>
                   </TableCell>
 
                   <TableCell>
