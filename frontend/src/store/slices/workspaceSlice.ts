@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { loadDashboard, processUploadFile } from "../actions";
+import { getPresetById } from "../../config/presets";
+import { loadDashboard, pollJobStatuses, processUploadFile, submitFoldingJob } from "../actions";
 import type {
   ApiHealth,
   FeedbackMessage,
@@ -17,9 +18,11 @@ export type WorkspaceState = {
   fastaSequence: string;
   fastaFilename: string;
   loading: boolean;
+  isSubmittingJob: boolean;
   jobFilter: JobFilter;
   isUploadModalOpen: boolean;
   isDraggingFile: boolean;
+  lastSubmittedJobId: string | null;
   errorMessage: FeedbackMessage | null;
   successMessage: FeedbackMessage | null;
 };
@@ -32,9 +35,11 @@ const initialState: WorkspaceState = {
   fastaSequence: "",
   fastaFilename: "sequence.fasta",
   loading: true,
+  isSubmittingJob: false,
   jobFilter: "all",
   isUploadModalOpen: false,
   isDraggingFile: false,
+  lastSubmittedJobId: null,
   errorMessage: null,
   successMessage: null,
 };
@@ -94,7 +99,19 @@ const workspaceSlice = createSlice({
       .addCase(loadDashboard.fulfilled, (state, action) => {
         state.loading = false;
         state.health = action.payload.health;
-        state.jobs = action.payload.jobs;
+        const completedJobIds = new Set(
+          action.payload.jobs
+            .filter((job) => job.status === "COMPLETED")
+            .map((job) => job.job_id)
+        );
+        const fetchedJobs = action.payload.jobs.filter((job) => job.status !== "COMPLETED");
+        const localActiveJobs = state.jobs.filter(
+          (job) =>
+            (job.status === "PENDING" || job.status === "RUNNING") &&
+            !completedJobIds.has(job.job_id) &&
+            !fetchedJobs.some((fetchedJob) => fetchedJob.job_id === job.job_id)
+        );
+        state.jobs = [...localActiveJobs, ...fetchedJobs];
         state.samples = action.payload.samples;
 
         if (!state.fastaSequence && action.payload.samples.length > 0) {
@@ -131,6 +148,80 @@ const workspaceSlice = createSlice({
       .addCase(processUploadFile.rejected, (state, action) => {
         state.errorMessage = action.payload ?? { key: "errors.uploadRead" };
         state.successMessage = null;
+      })
+      .addCase(submitFoldingJob.pending, (state) => {
+        state.isSubmittingJob = true;
+        state.lastSubmittedJobId = null;
+        state.errorMessage = null;
+        state.successMessage = null;
+      })
+      .addCase(submitFoldingJob.fulfilled, (state, action) => {
+        state.isSubmittingJob = false;
+        state.lastSubmittedJobId = action.payload.job_id;
+        const preset = getPresetById(action.meta.arg.presetId);
+        const fastaFilename = action.meta.arg.fastaFilename.trim() || "sequence.fasta";
+        const existingIndex = state.jobs.findIndex((job) => job.job_id === action.payload.job_id);
+        const submittedJob: Job = {
+          job_id: action.payload.job_id,
+          status: action.payload.status,
+          created_at: new Date().toISOString(),
+          started_at: null,
+          completed_at: null,
+          gpus: preset.gpus,
+          cpus: preset.cpus,
+          memory_gb: preset.memoryGb,
+          max_runtime_seconds: preset.maxRuntimeSeconds,
+          fasta_filename: fastaFilename,
+          error_message: null,
+        };
+
+        if (existingIndex >= 0) {
+          state.jobs[existingIndex] = {
+            ...state.jobs[existingIndex],
+            ...submittedJob,
+          };
+        } else {
+          state.jobs.unshift(submittedJob);
+        }
+
+        state.successMessage = {
+          key: "messages.jobSubmitted",
+          params: {
+            id: action.payload.job_id,
+          },
+        };
+      })
+      .addCase(submitFoldingJob.rejected, (state, action) => {
+        state.isSubmittingJob = false;
+        state.errorMessage =
+          action.payload ??
+          ({
+            key: "errors.jobSubmit",
+            params: {
+              detail: "Unknown error",
+            },
+          } as FeedbackMessage);
+        state.successMessage = null;
+      })
+      .addCase(pollJobStatuses.fulfilled, (state, action) => {
+        action.payload.forEach((statusUpdate) => {
+          const jobIndex = state.jobs.findIndex((job) => job.job_id === statusUpdate.job_id);
+          if (jobIndex < 0) {
+            return;
+          }
+
+          const existingJob = state.jobs[jobIndex];
+          existingJob.status = statusUpdate.status;
+          if (statusUpdate.started_at) {
+            existingJob.started_at = statusUpdate.started_at;
+          }
+          if (statusUpdate.completed_at) {
+            existingJob.completed_at = statusUpdate.completed_at;
+          }
+          if (statusUpdate.error_message) {
+            existingJob.error_message = statusUpdate.error_message;
+          }
+        });
       });
   },
 });

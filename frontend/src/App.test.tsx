@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
@@ -7,6 +7,7 @@ import { setupStore } from "./store";
 
 type MockState = {
   failJobs: boolean;
+  failSubmit: boolean;
   jobs: Array<{
     job_id: string;
     status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
@@ -30,10 +31,11 @@ type MockState = {
 
 const defaultMockState = (): MockState => ({
   failJobs: false,
+  failSubmit: false,
   jobs: [
     {
-      job_id: "job_done_001",
-      status: "COMPLETED",
+      job_id: "job_failed_001",
+      status: "FAILED",
       created_at: "2026-04-10T19:04:12.232598",
       started_at: "2026-04-10T19:04:17.237785",
       completed_at: "2026-04-10T19:04:22.633668",
@@ -75,14 +77,43 @@ const defaultMockState = (): MockState => ({
 });
 
 let mockState: MockState = defaultMockState();
+let submitRequests: Array<Record<string, unknown>> = [];
+let submittedJobStatus: "PENDING" | "RUNNING" | "COMPLETED" | null = null;
+let submittedJobPollCount = 0;
 
-const mockFetch = vi.fn(async (input: RequestInfo | URL) => {
+const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
   const url =
     typeof input === "string"
       ? input
       : input instanceof URL
         ? input.toString()
         : input.url;
+
+  if (url.endsWith("/jobs/submit")) {
+    if (typeof init?.body === "string") {
+      submitRequests.push(JSON.parse(init.body) as Record<string, unknown>);
+    }
+
+    if (mockState.failSubmit) {
+      return {
+        ok: false,
+        status: 400,
+        json: async () => ({ detail: "invalid request" }),
+      } as Response;
+    }
+
+    submittedJobStatus = "PENDING";
+    submittedJobPollCount = 0;
+
+    return {
+      ok: true,
+      json: async () => ({
+        job_id: "job_submitted_123",
+        status: "PENDING",
+        message: "Job submitted successfully. Use the job_id to check status.",
+      }),
+    } as Response;
+  }
 
   if (url.endsWith("/health")) {
     return {
@@ -106,7 +137,52 @@ const mockFetch = vi.fn(async (input: RequestInfo | URL) => {
 
     return {
       ok: true,
-      json: async () => mockState.jobs,
+      json: async () => [...mockState.jobs],
+    } as Response;
+  }
+
+  const statusMatch = url.match(/\/jobs\/([^/]+)\/status$/);
+  if (statusMatch) {
+    const jobId = statusMatch[1];
+
+    if (jobId === "job_submitted_123" && submittedJobStatus) {
+      submittedJobPollCount += 1;
+      if (submittedJobStatus === "PENDING" && submittedJobPollCount >= 2) {
+        submittedJobStatus = "RUNNING";
+      } else if (submittedJobStatus === "RUNNING" && submittedJobPollCount >= 4) {
+        submittedJobStatus = "COMPLETED";
+      }
+
+      return {
+        ok: true,
+        json: async () => ({
+          job_id: "job_submitted_123",
+          status: submittedJobStatus,
+          started_at: submittedJobStatus === "PENDING" ? null : "2026-04-10T22:11:17.237785",
+          completed_at: submittedJobStatus === "COMPLETED" ? "2026-04-10T22:19:10.237785" : null,
+          error_message: null,
+        }),
+      } as Response;
+    }
+
+    const existingJob = mockState.jobs.find((job) => job.job_id === jobId);
+    if (existingJob) {
+      return {
+        ok: true,
+        json: async () => ({
+          job_id: existingJob.job_id,
+          status: existingJob.status,
+          started_at: existingJob.started_at,
+          completed_at: existingJob.completed_at,
+          error_message: existingJob.error_message,
+        }),
+      } as Response;
+    }
+
+    return {
+      ok: false,
+      status: 404,
+      json: async () => ({ detail: "Not found" }),
     } as Response;
   }
 
@@ -136,11 +212,15 @@ const renderApp = () => {
 
 beforeEach(async () => {
   mockState = defaultMockState();
+  submitRequests = [];
+  submittedJobStatus = null;
+  submittedJobPollCount = 0;
   vi.stubGlobal("fetch", mockFetch);
   await i18n.changeLanguage("es");
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
@@ -151,21 +231,55 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("heading", { name: /biohack localfold/i })).toBeInTheDocument();
     expect(await screen.findByText(/trabajos recientes/i)).toBeInTheDocument();
-    expect(await screen.findByText(/job_done_001/i)).toBeInTheDocument();
-    expect(await screen.findByText(/job_running_002/i)).toBeInTheDocument();
+    expect(await screen.findByText(/ubiquitin/i)).toBeInTheDocument();
+    expect(await screen.findByText(/spike/i)).toBeInTheDocument();
   });
 
-  it("filters jobs by status", async () => {
+  it("filters jobs by running status", async () => {
     renderApp();
-    await screen.findByText(/job_done_001/i);
+    await screen.findByText(/ubiquitin/i);
 
     fireEvent.click(screen.getByRole("button", { name: /en ejecución/i }));
-    expect(await screen.findByText(/job_running_002/i)).toBeInTheDocument();
-    expect(screen.queryByText(/job_done_001/i)).not.toBeInTheDocument();
+    expect(await screen.findByText(/spike/i)).toBeInTheDocument();
+    expect(screen.queryByText(/ubiquitin/i)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /completados/i }));
-    expect(await screen.findByText(/job_done_001/i)).toBeInTheDocument();
-    expect(screen.queryByText(/job_running_002/i)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /todos/i }));
+    expect(await screen.findByText(/ubiquitin/i)).toBeInTheDocument();
+    expect(await screen.findByText(/spike/i)).toBeInTheDocument();
+  });
+
+  it("shows progress bar alongside in-progress button for active jobs", async () => {
+    renderApp();
+    await screen.findByText(/trabajos recientes/i);
+
+    const progressBars = screen.getAllByRole("progressbar");
+    expect(progressBars).toHaveLength(1);
+    expect(screen.getByRole("button", { name: /en progreso/i })).toBeInTheDocument();
+  });
+
+  it("does not render completed jobs from API mock", async () => {
+    mockState.jobs = [
+      ...mockState.jobs,
+      {
+        job_id: "job_completed_mock",
+        status: "COMPLETED",
+        created_at: "2026-04-10T21:10:12.232598",
+        started_at: "2026-04-10T21:11:17.237785",
+        completed_at: "2026-04-10T21:19:10.237785",
+        gpus: 1,
+        cpus: 8,
+        memory_gb: 32,
+        max_runtime_seconds: 3600,
+        fasta_filename: "mock.fasta",
+        error_message: null,
+      },
+    ];
+
+    renderApp();
+    await screen.findByText(/trabajos recientes/i);
+
+    expect(screen.queryByText(/job_completed_mock/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /completados/i })).not.toBeInTheDocument();
   });
 
   it("does not render sample or filename fields", async () => {
@@ -233,6 +347,67 @@ describe("App Home", () => {
     });
 
     expect(await screen.findByText(/el archivo está vacío/i)).toBeInTheDocument();
+  });
+
+  it("submits job with selected resource profile", async () => {
+    renderApp();
+    const runButton = await screen.findByRole("button", { name: /ejecutar plegamiento/i });
+
+    await waitFor(() => {
+      expect(runButton).not.toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /^alta precisión/i }));
+    fireEvent.click(runButton);
+
+    expect(await screen.findByText(/job enviado: job_submitted_123/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^job_submitted_123$/i)).not.toBeInTheDocument();
+    expect(submitRequests).toHaveLength(1);
+    expect(submitRequests[0]).toMatchObject({
+      gpus: 2,
+      cpus: 16,
+      memory_gb: 80,
+      max_runtime_seconds: 7200,
+    });
+    expect(String(submitRequests[0].fasta_sequence)).toMatch(/^>/);
+  });
+
+  it("polls submitted job status using the job status endpoint", async () => {
+    renderApp();
+    const runButton = await screen.findByRole("button", { name: /ejecutar plegamiento/i });
+
+    await waitFor(() => {
+      expect(runButton).not.toBeDisabled();
+    });
+
+    fireEvent.click(runButton);
+    expect(await screen.findByText(/job enviado: job_submitted_123/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      const calledStatusEndpoint = mockFetch.mock.calls.some(([input]) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.toString()
+              : input.url;
+        return url.includes("/jobs/job_submitted_123/status");
+      });
+
+      expect(calledStatusEndpoint).toBe(true);
+    });
+  });
+
+  it("disables submit when FASTA is invalid", async () => {
+    renderApp();
+    const sequenceTextarea = (await screen.findByLabelText(/secuencia/i)) as HTMLTextAreaElement;
+    const runButton = await screen.findByRole("button", { name: /ejecutar plegamiento/i });
+
+    fireEvent.change(sequenceTextarea, { target: { value: "INVALID_FASTA" } });
+
+    expect(runButton).toBeDisabled();
+    fireEvent.click(runButton);
+    expect(submitRequests).toHaveLength(0);
   });
 
   it("switches language to english and galician", async () => {

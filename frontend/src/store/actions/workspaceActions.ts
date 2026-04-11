@@ -1,5 +1,14 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { ApiHealth, FeedbackMessage, Job, ProteinSample } from "../../types/domain";
+import { getPresetById } from "../../config/presets";
+import type {
+  ApiHealth,
+  FeedbackMessage,
+  Job,
+  JobStatus,
+  ProteinSample,
+  ResourcePresetId,
+  SubmitJobResponse,
+} from "../../types/domain";
 
 export const apiUrl = (
   import.meta.env.VITE_API_URL ?? "https://api-mock-cesga.onrender.com"
@@ -55,6 +64,31 @@ export type UploadedFilePayload = {
   filename: string;
   content: string;
 };
+
+export type SubmitFoldingJobArgs = {
+  fastaSequence: string;
+  fastaFilename: string;
+  presetId: ResourcePresetId;
+};
+
+export type PollJobStatusesArgs = {
+  jobIds: string[];
+};
+
+export type JobStatusUpdate = {
+  job_id: string;
+  status: JobStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  error_message: string | null;
+};
+
+const validStatuses: JobStatus[] = ["PENDING", "RUNNING", "COMPLETED", "FAILED", "CANCELLED"];
+
+const normalizeJobStatus = (value: unknown): JobStatus | null =>
+  typeof value === "string" && validStatuses.includes(value as JobStatus)
+    ? (value as JobStatus)
+    : null;
 
 export const loadDashboard = createAsyncThunk<
   DashboardPayload,
@@ -127,3 +161,86 @@ export const processUploadFile = createAsyncThunk<
     return rejectWithValue({ key: "errors.uploadRead" });
   }
 });
+
+export const submitFoldingJob = createAsyncThunk<
+  SubmitJobResponse,
+  SubmitFoldingJobArgs,
+  { rejectValue: FeedbackMessage }
+>("workspace/submitFoldingJob", async (payload, { rejectWithValue }) => {
+  const fastaSequence = payload.fastaSequence.trim();
+  if (!fastaSequence || !fastaSequence.startsWith(">")) {
+    return rejectWithValue({ key: "errors.invalidFasta" });
+  }
+
+  const preset = getPresetById(payload.presetId);
+  const fastaFilename = payload.fastaFilename.trim() || "sequence.fasta";
+
+  try {
+    const response = await fetch(`${apiUrl}/jobs/submit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fasta_sequence: fastaSequence,
+        fasta_filename: fastaFilename,
+        gpus: preset.gpus,
+        cpus: preset.cpus,
+        memory_gb: preset.memoryGb,
+        max_runtime_seconds: preset.maxRuntimeSeconds,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await parseHttpError(response));
+    }
+
+    return (await response.json()) as SubmitJobResponse;
+  } catch (error) {
+    return rejectWithValue({
+      key: "errors.jobSubmit",
+      params: {
+        detail: error instanceof Error ? error.message : "Unknown error",
+      },
+    });
+  }
+});
+
+export const pollJobStatuses = createAsyncThunk<JobStatusUpdate[], PollJobStatusesArgs>(
+  "workspace/pollJobStatuses",
+  async ({ jobIds }) => {
+    const uniqueJobIds = Array.from(new Set(jobIds.map((id) => id.trim()).filter(Boolean)));
+    if (uniqueJobIds.length === 0) {
+      return [];
+    }
+
+    const statusChecks = await Promise.all(
+      uniqueJobIds.map(async (jobId) => {
+        try {
+          const response = await fetch(`${apiUrl}/jobs/${jobId}/status`);
+          if (!response.ok) {
+            return null;
+          }
+
+          const payload = (await response.json()) as Partial<JobStatusUpdate>;
+          const status = normalizeJobStatus(payload.status);
+          if (!status) {
+            return null;
+          }
+
+          return {
+            job_id: jobId,
+            status,
+            started_at: typeof payload.started_at === "string" ? payload.started_at : null,
+            completed_at: typeof payload.completed_at === "string" ? payload.completed_at : null,
+            error_message: typeof payload.error_message === "string" ? payload.error_message : null,
+          } satisfies JobStatusUpdate;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    return statusChecks.filter((entry): entry is JobStatusUpdate => entry !== null);
+  }
+);

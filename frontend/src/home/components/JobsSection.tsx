@@ -1,9 +1,10 @@
-import { Clock3, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
 import { cn } from "../../lib/utils";
-import { resourceKeyForJob, statusTranslationKey } from "../homeUtils";
+import { displayJobName, resourceKeyForJob, statusTranslationKey } from "../homeUtils";
 import type { Job, JobFilter } from "../../types/domain";
+import { JobProgressBar } from "./JobProgressBar";
 
 type JobsSectionProps = {
   locale: string;
@@ -56,16 +57,6 @@ export function JobsSection({
           >
             {t("jobs.filterRunning")}
           </button>
-          <button
-            className={cn(
-              "rounded px-3 py-1.5 text-[11px] font-bold transition",
-              jobFilter === "completed" ? "bg-white text-slate-900 shadow" : "text-slate-500"
-            )}
-            onClick={() => onFilterChange("completed")}
-            type="button"
-          >
-            {t("jobs.filterCompleted")}
-          </button>
         </div>
       </div>
 
@@ -99,10 +90,7 @@ export function JobsSection({
               filteredJobs.map((job) => (
                 <TableRow key={job.job_id}>
                   <TableCell>
-                    <div className="grid gap-0.5">
-                      <strong className="text-xs font-semibold text-slate-800">{job.fasta_filename}</strong>
-                      <small className="text-[11px] text-muted-foreground">{job.job_id}</small>
-                    </div>
+                    <strong className="text-xs font-semibold text-slate-800">{displayJobName(job)}</strong>
                   </TableCell>
 
                   <TableCell>
@@ -128,14 +116,18 @@ export function JobsSection({
                   </TableCell>
 
                   <TableCell className="text-right">
-                    {job.status === "COMPLETED" ? (
+                    {job.status === "RUNNING" || job.status === "PENDING" ? (
+                      <div className="ml-auto flex w-[220px] items-center justify-end gap-3">
+                        <div className="w-24">
+                          <JobProgressBar job={job} />
+                        </div>
+                        <Button type="button" size="sm" variant="outline" className="h-8 text-[11px]" disabled>
+                          {t("jobs.actions.inProgress")}
+                        </Button>
+                      </div>
+                    ) : job.status === "COMPLETED" ? (
                       <Button type="button" size="sm" className="h-8 rounded-md px-4 text-[11px] font-bold">
                         {t("jobs.actions.viewResults")}
-                      </Button>
-                    ) : job.status === "RUNNING" || job.status === "PENDING" ? (
-                      <Button type="button" size="sm" variant="outline" className="h-8 gap-1.5 text-[11px]" disabled>
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {t("jobs.actions.inProgress")}
                       </Button>
                     ) : (
                       <Button type="button" size="sm" variant="outline" className="h-8 text-[11px]">

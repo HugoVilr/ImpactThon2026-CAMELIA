@@ -1,16 +1,22 @@
-import { Rocket, Upload } from "lucide-react";
+import { Loader2, Rocket, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "../../commons/components/ui";
 
 type SequencePanelProps = {
   fastaSequence: string;
+  isSubmittingJob: boolean;
+  isRunDisabled: boolean;
   onOpenUploadModal: () => void;
+  onRunFolding: () => void;
   onSequenceChange: (value: string) => void;
 };
 
 export function SequencePanel({
   fastaSequence,
+  isSubmittingJob,
+  isRunDisabled,
   onOpenUploadModal,
+  onRunFolding,
   onSequenceChange,
 }: SequencePanelProps) {
   const { t } = useTranslation();
@@ -48,11 +54,16 @@ export function SequencePanel({
           <div className="flex flex-col items-center gap-2">
             <Button
               type="button"
-              disabled
-              className="h-12 min-w-[260px] gap-2 rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 disabled:opacity-100"
+              onClick={onRunFolding}
+              disabled={isRunDisabled || isSubmittingJob}
+              className="h-12 min-w-[260px] gap-2 rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25"
             >
-              <Rocket className="h-4 w-4" />
-              {t("sequence.runButton")}
+              {isSubmittingJob ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Rocket className="h-4 w-4" />
+              )}
+              {isSubmittingJob ? t("sequence.submittingButton") : t("sequence.runButton")}
             </Button>
             <p className="text-center text-[11px] text-muted-foreground">{t("sequence.uploadOnlyHint")}</p>
           </div>

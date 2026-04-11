@@ -26,6 +26,18 @@ export const resourceKeyForJob = (job: Job): string => {
   return "resource.standard";
 };
 
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export const displayJobName = (job: Job): string => {
+  const withoutExtension = job.fasta_filename.replace(/\.(fasta|fa|faa|txt)$/i, "").trim();
+  if (!withoutExtension) {
+    return "sequence";
+  }
+
+  const idSuffix = new RegExp(`([_\\-\\s]?${escapeRegExp(job.job_id)})$`, "i");
+  return withoutExtension.replace(idSuffix, "").trim() || withoutExtension;
+};
+
 export const resolveLanguage = (value: string | undefined): LanguageCode => {
   if (value === "en" || value === "es" || value === "gl") {
     return value;

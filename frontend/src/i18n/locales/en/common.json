@@ -29,8 +29,9 @@
     "input": "Sequence",
     "inputPlaceholder": ">protein_name\\nMKT...",
     "uploadButton": "Upload .fasta",
-    "uploadOnlyHint": "For now, only file upload is connected.",
-    "runButton": "Run Sequence Folding"
+    "uploadOnlyHint": "Choose a preset and submit the job.",
+    "runButton": "Run Sequence Folding",
+    "submittingButton": "Submitting Job..."
   },
   "presets": {
     "title": "Resource Presets",
@@ -70,7 +71,8 @@
       "viewResults": "View Results",
       "inProgress": "In Progress",
       "details": "Details"
-    }
+    },
+    "progressAria": "Progress for job {{name}}"
   },
   "status": {
     "pending": "Pending",
@@ -104,12 +106,15 @@
   },
   "messages": {
     "sampleLoaded": "Sample loaded: {{name}}",
-    "fileLoaded": "File loaded: {{name}}"
+    "fileLoaded": "File loaded: {{name}}",
+    "jobSubmitted": "Job submitted: {{id}}"
   },
   "errors": {
     "dashboardLoad": "Could not load dashboard data. {{detail}}",
     "uploadRead": "Could not read the file.",
     "uploadEmpty": "The file is empty.",
-    "fileFormat": "Unsupported file format."
+    "fileFormat": "Unsupported file format.",
+    "invalidFasta": "FASTA sequence must start with \">\".",
+    "jobSubmit": "Could not submit job. {{detail}}"
   }
 }

@@ -29,8 +29,9 @@
     "input": "Secuencia",
     "inputPlaceholder": ">nombre_proteina\\nMKT...",
     "uploadButton": "Subir .fasta",
-    "uploadOnlyHint": "Por ahora solo está conectada la subida de archivos.",
-    "runButton": "Ejecutar Plegamiento"
+    "uploadOnlyHint": "Selecciona un perfil y ejecuta el submit del job.",
+    "runButton": "Ejecutar Plegamiento",
+    "submittingButton": "Enviando Job..."
   },
   "presets": {
     "title": "Perfiles de Recursos",
@@ -70,7 +71,8 @@
       "viewResults": "Ver Resultados",
       "inProgress": "En Progreso",
       "details": "Detalles"
-    }
+    },
+    "progressAria": "Progreso del job {{name}}"
   },
   "status": {
     "pending": "Pendiente",
@@ -104,12 +106,15 @@
   },
   "messages": {
     "sampleLoaded": "Muestra cargada: {{name}}",
-    "fileLoaded": "Archivo cargado: {{name}}"
+    "fileLoaded": "Archivo cargado: {{name}}",
+    "jobSubmitted": "Job enviado: {{id}}"
   },
   "errors": {
     "dashboardLoad": "No se pudieron cargar los datos del panel. {{detail}}",
     "uploadRead": "No se pudo leer el archivo.",
     "uploadEmpty": "El archivo está vacío.",
-    "fileFormat": "Formato de archivo no compatible."
+    "fileFormat": "Formato de archivo no compatible.",
+    "invalidFasta": "La secuencia FASTA debe empezar por \">\".",
+    "jobSubmit": "No se pudo enviar el job. {{detail}}"
   }
 }

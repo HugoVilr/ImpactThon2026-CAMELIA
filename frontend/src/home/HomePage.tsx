@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { HomeFooter, StatusBanners, TopBar } from "../commons/components";
 import { HeroHeader, JobsSection, PresetPanel, SequencePanel, UploadModal } from "./components";
-import { loadDashboard, processUploadFile } from "../store/actions";
+import { loadDashboard, pollJobStatuses, processUploadFile, submitFoldingJob } from "../store/actions";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   closeUploadModal,
@@ -25,7 +25,9 @@ export function HomePage() {
     jobs,
     selectedPresetId,
     fastaSequence,
+    fastaFilename,
     loading,
+    isSubmittingJob,
     jobFilter,
     isUploadModalOpen,
     isDraggingFile,
@@ -39,15 +41,37 @@ export function HomePage() {
     }
 
     if (jobFilter === "completed") {
-      return jobs.filter((job) => job.status === "COMPLETED");
+      return [];
     }
 
     return jobs;
   }, [jobFilter, jobs]);
 
+  const activeJobIds = useMemo(
+    () =>
+      jobs
+        .filter((job) => job.status === "PENDING" || job.status === "RUNNING")
+        .map((job) => job.job_id),
+    [jobs]
+  );
+  const activeJobIdsKey = activeJobIds.join("|");
+
   useEffect(() => {
     void dispatch(loadDashboard());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (activeJobIds.length === 0) {
+      return;
+    }
+
+    void dispatch(pollJobStatuses({ jobIds: activeJobIds }));
+    const interval = window.setInterval(() => {
+      void dispatch(pollJobStatuses({ jobIds: activeJobIds }));
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, [dispatch, activeJobIds, activeJobIdsKey]);
 
   useEffect(() => {
     if (!errorMessage && !successMessage) {
@@ -68,6 +92,22 @@ export function HomePage() {
     void i18n.changeLanguage(language);
   };
 
+  const isFastaSequenceValid = fastaSequence.trim().startsWith(">");
+
+  const handleRunFolding = async () => {
+    const result = await dispatch(
+      submitFoldingJob({
+        fastaSequence,
+        fastaFilename,
+        presetId: selectedPresetId,
+      })
+    );
+
+    if (submitFoldingJob.fulfilled.match(result)) {
+      void dispatch(loadDashboard());
+    }
+  };
+
   return (
     <>
       <TopBar activeLanguage={activeLanguage} onLanguageChange={handleLanguageChange} />
@@ -78,7 +118,10 @@ export function HomePage() {
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_360px]">
           <SequencePanel
             fastaSequence={fastaSequence}
+            isSubmittingJob={isSubmittingJob}
+            isRunDisabled={!isFastaSequenceValid}
             onOpenUploadModal={() => dispatch(openUploadModal())}
+            onRunFolding={handleRunFolding}
             onSequenceChange={(value) => dispatch(setFastaSequence(value))}
           />
 
