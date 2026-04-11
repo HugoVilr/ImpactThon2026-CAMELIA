@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimePressables, useAnimeReveal } from "../commons/animations";
 import { HomeFooter, SafetyFindingsModal, StatusBanners, TopBar, type SafetyFinding } from "../commons/components";
 import { Badge, Button, Card, CardContent } from "../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../components/ProteinViewer";
@@ -59,6 +60,7 @@ type XrSupport = {
 
 export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageProps) {
   const { t, i18n } = useTranslation();
+  const pageRef = useRef<HTMLElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
   const [activeTab, setActiveTab] = useState<JobDetailsTab>(initialTab);
   const [job, setJob] = useState<JobStatusPayload | null>(null);
@@ -294,6 +296,18 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   }, [biologicalData?.allergenicity_alerts, biologicalData?.toxicity_alerts]);
   const hasSafetyData = Boolean(biologicalData);
 
+  useAnimeReveal(pageRef, {
+    selector: ":scope > *",
+    dependencyKey: jobId,
+    delayStep: 70,
+    duration: 520,
+    translateY: 16,
+  });
+
+  useAnimePressables(pageRef, {
+    selector: "button, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: activeTab,
+  });
 
   return (
     <>
@@ -302,7 +316,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         onLanguageChange={handleLanguageChange}
       />
 
-      <main className="page-enter mx-auto w-full max-w-[1200px] space-y-4 px-4 pb-8 pt-6 md:px-5">
+      <main ref={pageRef} className="mx-auto w-full max-w-[1200px] space-y-4 px-4 pb-8 pt-6 md:px-5">
         <section className="space-y-3">
           <div className="space-y-2">
             <p className="font-headline text-[1.85rem] font-extrabold uppercase tracking-[0.22em] text-primary md:text-[2.2rem]">
@@ -467,10 +481,10 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
               </div>
 
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] min-w-0">
-                  <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
-                    <CardContent className="flex flex-1 flex-col gap-3 p-4">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{t("jobLogs.details.bioInsights")}</p>
+                <div className="grid min-w-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                    <Card className="surface-shadow flex h-full flex-col rounded-2xl border-border/40 bg-white/95">
+                      <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{t("jobLogs.details.bioInsights")}</p>
 
                       <div className="flex flex-1 flex-col gap-3 text-[13px]">
                         <div className="flex items-center justify-between">

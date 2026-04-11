@@ -598,7 +598,7 @@ describe("App Home", () => {
     renderApp();
 
     expect(await screen.findByText(/scientific job logs/i)).toBeInTheDocument();
-    expect(await screen.findByText(/active project/i)).toBeInTheDocument();
+    expect(await screen.findByText(/active project|proyecto activo/i)).toBeInTheDocument();
     expect(screen.queryByText(/entrada de secuencia/i)).not.toBeInTheDocument();
   });
 
@@ -617,14 +617,14 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("button", { name: /visor/i })).toBeInTheDocument();
     expect(await screen.findByText(/global plddt avg/i)).toBeInTheDocument();
-    expect(await screen.findByText(/molecular metadata/i)).toBeInTheDocument();
+    expect(await screen.findByText(/molecular metadata|metadatos moleculares/i)).toBeInTheDocument();
   });
 
   it("renders the compare subpage and loads the job history on the right column", async () => {
     window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
     renderApp();
 
-    expect(await screen.findByText(/selecciona un job para comparar/i)).toBeInTheDocument();
+    expect(await screen.findByText(/comparación de proteínas/i)).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /comparar spike/i })).toBeInTheDocument();
   });
 

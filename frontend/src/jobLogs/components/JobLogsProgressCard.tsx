@@ -1,5 +1,8 @@
+import { animate } from "animejs";
+import { useEffect, useRef } from "react";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { shouldSkipAnimation } from "../../commons/animations";
 import { cn } from "../../lib/utils";
 import { resolveProgressViewModel } from "../jobLogsUtils";
 import type { JobStatusPayload } from "../types";
@@ -23,6 +26,7 @@ const statusTone = (status: JobStatusPayload["status"] | undefined): string => {
 
 export function JobLogsProgressCard({ job, loading }: JobLogsProgressCardProps) {
   const { t } = useTranslation();
+  const progressRef = useRef<HTMLDivElement | null>(null);
   const progress = resolveProgressViewModel(job);
   const phaseLabel = t(`jobLogs.progress.phases.${progress.phase}`);
 
@@ -34,6 +38,22 @@ export function JobLogsProgressCard({ job, loading }: JobLogsProgressCardProps) 
 
   const title = loading && !job ? t("jobLogs.progress.loadingTitle") : t(progress.titleKey);
   const currentStatus = job?.status;
+
+  useEffect(() => {
+    if (shouldSkipAnimation() || progress.indeterminate || !progressRef.current) {
+      return;
+    }
+
+    const tween = animate(progressRef.current, {
+      width: `${progress.percent}%`,
+      duration: 620,
+      ease: "outQuart",
+    });
+
+    return () => {
+      tween.revert();
+    };
+  }, [progress.indeterminate, progress.percent]);
 
   return (
     <section className="surface-shadow rounded-xl border border-border/50 bg-card/95 p-5">
@@ -57,6 +77,7 @@ export function JobLogsProgressCard({ job, loading }: JobLogsProgressCardProps) 
           <div className={cn("job-progress-indeterminate h-full w-[42%] rounded-full", progress.toneClass)} />
         ) : (
           <div
+            ref={progressRef}
             className={cn("h-full rounded-full transition-[width] duration-700 ease-out", progress.toneClass)}
             style={{ width: `${progress.percent}%` }}
           />

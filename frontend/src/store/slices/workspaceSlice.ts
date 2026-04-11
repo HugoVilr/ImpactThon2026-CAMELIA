@@ -215,14 +215,16 @@ const workspaceSlice = createSlice({
           }
 
           const existingJob = state.jobs[jobIndex];
-          existingJob.status = statusUpdate.status;
-          if (statusUpdate.started_at) {
+          if (existingJob.status !== statusUpdate.status) {
+            existingJob.status = statusUpdate.status;
+          }
+          if (statusUpdate.started_at && existingJob.started_at !== statusUpdate.started_at) {
             existingJob.started_at = statusUpdate.started_at;
           }
-          if (statusUpdate.completed_at) {
+          if (statusUpdate.completed_at && existingJob.completed_at !== statusUpdate.completed_at) {
             existingJob.completed_at = statusUpdate.completed_at;
           }
-          if (statusUpdate.error_message) {
+          if (statusUpdate.error_message && existingJob.error_message !== statusUpdate.error_message) {
             existingJob.error_message = statusUpdate.error_message;
           }
         });

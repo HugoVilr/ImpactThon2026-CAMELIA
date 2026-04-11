@@ -35,8 +35,8 @@ export function PresetPanel({ selectedPresetId, onSelectPreset }: PresetPanelPro
               type="button"
               onClick={() => onSelectPreset(preset.id)}
               className={cn(
-                "w-full rounded-lg border px-3 py-3 text-left shadow-sm transition",
-                "hover:-translate-y-0.5 hover:shadow-md",
+                "relative w-full overflow-hidden rounded-lg border px-3 py-3 text-left shadow-sm transition-all duration-200 ease-out",
+                "hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-primary/20",
                 selectedPresetId === preset.id
                   ? "border-primary/60 bg-emerald-50 shadow-emerald-200/70"
                   : "border-border/70 bg-card hover:border-slate-300"

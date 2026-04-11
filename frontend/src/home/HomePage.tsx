@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useAnimePressables, useAnimeReveal } from "../commons/animations";
 import { HomeFooter, StatusBanners, TopBar } from "../commons/components";
 import { HeroHeader, JobsSection, PresetPanel, SequencePanel, UploadModal } from "./components";
 import { loadDashboard, pollJobStatuses, processUploadFile, submitFoldingJob } from "../store/actions";
@@ -20,6 +21,7 @@ export function HomePage() {
   const dispatch = useAppDispatch();
   const { i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const pageRef = useRef<HTMLElement | null>(null);
 
   const {
     jobs,
@@ -108,11 +110,20 @@ export function HomePage() {
     }
   };
 
+  useAnimeReveal(pageRef, {
+    selector: ":scope > *",
+    delayStep: 90,
+    duration: 560,
+    translateY: 18,
+  });
+
+  useAnimePressables(pageRef);
+
   return (
     <>
       <TopBar activeLanguage={activeLanguage} onLanguageChange={handleLanguageChange} />
 
-      <main className="page-enter mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-8 md:px-6">
+      <main ref={pageRef} className="mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-8 md:px-6">
         <HeroHeader />
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_360px]">
