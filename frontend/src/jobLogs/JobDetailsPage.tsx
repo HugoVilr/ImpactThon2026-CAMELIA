@@ -28,7 +28,7 @@ import {
   type JobDetailsTab,
 } from "./jobResultsUtils";
 import { buildSyntheticLogs, isJobActive, parseRawLogs } from "./jobLogsUtils";
-import { JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
+import { ExportResultsModal, JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
 import type { FeedbackMessage, LanguageCode } from "../types/domain";
 import type { JobAccountingPayload, JobLogEntry, JobOutputsPayload, JobStatusPayload } from "./types";
 
@@ -72,6 +72,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const [xrSupport, setXrSupport] = useState<XrSupport>({ ar: false, vr: false });
   const [xrError, setXrError] = useState<string | null>(null);
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const activeLanguage = resolveLanguage(i18n.resolvedLanguage ?? i18n.language);
   useEffect(() => {
@@ -306,7 +307,12 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
             {activeTab === "viewer" ? (
               <div className="flex flex-wrap items-center gap-3">
-                <Button type="button" variant="outline" className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]"
+                  onClick={() => setIsExportModalOpen(true)}
+                >
                   <Download className="h-3.5 w-3.5" />
                   {t("jobLogs.details.export")}
                 </Button>
@@ -765,6 +771,12 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         isOpen={isSafetyModalOpen}
         findings={safetyFindings}
         onClose={() => setIsSafetyModalOpen(false)}
+      />
+
+      <ExportResultsModal 
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        outputs={outputs}
       />
     </>
   );

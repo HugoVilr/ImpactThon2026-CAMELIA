@@ -121,9 +121,9 @@
             "strand": "Lámina",
             "unknownMethod": "Método desconocido",
             "mw": "Peso molecular",
-            "high": "Alta >90",
+            "high": "Alta \u003e90",
             "cys": "Cisteínas",
-            "too_solubility": "Estimación de la probabilidad de que la proteína sea soluble en agua. Valores >50 indican una proteína soluble, mientras que valores <30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.",
+            "too_solubility": "Estimación de la probabilidad de que la proteína sea soluble en agua. Valores \u003e50 indican una proteína soluble, mientras que valores \u003c30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.",
             "noStructure": "La estructura no está disponible aún para este job.",
             "too_mw": "Masa total de la proteína en kiloDaltons (kDa). Es esencial para identificar la molécula en experimentos de laboratorio como el Western Blot.",
             "unknownStruct": "Estructura desconocida",
@@ -223,5 +223,26 @@
         "fileFormat": "Formato de archivo no compatible.",
         "invalidFasta": "La secuencia FASTA debe empezar por \"\u003e\".",
         "jobSubmit": "No se pudo enviar el job. {{detail}}"
+    },
+    "exportModal": {
+        "downloadAll": "Download All Assets (.zip)",
+        "pdf": {
+            "desc": "Un documento generado automáticamente que incluya la imagen de la proteína, el gráfico de pLDDT y la tabla de Biological Insights.",
+            "title": "Exportar Reporte (PDF)"
+        },
+        "close": "Cerrar modal",
+        "cif": {
+            "desc": "Archivo de alta precisión para estructuras complejas.",
+            "title": "Full Model (mmCIF)"
+        },
+        "pdb": {
+            "desc": "Formato estándar para visualización 3D.",
+            "title": "Structure (PDB)"
+        },
+        "title": "Descargar Resultados",
+        "json": {
+            "desc": "Valores brutos de pLDDT y matriz de error PAE.",
+            "title": "Confidence Data (JSON)"
+        }
     }
 }

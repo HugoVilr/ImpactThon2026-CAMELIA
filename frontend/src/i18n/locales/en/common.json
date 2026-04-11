@@ -223,5 +223,26 @@
                    "fileFormat":  "Unsupported file format.",
                    "invalidFasta":  "FASTA sequence must start with \"\u003e\".",
                    "jobSubmit":  "Could not submit job. {{detail}}"
-               }
+               },
+    "exportModal":  {
+                        "downloadAll":  "Download All Assets (.zip)",
+                        "pdf":  {
+                                    "desc":  "An automatically generated document that includes the protein image, pLDDT chart, and Biological Insights table.",
+                                    "title":  "Export Report (PDF)"
+                                },
+                        "close":  "Close modal",
+                        "cif":  {
+                                    "desc":  "High precision file for complex structures.",
+                                    "title":  "Full Model (mmCIF)"
+                                },
+                        "pdb":  {
+                                    "desc":  "Standard format for 3D visualization.",
+                                    "title":  "Structure (PDB)"
+                                },
+                        "title":  "Download Results",
+                        "json":  {
+                                     "desc":  "Raw pLDDT values and PAE error matrix.",
+                                     "title":  "Confidence Data (JSON)"
+                                 }
+                    }
 }
