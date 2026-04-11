@@ -76,14 +76,26 @@
     "jobLogs":  {
                     "kicker":  "Proxecto Activo",
                     "jobId":  "Job {{id}}",
-                    "tabs":  {
-                                 "viewer":  "Visor",
-                                 "logs":  "Logs",
-                                 "extras":  "Extras"
-                             },
-                    "progress":  {
-                                     "loadingTitle":  "Cargando estado do job...",
-                                     "pendingTitle":  "Job en cola no clúster CESGA...",
+        "tabs":  {
+                         "viewer":  "Visor",
+                         "compare":  "Comparar",
+                         "logs":  "Logs",
+                         "extras":  "Extras"
+                     },
+        "compare":  {
+                        "currentProtein":  "Proteína actual",
+                        "comparedProtein":  "Proteína comparada",
+                        "changeSelection":  "Cambiar proteína",
+                        "selectTitle":  "Comparación de proteínas",
+                        "selectDescription":  "Selecciona un job completado para cargar unha segunda proteína en paralelo.",
+                        "loadingSelection":  "Cargando proteína seleccionada...",
+                        "loadingJobs":  "Cargando historial de jobs...",
+                        "empty":  "Non hai outros jobs dispoñibles para comparar.",
+                        "compareAction":  "Comparar"
+                    },
+        "progress":  {
+                         "loadingTitle":  "Cargando estado do job...",
+                         "pendingTitle":  "Job en cola no clúster CESGA...",
                                      "runningTitle":  "Calculando estrutura no clúster CESGA...",
                                      "completedTitle":  "Execución completada. Outputs dispoñibles.",
                                      "failedTitle":  "A execución rematou con erro.",

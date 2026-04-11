@@ -28,7 +28,7 @@ import {
   type JobDetailsTab,
 } from "./jobResultsUtils";
 import { buildSyntheticLogs, isJobActive, parseRawLogs } from "./jobLogsUtils";
-import { ExportResultsModal, JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
+import { ExportResultsModal, JobCompareTab, JobLogDownloadAction, JobLogStreamPanel, JobLogsTabs } from "./components";
 import type { FeedbackMessage, LanguageCode } from "../types/domain";
 import type { JobAccountingPayload, JobLogEntry, JobOutputsPayload, JobStatusPayload } from "./types";
 
