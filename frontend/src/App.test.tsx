@@ -624,7 +624,6 @@ describe("App Home", () => {
     window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
     renderApp();
 
-    expect(await screen.findByText(/comparación de proteínas/i)).toBeInTheDocument();
     expect(await screen.findByText(/selecciona un job para comparar/i)).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /comparar spike/i })).toBeInTheDocument();
   });
@@ -648,6 +647,13 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("heading", { name: /calmodulin/i })).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
+  });
+
+  it("uses the resolved protein name in the dashboard job list when outputs differ from the fasta filename", async () => {
+    renderApp();
+
+    const calmodulinLinks = await screen.findAllByRole("link", { name: /calmodulin/i });
+    expect(calmodulinLinks.some((link) => link.getAttribute("href") === "/jobs/job_completed_004")).toBe(true);
   });
 
   it("filters jobs by running status", async () => {

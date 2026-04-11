@@ -3,6 +3,7 @@ import { Loader2, Plus, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent } from "../../commons/components/ui";
 import { displayJobName, localeForLanguage, resolveLanguage, resourceKeyForJob, statusTranslationKey } from "../../home/homeUtils";
+import { resolveProteinNameFromOutputs } from "../jobNameResolver";
 import type { Job } from "../../types/domain";
 import { fetchJobOutputs, fetchJobsList } from "../logsApi";
 import { useJobDetailSnapshot } from "../useJobDetailSnapshot";
@@ -23,7 +24,11 @@ const statusClassByValue = {
 } as const;
 
 const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): string => {
-  return resolvedNames[job.job_id] ?? displayJobName(job);
+  if (resolvedNames[job.job_id]) {
+    return resolvedNames[job.job_id];
+  }
+
+  return displayJobName(job);
 };
 
 export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
@@ -34,7 +39,12 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const selectedSnapshot = useJobDetailSnapshot(selectedJobId);
+  const comparableJobs = useMemo(
+    () => jobs.filter((job) => job.job_id !== baseJobId),
+    [baseJobId, jobs]
+  );
+  const selectedJob = comparableJobs.find((job) => job.job_id === selectedJobId) ?? null;
+  const selectedSnapshot = useJobDetailSnapshot(selectedJobId, selectedJob);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,10 +59,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
         completedJobs.map(async (job) => {
           try {
             const outputs = await fetchJobOutputs(job.job_id);
-            const resolvedName =
-              outputs?.protein_metadata?.protein_name?.trim() ||
-              outputs?.protein_metadata?.identified_protein?.trim() ||
-              null;
+            const resolvedName = resolveProteinNameFromOutputs(outputs);
 
             return resolvedName ? [job.job_id, resolvedName] as const : null;
           } catch {
@@ -77,6 +84,23 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
       cancelled = true;
     };
   }, [jobs]);
+
+  useEffect(() => {
+    const resolvedName = resolveProteinNameFromOutputs(selectedSnapshot.outputs);
+
+    if (!selectedJobId || !resolvedName) {
+      return;
+    }
+
+    setResolvedJobNames((current) => (
+      current[selectedJobId] === resolvedName
+        ? current
+        : {
+            ...current,
+            [selectedJobId]: resolvedName,
+          }
+    ));
+  }, [selectedJobId, selectedSnapshot.outputs]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,13 +140,6 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
       window.clearInterval(interval);
     };
   }, []);
-
-  const comparableJobs = useMemo(
-    () => jobs.filter((job) => job.job_id !== baseJobId),
-    [baseJobId, jobs]
-  );
-
-  const selectedJob = comparableJobs.find((job) => job.job_id === selectedJobId) ?? null;
 
   return (
     <div className="space-y-4">

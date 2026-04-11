@@ -1,8 +1,10 @@
 import { Loader2 } from "lucide-react";
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
+import { fetchJobOutputs } from "../../jobLogs/logsApi";
+import { resolveProteinNameFromOutputs } from "../../jobLogs/jobNameResolver";
 import { cn } from "../../lib/utils";
 import { displayJobName, resourceKeyForJob, statusTranslationKey } from "../homeUtils";
 import type { Job, JobFilter } from "../../types/domain";
@@ -24,6 +26,14 @@ const statusClassByValue = {
   CANCELLED: "bg-red-100 text-red-700",
 } as const;
 
+const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): string => {
+  if (resolvedNames[job.job_id]) {
+    return resolvedNames[job.job_id];
+  }
+
+  return displayJobName(job);
+};
+
 export function JobsSection({
   locale,
   loading,
@@ -32,6 +42,48 @@ export function JobsSection({
   onFilterChange,
 }: JobsSectionProps) {
   const { t } = useTranslation();
+  const [resolvedJobNames, setResolvedJobNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrateCompletedJobNames = async () => {
+      const unresolvedCompletedJobs = filteredJobs.filter(
+        (job) => job.status === "COMPLETED" && !resolvedJobNames[job.job_id]
+      );
+
+      if (unresolvedCompletedJobs.length === 0) {
+        return;
+      }
+
+      const resolvedEntries = await Promise.all(
+        unresolvedCompletedJobs.map(async (job) => {
+          try {
+            const outputs = await fetchJobOutputs(job.job_id);
+            const resolvedName = resolveProteinNameFromOutputs(outputs);
+            return resolvedName ? [job.job_id, resolvedName] as const : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (!cancelled) {
+        setResolvedJobNames((current) => ({
+          ...current,
+          ...Object.fromEntries(
+            resolvedEntries.filter((entry): entry is readonly [string, string] => entry !== null)
+          ),
+        }));
+      }
+    };
+
+    void hydrateCompletedJobNames();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filteredJobs, resolvedJobNames]);
 
   return (
     <section className="space-y-3">
@@ -122,7 +174,7 @@ export function JobsSection({
                       }
                       className="text-xs font-semibold text-slate-800 transition hover:text-primary"
                     >
-                      {displayJobName(job)}
+                      {resolveJobLabel(job, resolvedJobNames)}
                     </Link>
                   </TableCell>
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { FeedbackMessage } from "../types/domain";
 import { buildSyntheticLogs, isJobActive, parseRawLogs } from "./jobLogsUtils";
 import { fetchJobAccounting, fetchJobOutputs, fetchJobStatus, fetchProteinDetail } from "./logsApi";
-import type { JobDetailSnapshot, ProteinCatalogDetail } from "./types";
+import type { JobDetailSnapshot, JobStatusPayload, ProteinCatalogDetail } from "./types";
 
 const emptySnapshot: JobDetailSnapshot = {
   job: null,
@@ -49,7 +49,7 @@ export const fetchJobDetailSnapshot = async (jobId: string): Promise<JobDetailSn
   };
 };
 
-export function useJobDetailSnapshot(jobId?: string | null) {
+export function useJobDetailSnapshot(jobId?: string | null, initialJob?: JobStatusPayload | null) {
   const [snapshot, setSnapshot] = useState<JobDetailSnapshot>(emptySnapshot);
   const [isLoading, setIsLoading] = useState(Boolean(jobId));
   const [errorMessage, setErrorMessage] = useState<FeedbackMessage | null>(null);
@@ -65,16 +65,83 @@ export function useJobDetailSnapshot(jobId?: string | null) {
     let cancelled = false;
 
     const loadSnapshot = async () => {
+      let shouldFinishInFinally = true;
+
       setIsLoading(true);
+      setErrorMessage(null);
+
+      if (initialJob && initialJob.job_id === jobId) {
+        setSnapshot({
+          job: initialJob,
+          outputs: null,
+          accounting: null,
+          proteinDetail: null,
+          rawLogs: null,
+          logEntries: buildSyntheticLogs(initialJob),
+        });
+      } else {
+        setSnapshot(emptySnapshot);
+      }
 
       try {
-        const nextSnapshot = await fetchJobDetailSnapshot(jobId);
+        const currentStatus = await fetchJobStatus(jobId);
         if (cancelled) {
           return;
         }
 
-        setSnapshot(nextSnapshot);
-        setErrorMessage(null);
+        if (currentStatus.status !== "COMPLETED") {
+          setSnapshot({
+            job: currentStatus,
+            outputs: null,
+            accounting: null,
+            proteinDetail: null,
+            rawLogs: null,
+            logEntries: buildSyntheticLogs(currentStatus),
+          });
+          return;
+        }
+
+        setSnapshot((current) => ({
+          ...current,
+          job: currentStatus,
+        }));
+
+        const [outputsPayload, accountingPayload] = await Promise.all([
+          fetchJobOutputs(jobId),
+          fetchJobAccounting(jobId),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        const nextLogEntries = outputsPayload?.logs ? parseRawLogs(outputsPayload.logs) : buildSyntheticLogs(currentStatus);
+
+        setSnapshot((current) => ({
+          ...current,
+          job: currentStatus,
+          outputs: outputsPayload,
+          accounting: accountingPayload,
+          rawLogs: outputsPayload?.logs ?? null,
+          logEntries: nextLogEntries,
+        }));
+        shouldFinishInFinally = false;
+        setIsLoading(false);
+
+        const identifiedProtein = outputsPayload?.protein_metadata?.identified_protein;
+        if (!identifiedProtein) {
+          return;
+        }
+
+        const detailPayload = await fetchProteinDetail(identifiedProtein);
+        if (cancelled) {
+          return;
+        }
+
+        setSnapshot((current) => ({
+          ...current,
+          proteinDetail: (detailPayload ?? null) as ProteinCatalogDetail | null,
+        }));
       } catch (error) {
         if (!cancelled) {
           setErrorMessage({
@@ -86,7 +153,7 @@ export function useJobDetailSnapshot(jobId?: string | null) {
           setSnapshot(emptySnapshot);
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && shouldFinishInFinally) {
           setIsLoading(false);
         }
       }

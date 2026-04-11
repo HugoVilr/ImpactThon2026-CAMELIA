@@ -151,7 +151,10 @@ export function ProteinOverviewPanel({
   const confidenceTotal = confidenceBuckets.reduce((sum, bucket) => sum + bucket.value, 0);
   const hasSafetyData = Boolean(biologicalData);
   const safetyFindings = useMemo(() => buildSafetyFindings(biologicalData), [biologicalData]);
-  const panelTitle = proteinMetadata?.protein_name ?? (job ? displayJobName(job) : jobId);
+  const panelTitle =
+    proteinMetadata?.protein_name?.trim() ||
+    proteinMetadata?.identified_protein?.trim() ||
+    (job ? displayJobName(job) : jobId);
 
   return (
     <>
