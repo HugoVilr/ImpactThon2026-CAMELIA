@@ -360,7 +360,7 @@ describe("App Home", () => {
   it("renders home layout and jobs table", async () => {
     renderApp();
 
-    expect(await screen.findByRole("heading", { name: /biohack localfold/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /entrada y configuración/i })).toBeInTheDocument();
     expect(await screen.findByText(/trabajos recientes/i)).toBeInTheDocument();
     expect(await screen.findByText(/ubiquitin/i)).toBeInTheDocument();
     expect(await screen.findByText(/spike/i)).toBeInTheDocument();
@@ -415,7 +415,7 @@ describe("App Home", () => {
 
   it("does not render sample or filename fields", async () => {
     renderApp();
-    await screen.findByText(/entrada de secuencia/i);
+    await screen.findByText(/entrada y configuración/i);
 
     expect(screen.queryByLabelText(/usar muestra fasta/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/nombre de archivo fasta/i)).not.toBeInTheDocument();
@@ -423,9 +423,9 @@ describe("App Home", () => {
 
   it("uploads a FASTA file from modal", async () => {
     renderApp();
-    await screen.findByText(/entrada de secuencia/i);
+    await screen.findByText(/entrada y configuración/i);
 
-    fireEvent.click(screen.getByRole("button", { name: /subir \.fasta/i }));
+    fireEvent.click(screen.getByRole("button", { name: /subir archivo/i }));
 
     const file = new File([">protein_demo\nMKTLLIL"], "uploaded.fasta", {
       type: "text/plain",
@@ -446,9 +446,9 @@ describe("App Home", () => {
 
   it("shows error for unsupported upload extension", async () => {
     renderApp();
-    await screen.findByText(/entrada de secuencia/i);
+    await screen.findByText(/entrada y configuración/i);
 
-    fireEvent.click(screen.getByRole("button", { name: /subir \.fasta/i }));
+    fireEvent.click(screen.getByRole("button", { name: /subir archivo/i }));
 
     const file = new File(["fake"], "not-valid.csv", { type: "text/csv" });
     Object.defineProperty(file, "text", {
@@ -464,9 +464,9 @@ describe("App Home", () => {
 
   it("shows error for empty upload file", async () => {
     renderApp();
-    await screen.findByText(/entrada de secuencia/i);
+    await screen.findByText(/entrada y configuración/i);
 
-    fireEvent.click(screen.getByRole("button", { name: /subir \.fasta/i }));
+    fireEvent.click(screen.getByRole("button", { name: /subir archivo/i }));
 
     const file = new File([""], "empty.fasta", { type: "text/plain" });
     Object.defineProperty(file, "text", {
@@ -543,7 +543,7 @@ describe("App Home", () => {
 
   it("switches language to english and galician", async () => {
     renderApp();
-    await screen.findByRole("heading", { name: /biohack localfold/i });
+    await screen.findByRole("heading", { name: /entrada y configuración/i });
 
     fireEvent.click(screen.getByRole("button", { name: "EN" }));
     expect(await screen.findByRole("button", { name: /run sequence folding/i })).toBeInTheDocument();
@@ -552,21 +552,20 @@ describe("App Home", () => {
     expect(await screen.findByRole("button", { name: /executar pregamento/i })).toBeInTheDocument();
   });
 
-  it("keeps the main hero title stable across language switches", async () => {
+  it("updates the workspace title across language switches", async () => {
     renderApp();
-    const heroTitle = await screen.findByRole("heading", { name: /biohack localfold/i });
-    expect(heroTitle).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /entrada y configuración/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "EN" }));
-    expect(await screen.findByRole("heading", { name: /biohack localfold/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /input & setup/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "GL" }));
-    expect(await screen.findByRole("heading", { name: /biohack localfold/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /entrada e configuración/i })).toBeInTheDocument();
   });
 
   it("does not render dashboard/analytics/protocol/registry links in the header", async () => {
     renderApp();
-    await screen.findByRole("heading", { name: /biohack localfold/i });
+    await screen.findByRole("heading", { name: /entrada y configuración/i });
 
     expect(screen.queryByRole("link", { name: /dashboard/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /analytics/i })).not.toBeInTheDocument();

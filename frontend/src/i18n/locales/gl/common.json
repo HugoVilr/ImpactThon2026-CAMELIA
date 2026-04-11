@@ -12,12 +12,12 @@
     "registry": "Rexistro"
   },
   "hero": {
-    "kicker": "CONTORNA DE LABORATORIO",
+    "kicker": "LABORATORY WORKSPACE",
     "title": "Biohack Localfold",
     "description": "Prepara as túas secuencias de aminoácidos para o pregamento. Escolle a intensidade de recursos segundo a resolución obxectivo e os requisitos de pLDDT."
   },
   "sequence": {
-    "title": "Entrada de Secuencia",
+    "title": "Entrada e configuración",
     "api": "API: {{api}}",
     "service": "Servizo: {{service}} · {{status}} · v{{version}}",
     "serviceNoVersion": "Servizo: {{service}} · {{status}}",
@@ -28,8 +28,7 @@
     "filenamePlaceholder": "proteina.fasta",
     "input": "Secuencia",
     "inputPlaceholder": ">nome_proteina\\nMKT...",
-    "uploadButton": "Subir .fasta",
-    "uploadOnlyHint": "Escolle un perfil e envía o job.",
+    "uploadButton": "Subir ficheiro",
     "runButton": "Executar Pregamento",
     "submittingButton": "Enviando Job..."
   },
@@ -126,7 +125,7 @@
   },
   "footer": {
     "brand": "BioHack",
-    "copy": "© 2026 Genomic Lens Systems.",
+    "copy": "© 2026 OSG",
     "privacy": "Privacidade",
     "terms": "Termos",
     "systemStatus": "Estado do Sistema"

@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 210 33% 97%;
+    --background: 140 14% 91%;
     --foreground: 220 17% 14%;
     --card: 0 0% 100%;
     --card-foreground: 220 17% 14%;
@@ -14,16 +14,16 @@
     --popover-foreground: 220 17% 14%;
     --primary: 158 87% 25%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 26% 95%;
+    --secondary: 210 18% 94%;
     --secondary-foreground: 220 17% 22%;
-    --muted: 210 27% 94%;
+    --muted: 200 15% 93%;
     --muted-foreground: 215 14% 43%;
-    --accent: 210 24% 92%;
+    --accent: 200 14% 91%;
     --accent-foreground: 220 18% 18%;
     --destructive: 0 74% 47%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 21% 85%;
-    --input: 214 21% 85%;
+    --border: 210 14% 80%;
+    --input: 210 14% 80%;
     --ring: 158 87% 25%;
     --radius: 0.75rem;
   }
@@ -41,8 +41,8 @@
   body {
     @apply m-0 bg-background font-sans text-foreground antialiased;
     background-image:
-      radial-gradient(circle at 100% 0%, rgb(173 233 209 / 22%) 0%, transparent 42%),
-      radial-gradient(circle at 0% 100%, rgb(223 230 248 / 40%) 0%, transparent 46%);
+      radial-gradient(circle at 100% 0%, rgb(173 233 209 / 14%) 0%, transparent 36%),
+      radial-gradient(circle at 0% 100%, rgb(255 255 255 / 35%) 0%, transparent 42%);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
   }
@@ -61,19 +61,21 @@
 
 @layer utilities {
   .surface-shadow-soft {
-    box-shadow: 0 2px 12px rgb(15 23 34 / 6%);
+    box-shadow:
+      0 1px 2px rgb(15 23 34 / 4%),
+      0 10px 24px rgb(15 23 34 / 6%);
   }
 
   .surface-shadow {
     box-shadow:
-      0 1px 2px rgb(15 23 34 / 6%),
-      0 10px 24px rgb(15 23 34 / 10%);
+      0 1px 2px rgb(15 23 34 / 4%),
+      0 18px 34px rgb(15 23 34 / 10%);
   }
 
   .surface-shadow-strong {
     box-shadow:
-      0 8px 24px rgb(15 23 34 / 16%),
-      0 22px 54px rgb(15 23 34 / 20%);
+      0 10px 28px rgb(15 23 34 / 12%),
+      0 28px 56px rgb(15 23 34 / 16%);
   }
 
   .page-enter {

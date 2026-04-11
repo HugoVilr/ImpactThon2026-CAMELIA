@@ -1,6 +1,6 @@
 import { Loader2, Rocket, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "../../commons/components/ui";
+import { Button, Card, CardContent, CardHeader } from "../../commons/components/ui";
 
 type SequencePanelProps = {
   fastaSequence: string;
@@ -23,8 +23,7 @@ export function SequencePanel({
 
   return (
     <Card className="surface-shadow overflow-hidden border-border bg-card">
-      <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-border bg-muted/55 px-4 py-3">
-        <CardTitle className="text-sm font-semibold">{t("sequence.title")}</CardTitle>
+      <CardHeader className="flex-row items-center justify-end space-y-0 border-b border-border bg-muted/55 px-4 py-3">
         <Button
           type="button"
           variant="outline"
@@ -46,8 +45,8 @@ export function SequencePanel({
               value={fastaSequence}
               onChange={(event) => onSequenceChange(event.target.value)}
               placeholder={t("sequence.inputPlaceholder")}
-              rows={12}
-              className="block min-h-[320px] w-full resize-y rounded-none border border-border bg-white p-4 font-mono text-xs leading-relaxed text-slate-700 outline-none transition focus:ring-2 focus:ring-primary/30"
+              rows={8}
+              className="block min-h-[220px] w-full resize-y rounded-none border border-border bg-white p-4 font-mono text-xs leading-relaxed text-slate-700 outline-none transition focus:ring-2 focus:ring-primary/30"
             />
           </label>
 
@@ -65,7 +64,6 @@ export function SequencePanel({
               )}
               {isSubmittingJob ? t("sequence.submittingButton") : t("sequence.runButton")}
             </Button>
-            <p className="text-center text-[11px] text-muted-foreground">{t("sequence.uploadOnlyHint")}</p>
           </div>
         </form>
       </CardContent>

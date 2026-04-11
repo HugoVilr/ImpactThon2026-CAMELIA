@@ -17,7 +17,7 @@
     "description": "Prepare your amino acid sequences for folding. Select resource intensity based on your target resolution and pLDDT requirements."
   },
   "sequence": {
-    "title": "Sequence Input",
+    "title": "Input & Setup",
     "api": "API: {{api}}",
     "service": "Service: {{service}} · {{status}} · v{{version}}",
     "serviceNoVersion": "Service: {{service}} · {{status}}",
@@ -28,8 +28,7 @@
     "filenamePlaceholder": "protein.fasta",
     "input": "Sequence",
     "inputPlaceholder": ">protein_name\\nMKT...",
-    "uploadButton": "Upload .fasta",
-    "uploadOnlyHint": "Choose a preset and submit the job.",
+    "uploadButton": "Upload file",
     "runButton": "Run Sequence Folding",
     "submittingButton": "Submitting Job..."
   },
@@ -126,7 +125,7 @@
   },
   "footer": {
     "brand": "BioHack",
-    "copy": "© 2026 Genomic Lens Systems.",
+    "copy": "© 2026 OSG",
     "privacy": "Privacy",
     "terms": "Terms",
     "systemStatus": "System Status"
