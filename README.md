@@ -112,6 +112,36 @@ cd ..
 npm run dev:frontend
 ```
 
+## Tests
+
+### Frontend
+
+Desde la raíz del monorepo:
+
+```bash
+npm run test --workspace frontend
+```
+
+Modo watch en frontend:
+
+```bash
+npm run test:watch --workspace frontend
+```
+
+Build de validación frontend:
+
+```bash
+npm run build --workspace frontend
+```
+
+### Backend
+
+Desde `backend/`:
+
+```bash
+pipenv run test
+```
+
 ## Base de datos local
 
 El backend usa PostgreSQL local con esta configuración por defecto:
