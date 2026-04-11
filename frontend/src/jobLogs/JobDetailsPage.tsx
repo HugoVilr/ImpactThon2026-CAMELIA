@@ -309,9 +309,9 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
             {activeTab === "viewer" ? (
               <div className="flex flex-wrap items-center gap-3">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]"
                   onClick={() => setIsExportModalOpen(true)}
                 >
@@ -434,7 +434,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                                 const endX = Math.min((rowIndex + 1) * paeStep, paeOriginalSize);
                                 const startY = colIndex * paeStep + 1;
                                 const endY = Math.min((colIndex + 1) * paeStep, paeOriginalSize);
-                                
+
                                 return (
                                   <div
                                     key={`${rowIndex}-${colIndex}`}
@@ -460,188 +460,188 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] min-w-0">
-                <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{t("jobLogs.details.bioInsights")}</p>
+                  <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">{t("jobLogs.details.bioInsights")}</p>
 
-                    <div className="flex flex-1 flex-col gap-3 text-[13px]">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2" title={t("jobLogs.details.too_solubility")}>
-                          <span>{t("jobLogs.details.solubility")}</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[1.25rem] font-extrabold text-primary">
-                          {formatCompactNumber(biologicalData?.solubility_score, 1)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t border-border/60 pt-3">
-                        <div className="flex items-center gap-2" title={t("jobLogs.details.too_stability")}>
-                          <span>{t("jobLogs.details.stability")}</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-900">
-                          {(biologicalData?.stability_status ?? "N/A").toUpperCase()}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t border-border/60 pt-3">
-                        <div className="flex items-center gap-2" title={t("jobLogs.details.too_instability")}>
-                          <span>{t("jobLogs.details.instability")}</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[1.25rem] font-extrabold text-slate-950">
-                          {formatCompactNumber(biologicalData?.instability_index, 1)}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-[12px] text-left transition hover:bg-amber-100/60 disabled:cursor-not-allowed disabled:opacity-60"
-                        onClick={() => setIsSafetyModalOpen(true)}
-                        disabled={!hasSafetyData}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 text-amber-800">
-                            <AlertTriangle className="h-4 w-4" />
-                            <span className="font-bold uppercase tracking-[0.1em] leading-4">
-                              {safetyAlerts > 0 ? t("jobLogs.details.alertsFound", { count: safetyAlerts }) : t("jobLogs.details.noAlerts")}
-                            </span>
+                      <div className="flex flex-1 flex-col gap-3 text-[13px]">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2" title={t("jobLogs.details.too_solubility")}>
+                            <span>{t("jobLogs.details.solubility")}</span>
+                            <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
                           </div>
-                          <span className="text-amber-500">›</span>
+                          <span className="text-[1.25rem] font-extrabold text-primary">
+                            {formatCompactNumber(biologicalData?.solubility_score, 1)}
+                          </span>
                         </div>
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="flex flex-1 flex-col p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
-                      {t("jobLogs.details.secStruct")}
-                    </p>
+                        <div className="flex items-center justify-between border-t border-border/60 pt-3">
+                          <div className="flex items-center gap-2" title={t("jobLogs.details.too_stability")}>
+                            <span>{t("jobLogs.details.stability")}</span>
+                            <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+                          </div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-900">
+                            {(biologicalData?.stability_status ?? "N/A").toUpperCase()}
+                          </span>
+                        </div>
 
-                    <div className="flex flex-1 flex-col justify-center gap-6 my-2">
-                      <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
-                        <div className="bg-primary" style={{ width: `${secondaryStructure?.helix_percent ?? 0}%` }} />
-                        <div className="bg-slate-950" style={{ width: `${secondaryStructure?.strand_percent ?? 0}%` }} />
-                        <div className="bg-slate-300" style={{ width: `${secondaryStructure?.coil_percent ?? 0}%` }} />
+                        <div className="flex items-center justify-between border-t border-border/60 pt-3">
+                          <div className="flex items-center gap-2" title={t("jobLogs.details.too_instability")}>
+                            <span>{t("jobLogs.details.instability")}</span>
+                            <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+                          </div>
+                          <span className="text-[1.25rem] font-extrabold text-slate-950">
+                            {formatCompactNumber(biologicalData?.instability_index, 1)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-[12px] text-left transition hover:bg-amber-100/60 disabled:cursor-not-allowed disabled:opacity-60"
+                          onClick={() => setIsSafetyModalOpen(true)}
+                          disabled={!hasSafetyData}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 text-amber-800">
+                              <AlertTriangle className="h-4 w-4" />
+                              <span className="font-bold uppercase tracking-[0.1em] leading-4">
+                                {safetyAlerts > 0 ? t("jobLogs.details.alertsFound", { count: safetyAlerts }) : t("jobLogs.details.noAlerts")}
+                              </span>
+                            </div>
+                            <span className="text-amber-500">›</span>
+                          </div>
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="flex flex-1 flex-col p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                        {t("jobLogs.details.secStruct")}
+                      </p>
+
+                      <div className="flex flex-1 flex-col justify-center gap-6 my-2">
+                        <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
+                          <div className="bg-primary" style={{ width: `${secondaryStructure?.helix_percent ?? 0}%` }} />
+                          <div className="bg-slate-950" style={{ width: `${secondaryStructure?.strand_percent ?? 0}%` }} />
+                          <div className="bg-slate-300" style={{ width: `${secondaryStructure?.coil_percent ?? 0}%` }} />
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-primary" />
+                              {t("jobLogs.details.helix")}
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.helix_percent, 1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-slate-950" />
+                              {t("jobLogs.details.strand")}
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.strand_percent, 1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-slate-300" />
+                              {t("jobLogs.details.coil")}
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.coil_percent, 1)}%
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="grid gap-3 md:grid-cols-3">
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-primary" />
-                            {t("jobLogs.details.helix")}
+                      <div className="mt-auto grid gap-2.5 border-t border-border/60 pt-4 md:grid-cols-3">
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_cys")}>
+                            <span>{t("jobLogs.details.cys")}</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.helix_percent, 1)}%
+                          <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
+                            {sequenceProperties?.cysteine_residues ?? "N/A"}
                           </p>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-slate-950" />
-                            {t("jobLogs.details.strand")}
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_arom")}>
+                            <span>{t("jobLogs.details.arom")}</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.strand_percent, 1)}%
+                          <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
+                            {sequenceProperties?.aromatic_residues ?? "N/A"}
                           </p>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-slate-300" />
-                            {t("jobLogs.details.coil")}
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_source")}>
+                            <span>{t("jobLogs.details.source")}</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.coil_percent, 1)}%
+                          <p className="mt-2 break-words text-[10px] font-extrabold uppercase tracking-[0.04em] text-slate-950">
+                            {biologicalData?.source ?? "N/A"}
                           </p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="mt-auto grid gap-2.5 border-t border-border/60 pt-4 md:grid-cols-3">
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_cys")}>
-                          <span>{t("jobLogs.details.cys")}</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
-                          {sequenceProperties?.cysteine_residues ?? "N/A"}
-                        </p>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_arom")}>
-                          <span>{t("jobLogs.details.arom")}</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
-                          {sequenceProperties?.aromatic_residues ?? "N/A"}
-                        </p>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_source")}>
-                          <span>{t("jobLogs.details.source")}</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 break-words text-[10px] font-extrabold uppercase tracking-[0.04em] text-slate-950">
-                          {biologicalData?.source ?? "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <div className="min-w-0">
-                <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="space-y-3 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.meta")}</p>
+                  <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="space-y-3 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.meta")}</p>
 
-                    <div className="space-y-3">
-                      <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_uniprot")}>
-                          <span>{t("jobLogs.details.uniprot")}</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 break-words text-[0.88rem] font-extrabold leading-6 tracking-[-0.02em] text-slate-950">
-                          {proteinMetadata?.uniprot_id ?? "N/A"}
-                          {proteinMetadata?.organism ? ` (${proteinMetadata.organism})` : ""}
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_mw")}>
-                          <span>{t("jobLogs.details.mw")}</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
-                          {formatCompactNumber(sequenceProperties?.molecular_weight_kda, 1)} kDa
-                        </p>
-                      </div>
-                      <div className="grid gap-3 grid-cols-2">
+                      <div className="space-y-3">
                         <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_charges")}>
-                            <span>{t("jobLogs.details.charges")}</span>
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_uniprot")}>
+                            <span>{t("jobLogs.details.uniprot")}</span>
                             <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
-                            {sequenceProperties
-                              ? `${sequenceProperties.positive_charges} / ${sequenceProperties.negative_charges}`
-                              : "N/A"}
+                          <p className="mt-2 break-words text-[0.88rem] font-extrabold leading-6 tracking-[-0.02em] text-slate-950">
+                            {proteinMetadata?.uniprot_id ?? "N/A"}
+                            {proteinMetadata?.organism ? ` (${proteinMetadata.organism})` : ""}
                           </p>
                         </div>
                         <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_hydro")}>
-                            <span>{t("jobLogs.details.hydro")}</span>
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_mw")}>
+                            <span>{t("jobLogs.details.mw")}</span>
                             <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
                           <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
-                            {typeof sequenceProperties?.hydrophobicity === "number" ? sequenceProperties.hydrophobicity.toFixed(2) : "N/A"}
+                            {formatCompactNumber(sequenceProperties?.molecular_weight_kda, 1)} kDa
                           </p>
                         </div>
+                        <div className="grid gap-3 grid-cols-2">
+                          <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_charges")}>
+                              <span>{t("jobLogs.details.charges")}</span>
+                              <Info className="h-3.5 w-3.5 cursor-help" />
+                            </div>
+                            <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
+                              {sequenceProperties
+                                ? `${sequenceProperties.positive_charges} / ${sequenceProperties.negative_charges}`
+                                : "N/A"}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500" title={t("jobLogs.details.too_hydro")}>
+                              <span>{t("jobLogs.details.hydro")}</span>
+                              <Info className="h-3.5 w-3.5 cursor-help" />
+                            </div>
+                            <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
+                              {typeof sequenceProperties?.hydrophobicity === "number" ? sequenceProperties.hydrophobicity.toFixed(2) : "N/A"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
@@ -785,7 +785,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         onClose={() => setIsSafetyModalOpen(false)}
       />
 
-      <ExportResultsModal 
+      <ExportResultsModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         outputs={outputs}
