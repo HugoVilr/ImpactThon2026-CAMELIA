@@ -21,4 +21,4 @@ COPY app/ ./app/
 EXPOSE 8080
 
 # Ejecutar el servidor para el contenedor, sin flag de reload ya que es para subirse (producción)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
