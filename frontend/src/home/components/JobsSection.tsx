@@ -1,7 +1,9 @@
+import { animate } from "animejs";
 import { Loader2 } from "lucide-react";
-import type { CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { shouldSkipAnimation, useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
 import { cn } from "../../lib/utils";
 import { displayJobName, resourceKeyForJob, statusTranslationKey } from "../homeUtils";
@@ -24,6 +26,14 @@ const statusClassByValue = {
   CANCELLED: "bg-red-100 text-red-700",
 } as const;
 
+const filterOrder: JobFilter[] = ["all", "running", "completed"];
+
+const filterRefMap = () => ({
+  all: null as HTMLButtonElement | null,
+  running: null as HTMLButtonElement | null,
+  completed: null as HTMLButtonElement | null,
+});
+
 export function JobsSection({
   locale,
   loading,
@@ -31,44 +41,136 @@ export function JobsSection({
   jobFilter,
   onFilterChange,
 }: JobsSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const tableShellRef = useRef<HTMLDivElement | null>(null);
+  const tableBodyRef = useRef<HTMLTableSectionElement | null>(null);
+  const filtersRef = useRef<HTMLDivElement | null>(null);
+  const filterRefs = useRef(filterRefMap());
+  const [filterIndicator, setFilterIndicator] = useState({
+    left: 0,
+    width: 0,
+    ready: false,
+  });
+  const rowsAnimationKey = useMemo(() => filteredJobs.map((job) => job.job_id).join("|"), [filteredJobs]);
+
+  useAnimeReveal(tableBodyRef, {
+    selector: ":scope > [data-anime='job-row']",
+    dependencyKey: rowsAnimationKey,
+    delayStep: 60,
+    duration: 420,
+    translateY: 10,
+    startScale: 0.998,
+  });
+
+  useAnimePressables(sectionRef, {
+    selector: "button, a, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: rowsAnimationKey,
+  });
+
+  const updateFilterIndicator = useCallback(() => {
+    const filters = filtersRef.current;
+    const activeFilter = filterRefs.current[jobFilter];
+    if (!filters || !activeFilter) {
+      return;
+    }
+
+    setFilterIndicator({
+      left: activeFilter.offsetLeft,
+      width: activeFilter.offsetWidth,
+      ready: true,
+    });
+  }, [jobFilter]);
+
+  useLayoutEffect(() => {
+    updateFilterIndicator();
+    const rafId = window.requestAnimationFrame(updateFilterIndicator);
+    window.addEventListener("resize", updateFilterIndicator);
+    const canUseResizeObserver = typeof ResizeObserver !== "undefined";
+    const resizeObserver = canUseResizeObserver
+      ? new ResizeObserver(() => {
+          updateFilterIndicator();
+        })
+      : null;
+
+    if (resizeObserver && filtersRef.current) {
+      resizeObserver.observe(filtersRef.current);
+    }
+    if (resizeObserver) {
+      filterOrder.forEach((filter) => {
+        const button = filterRefs.current[filter];
+        if (button) {
+          resizeObserver.observe(button);
+        }
+      });
+    }
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", updateFilterIndicator);
+      resizeObserver?.disconnect();
+    };
+  }, [updateFilterIndicator, i18n.resolvedLanguage]);
+
+  useEffect(() => {
+    if (!tableShellRef.current || shouldSkipAnimation()) {
+      return;
+    }
+
+    const transition = animate(tableShellRef.current, {
+      opacity: [0.8, 1],
+      translateY: [8, 0],
+      duration: 300,
+      ease: "outCubic",
+    });
+
+    return () => {
+      transition.revert();
+    };
+  }, [rowsAnimationKey]);
 
   return (
-    <section className="space-y-3">
+    <section ref={sectionRef} className="space-y-3">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
-        <h2 className="font-headline text-2xl font-bold text-slate-900 md:text-3xl">{t("jobs.title")}</h2>
+        <h2 className="font-headline text-2xl font-bold text-slate-900 md:text-3xl">
+          {t("jobs.title")}
+        </h2>
 
-        <div className="inline-flex items-center rounded-md border border-border bg-muted p-1" role="tablist" aria-label={t("jobs.filtersAria")}>
-          <button
+        <div
+          ref={filtersRef}
+          className="relative inline-flex items-center rounded-md border border-border bg-muted p-1"
+          role="tablist"
+          aria-label={t("jobs.filtersAria")}
+        >
+          <span
+            aria-hidden="true"
             className={cn(
-              "rounded px-3 py-1.5 text-[11px] font-bold transition",
-              jobFilter === "all" ? "bg-white text-slate-900 shadow" : "text-slate-500"
+              "pointer-events-none absolute left-0 inset-y-1 rounded bg-white shadow transition-[transform,width] duration-300 ease-out",
+              filterIndicator.ready ? "opacity-100" : "opacity-0"
             )}
-            onClick={() => onFilterChange("all")}
-            type="button"
-          >
-            {t("jobs.filterAll")}
-          </button>
-          <button
-            className={cn(
-              "rounded px-3 py-1.5 text-[11px] font-bold transition",
-              jobFilter === "running" ? "bg-white text-slate-900 shadow" : "text-slate-500"
-            )}
-            onClick={() => onFilterChange("running")}
-            type="button"
-          >
-            {t("jobs.filterRunning")}
-          </button>
-          <button
-            className={cn(
-              "rounded px-3 py-1.5 text-[11px] font-bold transition",
-              jobFilter === "completed" ? "bg-white text-slate-900 shadow" : "text-slate-500"
-            )}
-            onClick={() => onFilterChange("completed")}
-            type="button"
-          >
-            {t("jobs.filterCompleted")}
-          </button>
+            style={{
+              width: `${filterIndicator.width}px`,
+              transform: `translateX(${filterIndicator.left}px)`,
+            }}
+          />
+
+          {filterOrder.map((filter) => (
+            <button
+              key={filter}
+              ref={(element) => {
+                filterRefs.current[filter] = element;
+              }}
+              data-anime="jobs-filter"
+              className={cn(
+                "relative z-[1] rounded px-3 py-1.5 text-[11px] font-bold transition-colors",
+                jobFilter === filter ? "text-slate-900" : "text-slate-500 hover:text-slate-700"
+              )}
+              onClick={() => onFilterChange(filter)}
+              type="button"
+            >
+              {filter === "all" ? t("jobs.filterAll") : filter === "running" ? t("jobs.filterRunning") : t("jobs.filterCompleted")}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -79,7 +181,7 @@ export function JobsSection({
         </p>
       ) : null}
 
-      <div className="surface-shadow overflow-hidden rounded-lg border border-border bg-card">
+      <div ref={tableShellRef} className="surface-shadow overflow-hidden rounded-lg border border-border bg-card">
         <Table
           className="table-fixed"
           style={{ "--jobs-actions-width": "20rem", "--jobs-action-button-width": "8.75rem" } as CSSProperties}
@@ -103,7 +205,7 @@ export function JobsSection({
             </TableRow>
           </TableHeader>
 
-          <TableBody>
+          <TableBody ref={tableBodyRef}>
             {filteredJobs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-xs text-muted-foreground">
@@ -112,7 +214,7 @@ export function JobsSection({
               </TableRow>
             ) : (
               filteredJobs.map((job) => (
-                <TableRow key={job.job_id}>
+                <TableRow key={job.job_id} data-anime="job-row">
                   <TableCell className="pl-10">
                     <Link
                       to={

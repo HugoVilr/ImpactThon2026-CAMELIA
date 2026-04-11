@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAnimePressables, useAnimeReveal } from "../commons/animations";
 import { HomeFooter, StatusBanners, TopBar } from "../commons/components";
 import { resolveLanguage } from "../home/homeUtils";
 import { fetchJobOutputs, fetchJobStatus } from "./logsApi";
@@ -14,6 +15,7 @@ type JobLogsPageProps = {
 
 export function JobLogsPage({ jobId }: JobLogsPageProps) {
   const { i18n } = useTranslation();
+  const pageRef = useRef<HTMLElement | null>(null);
   const [job, setJob] = useState<JobStatusPayload | null>(null);
   const [logEntries, setLogEntries] = useState<JobLogEntry[]>([]);
   const [rawLogs, setRawLogs] = useState<string | null>(null);
@@ -93,11 +95,20 @@ export function JobLogsPage({ jobId }: JobLogsPageProps) {
     return buildSyntheticLogs(job);
   }, [job, logEntries]);
 
+  useAnimeReveal(pageRef, {
+    selector: ":scope > *",
+    dependencyKey: job?.status,
+    delayStep: 80,
+    duration: 520,
+  });
+
+  useAnimePressables(pageRef);
+
   return (
     <>
       <TopBar activeLanguage={activeLanguage} onLanguageChange={handleLanguageChange} />
 
-      <main className="page-enter mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-24 md:px-6">
+      <main ref={pageRef} className="mx-auto w-full max-w-[1320px] space-y-8 px-4 pb-10 pt-24 md:px-6">
         <JobLogsTabs jobId={jobId} activeTab="logs" onTabChange={() => undefined} />
         <JobLogsProgressCard job={job} loading={isLoading} />
         <JobLogStreamPanel entries={effectiveEntries} isLive={isJobActive(job)} />

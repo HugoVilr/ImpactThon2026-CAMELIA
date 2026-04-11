@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { animate } from "animejs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { shouldSkipAnimation } from "../../commons/animations";
 import { cn } from "../../lib/utils";
 import { displayJobName } from "../homeUtils";
 import type { Job } from "../../types/domain";
@@ -75,6 +77,7 @@ const resolveProgress = (job: Job, now: number): ProgressMeta => {
 
 export function JobProgressBar({ job }: JobProgressBarProps) {
   const [now, setNow] = useState(() => Date.now());
+  const barRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -93,6 +96,22 @@ export function JobProgressBar({ job }: JobProgressBarProps) {
 
   const progress = useMemo(() => resolveProgress(job, now), [job, now]);
   const progressAria = t("jobs.progressAria", { name: displayJobName(job) });
+
+  useEffect(() => {
+    if (shouldSkipAnimation() || progress.indeterminate || !barRef.current) {
+      return;
+    }
+
+    const tween = animate(barRef.current, {
+      width: `${progress.percent}%`,
+      duration: 580,
+      ease: "outQuart",
+    });
+
+    return () => {
+      tween.revert();
+    };
+  }, [progress.indeterminate, progress.percent]);
 
   return (
     <div className="w-full">
@@ -113,6 +132,7 @@ export function JobProgressBar({ job }: JobProgressBarProps) {
           />
         ) : (
           <div
+            ref={barRef}
             className={cn(
               "h-full rounded-full transition-[width] duration-700 ease-out",
               progress.toneClass

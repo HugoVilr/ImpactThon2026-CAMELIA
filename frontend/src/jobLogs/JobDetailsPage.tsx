@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimePressables, useAnimeReveal } from "../commons/animations";
 import { HomeFooter, SafetyFindingsModal, StatusBanners, TopBar, type SafetyFinding } from "../commons/components";
 import { Badge, Button, Card, CardContent } from "../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../components/ProteinViewer";
@@ -63,6 +64,7 @@ type XrSupport = {
 
 export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageProps) {
   const { i18n } = useTranslation();
+  const pageRef = useRef<HTMLElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
   const [activeTab, setActiveTab] = useState<JobDetailsTab>(initialTab);
   const [job, setJob] = useState<JobStatusPayload | null>(null);
@@ -287,6 +289,18 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   }, [biologicalData?.allergenicity_alerts, biologicalData?.toxicity_alerts]);
   const hasSafetyData = Boolean(biologicalData);
 
+  useAnimeReveal(pageRef, {
+    selector: ":scope > *",
+    dependencyKey: jobId,
+    delayStep: 70,
+    duration: 520,
+    translateY: 16,
+  });
+
+  useAnimePressables(pageRef, {
+    selector: "button, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: activeTab,
+  });
 
   return (
     <>
@@ -296,7 +310,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         hideLanguageSelector={activeTab === "viewer"}
       />
 
-      <main className="page-enter mx-auto w-full max-w-[1200px] space-y-4 px-4 pb-8 pt-6 md:px-5">
+      <main ref={pageRef} className="mx-auto w-full max-w-[1200px] space-y-4 px-4 pb-8 pt-6 md:px-5">
         <section className="space-y-3">
           <div className="space-y-2">
             <p className="font-headline text-[1.85rem] font-extrabold uppercase tracking-[0.22em] text-primary md:text-[2.2rem]">
@@ -460,169 +474,185 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
               </div>
 
               <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)] min-w-0">
-                <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="flex flex-1 flex-col gap-3 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Biological Insights</p>
+                <div className="grid min-w-0 gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                  <Card className="surface-shadow flex h-full flex-col rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Biological Insights</p>
 
-                    <div className="flex flex-1 flex-col gap-3 text-[13px]">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2" title="Estimación de la probabilidad de que la proteína sea soluble en agua. Valores >50 indican una proteína soluble, mientras que valores <30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio.">
-                          <span>Solubility</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[1.25rem] font-extrabold text-primary">
-                          {formatCompactNumber(biologicalData?.solubility_score, 1)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t border-border/60 pt-3">
-                        <div className="flex items-center gap-2" title="Clasificación basada en el Índice de Inestabilidad. Se considera &quot;Estable&quot; si el índice es inferior a 40, lo que predice una vida media más larga de la molécula sintetizada.">
-                          <span>Stability</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-900">
-                          {(biologicalData?.stability_status ?? "N/A").toUpperCase()}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between border-t border-border/60 pt-3">
-                        <div className="flex items-center gap-2" title="Medida que estima la estabilidad de la proteína en un tubo de ensayo basada en su composición de aminoácidos. Los valores inferiores a 40 son el umbral estándar para considerar que una proteína es estable.">
-                          <span>Instability Index</span>
-                          <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                        </div>
-                        <span className="text-[1.25rem] font-extrabold text-slate-950">
-                          {formatCompactNumber(biologicalData?.instability_index, 1)}
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-[12px] text-left transition hover:bg-amber-100/60 disabled:cursor-not-allowed disabled:opacity-60"
-                        onClick={() => setIsSafetyModalOpen(true)}
-                        disabled={!hasSafetyData}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 text-amber-800">
-                            <AlertTriangle className="h-4 w-4" />
-                            <span className="font-bold uppercase tracking-[0.1em] leading-4">
-                              {safetyAlerts > 0 ? `${safetyAlerts} Security Alerts Found` : "No Security Alerts"}
-                            </span>
+                      <div className="flex flex-1 flex-col gap-3 text-[13px]">
+                        <div className="flex items-center justify-between">
+                          <div
+                            className="flex items-center gap-2"
+                            title="Estimación de la probabilidad de que la proteína sea soluble en agua. Valores >50 indican una proteína soluble, mientras que valores <30 sugieren que probablemente sea insoluble en condiciones estándar de laboratorio."
+                          >
+                            <span>Solubility</span>
+                            <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
                           </div>
-                          <span className="text-amber-500">›</span>
+                          <span className="text-[1.25rem] font-extrabold text-primary">
+                            {formatCompactNumber(biologicalData?.solubility_score, 1)}
+                          </span>
                         </div>
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card className="surface-shadow h-full flex flex-col rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="flex flex-1 flex-col p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
-                      Secondary Structure Breakdown
-                    </p>
+                        <div className="flex items-center justify-between border-t border-border/60 pt-3">
+                          <div
+                            className="flex items-center gap-2"
+                            title="Clasificación basada en el Índice de Inestabilidad. Se considera &quot;Estable&quot; si el índice es inferior a 40, lo que predice una vida media más larga de la molécula sintetizada."
+                          >
+                            <span>Stability</span>
+                            <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
+                          </div>
+                          <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-900">
+                            {(biologicalData?.stability_status ?? "N/A").toUpperCase()}
+                          </span>
+                        </div>
 
-                    <div className="flex flex-1 flex-col justify-center gap-6 my-2">
-                      <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
-                        <div className="bg-primary" style={{ width: `${secondaryStructure?.helix_percent ?? 0}%` }} />
-                        <div className="bg-slate-950" style={{ width: `${secondaryStructure?.strand_percent ?? 0}%` }} />
-                        <div className="bg-slate-300" style={{ width: `${secondaryStructure?.coil_percent ?? 0}%` }} />
+                        <div className="flex items-center justify-between border-t border-border/60 pt-3">
+                          <div
+                            className="flex items-center gap-2"
+                            title="Medida que estima la estabilidad de la proteína en un tubo de ensayo basada en su composición de aminoácidos. Los valores inferiores a 40 son el umbral estándar para considerar que una proteína es estable."
+                          >
+                            <span>Instability Index</span>
+                            <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
+                          </div>
+                          <span className="text-[1.25rem] font-extrabold text-slate-950">
+                            {formatCompactNumber(biologicalData?.instability_index, 1)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mt-auto rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-left text-[12px] transition hover:bg-amber-100/60 disabled:cursor-not-allowed disabled:opacity-60"
+                          onClick={() => setIsSafetyModalOpen(true)}
+                          disabled={!hasSafetyData}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 text-amber-800">
+                              <AlertTriangle className="h-4 w-4" />
+                              <span className="font-bold uppercase leading-4 tracking-[0.1em]">
+                                {safetyAlerts > 0 ? `${safetyAlerts} Security Alerts Found` : "No Security Alerts"}
+                              </span>
+                            </div>
+                            <span className="text-amber-500">›</span>
+                          </div>
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="surface-shadow flex h-full flex-col rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="flex flex-1 flex-col p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Secondary Structure Breakdown</p>
+
+                      <div className="my-2 flex flex-1 flex-col justify-center gap-6">
+                        <div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-200">
+                          <div className="bg-primary" style={{ width: `${secondaryStructure?.helix_percent ?? 0}%` }} />
+                          <div className="bg-slate-950" style={{ width: `${secondaryStructure?.strand_percent ?? 0}%` }} />
+                          <div className="bg-slate-300" style={{ width: `${secondaryStructure?.coil_percent ?? 0}%` }} />
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-primary" />
+                              Helix
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.helix_percent, 1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-slate-950" />
+                              Strand
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.strand_percent, 1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                              <span className="h-2 w-2 rounded-full bg-slate-300" />
+                              Coil
+                            </div>
+                            <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
+                              {formatCompactNumber(secondaryStructure?.coil_percent, 1)}%
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="grid gap-3 md:grid-cols-3">
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-primary" />
-                            Helix
+                      <div className="mt-auto grid gap-2.5 border-t border-border/60 pt-4 md:grid-cols-3">
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div
+                            className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500"
+                            title="Recuento total de aminoácidos de cisteína en la secuencia. Estos residuos son críticos porque permiten la formación de puentes disulfuro, los cuales actúan como &quot;remaches&quot; que estabilizan la estructura tridimensional."
+                          >
+                            <span>Cysteine Residues</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.helix_percent, 1)}%
+                          <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
+                            {sequenceProperties?.cysteine_residues ?? "N/A"}
                           </p>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-slate-950" />
-                            Strand
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div
+                            className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500"
+                            title="Número de aminoácidos con anillos aromáticos (Fenilalanina, Tirosina y Triptófano). Estos residuos tienden a agruparse en el núcleo interno de la proteína para evitar el contacto con el agua, ayudando al plegamiento."
+                          >
+                            <span>Aromatic Count</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.strand_percent, 1)}%
+                          <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
+                            {sequenceProperties?.aromatic_residues ?? "N/A"}
                           </p>
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
-                            <span className="h-2 w-2 rounded-full bg-slate-300" />
-                            Coil
+                        <div className="rounded-xl bg-slate-50 px-3 py-3">
+                          <div
+                            className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500"
+                            title="Indica de dónde provienen los resultados estructurales. 'Synthetic Prediction' significa que, al no coincidir con las 22 proteínas del catálogo real, el sistema ha generado una estructura y datos biológicos mediante algoritmos de simulación."
+                          >
+                            <span>Source</span>
+                            <Info className="h-3.5 w-3.5 cursor-help" />
                           </div>
-                          <p className="mt-1.5 text-[1.1rem] font-extrabold text-slate-950">
-                            {formatCompactNumber(secondaryStructure?.coil_percent, 1)}%
+                          <p className="mt-2 break-words text-[10px] font-extrabold uppercase tracking-[0.04em] text-slate-950">
+                            {biologicalData?.source ?? "N/A"}
                           </p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="mt-auto grid gap-2.5 border-t border-border/60 pt-4 md:grid-cols-3">
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title="Recuento total de aminoácidos de cisteína en la secuencia. Estos residuos son críticos porque permiten la formación de puentes disulfuro, los cuales actúan como &quot;remaches&quot; que estabilizan la estructura tridimensional.">
-                          <span>Cysteine Residues</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
-                          {sequenceProperties?.cysteine_residues ?? "N/A"}
-                        </p>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title="Número de aminoácidos con anillos aromáticos (Fenilalanina, Tirosina y Triptófano). Estos residuos tienden a agruparse en el núcleo interno de la proteína para evitar el contacto con el agua, ayudando al plegamiento.">
-                          <span>Aromatic Count</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 text-[1.05rem] font-extrabold text-slate-950">
-                          {sequenceProperties?.aromatic_residues ?? "N/A"}
-                        </p>
-                      </div>
-                      <div className="rounded-xl bg-slate-50 px-3 py-3">
-                        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500" title="Indica de dónde provienen los resultados estructurales. 'Synthetic Prediction' significa que, al no coincidir con las 22 proteínas del catálogo real, el sistema ha generado una estructura y datos biológicos mediante algoritmos de simulación.">
-                          <span>Source</span>
-                          <Info className="h-3.5 w-3.5 cursor-help" />
-                        </div>
-                        <p className="mt-2 break-words text-[10px] font-extrabold uppercase tracking-[0.04em] text-slate-950">
-                          {biologicalData?.source ?? "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <div className="min-w-0">
-                <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
-                  <CardContent className="space-y-3 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Molecular Metadata</p>
+                  <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
+                    <CardContent className="space-y-3 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Molecular Metadata</p>
 
-                    <div className="space-y-3">
-                      <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Uniprot ID</p>
-                        <p className="mt-2 break-words text-[0.88rem] font-extrabold leading-6 tracking-[-0.02em] text-slate-950">
-                          {proteinMetadata?.uniprot_id ?? "N/A"}
-                          {proteinMetadata?.organism ? ` (${proteinMetadata.organism})` : ""}
-                        </p>
+                      <div className="space-y-3">
+                        <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Uniprot ID</p>
+                          <p className="mt-2 break-words text-[0.88rem] font-extrabold leading-6 tracking-[-0.02em] text-slate-950">
+                            {proteinMetadata?.uniprot_id ?? "N/A"}
+                            {proteinMetadata?.organism ? ` (${proteinMetadata.organism})` : ""}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Molecular Weight</p>
+                          <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
+                            {formatCompactNumber(sequenceProperties?.molecular_weight_kda, 1)} kDa
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Net Charges (+/-)</p>
+                          <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
+                            {sequenceProperties
+                              ? `${sequenceProperties.positive_charges} / ${sequenceProperties.negative_charges}`
+                              : "N/A"}
+                          </p>
+                        </div>
                       </div>
-                      <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Molecular Weight</p>
-                        <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
-                          {formatCompactNumber(sequenceProperties?.molecular_weight_kda, 1)} kDa
-                        </p>
-                      </div>
-                      <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Net Charges (+/-)</p>
-                        <p className="mt-2 text-[0.88rem] font-extrabold tracking-[-0.02em] text-slate-950">
-                          {sequenceProperties
-                            ? `${sequenceProperties.positive_charges} / ${sequenceProperties.negative_charges}`
-                            : "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
