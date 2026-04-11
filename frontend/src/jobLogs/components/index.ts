@@ -4,3 +4,4 @@ export { JobLogStreamPanel } from "./JobLogStreamPanel";
 export { JobLogsProgressCard } from "./JobLogsProgressCard";
 export { JobLogsTabs } from "./JobLogsTabs";
 export { ProteinOverviewPanel } from "./ProteinOverviewPanel";
+export { ExportResultsModal } from "./ExportResultsModal";

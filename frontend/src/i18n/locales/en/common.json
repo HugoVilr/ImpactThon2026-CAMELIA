@@ -1,182 +1,248 @@
 {
-  "language": {
-    "label": "Language",
-    "es": "ES",
-    "en": "EN",
-    "gl": "GL"
-  },
-  "nav": {
-    "dashboard": "Dashboard",
-    "analytics": "Analytics",
-    "protocol": "Protocol",
-    "registry": "Registry"
-  },
-  "hero": {
-    "kicker": "LABORATORY WORKSPACE",
-    "title": "Biohack Localfold",
-    "description": "Prepare your amino acid sequences for folding. Select resource intensity based on your target resolution and pLDDT requirements."
-  },
-  "sequence": {
-    "title": "Input & Setup",
-    "api": "API: {{api}}",
-    "service": "Service: {{service}} · {{status}} · v{{version}}",
-    "serviceNoVersion": "Service: {{service}} · {{status}}",
-    "serviceChecking": "Service: Checking status...",
-    "useSample": "Use FASTA sample",
-    "samplePlaceholder": "Select a sample",
-    "filename": "FASTA filename",
-    "filenamePlaceholder": "protein.fasta",
-    "input": "Sequence",
-    "inputPlaceholder": ">protein_name\\nMKT...",
-    "uploadButton": "Upload file",
-    "runButton": "Run Sequence Folding",
-    "submittingButton": "Submitting Job..."
-  },
-  "presets": {
-    "title": "Resource Presets",
-    "badge": "RECOMMENDED",
-    "draft": {
-      "name": "Fast Draft",
-      "subtitle": "Low GPU Usage",
-      "description": "Quick structural sanity checks. Minimal recycling iterations."
-    },
-    "standard": {
-      "name": "Standard Research",
-      "subtitle": "Balanced GPU Cluster",
-      "description": "Full MSA search with multiple recycling stages. High pLDDT accuracy."
-    },
-    "precision": {
-      "name": "High Precision",
-      "subtitle": "Dedicated H100 Node",
-      "description": "Maximum recycling. Ideal for complex protein complexes and novel folds."
-    }
-  },
-  "jobs": {
-    "title": "Recent Jobs",
-    "filterAll": "All Jobs",
-    "filterRunning": "Running",
-    "filterCompleted": "Completed",
-    "filtersAria": "Job filters",
-    "loading": "Loading jobs...",
-    "empty": "No jobs for this filter.",
-    "columns": {
-      "jobName": "Job Name",
-      "status": "Status",
-      "timestamp": "Timestamp",
-      "resource": "Resource",
-      "actions": "Actions"
-    },
-    "actions": {
-      "viewResults": "View Results",
-      "inProgress": "In Progress",
-      "details": "Details"
-    },
-    "progressAria": "Progress for job {{name}}"
-  },
-  "jobLogs": {
-    "kicker": "Active Project",
-    "jobId": "Job {{id}}",
-    "tabs": {
-      "viewer": "Viewer",
-      "compare": "Compare",
-      "logs": "Logs",
-      "extras": "Extras"
-    },
-    "compare": {
-      "title": "Protein Comparison",
-      "description": "Keep the current protein on the left and use the job history to load a second protein in parallel.",
-      "currentProtein": "Current Protein",
-      "comparedProtein": "Compared Protein",
-      "selectTitle": "Select a job to compare",
-      "selectDescription": "Any history entry can be opened on the right column to inspect structure, metrics, and metadata side by side.",
-      "compareAction": "Compare",
-      "changeSelection": "Change Protein",
-      "loadingJobs": "Loading job history...",
-      "loadingSelection": "Loading selected protein...",
-      "empty": "There are no other jobs available to compare yet."
-    },
-    "progress": {
-      "loadingTitle": "Loading job status...",
-      "pendingTitle": "Job queued in CESGA cluster...",
-      "runningTitle": "Calculating structure in CESGA cluster...",
-      "completedTitle": "Execution completed. Outputs available.",
-      "failedTitle": "Execution finished with an error.",
-      "cancelledTitle": "Job was cancelled.",
-      "step": "STEP {{current}}/{{total}} · {{phase}}",
-      "phases": {
-        "init": "INIT",
-        "queue": "QUEUE",
-        "msa": "MSA",
-        "features": "FEATURES",
-        "folding": "FOLDING",
-        "complete": "COMPLETE",
-        "failed": "FAILED",
-        "cancelled": "CANCELLED"
-      }
-    },
-    "stream": {
-      "title": "Scientific Job Logs",
-      "live": "Live Stream",
-      "snapshot": "Snapshot",
-      "empty": "No log events yet."
-    },
-    "download": "Download Full Technical Logs",
-    "errors": {
-      "load": "Could not load job logs. {{detail}}"
-    }
-  },
-  "status": {
-    "pending": "Pending",
-    "running": "Running",
-    "completed": "Completed",
-    "failed": "Failed",
-    "cancelled": "Cancelled"
-  },
-  "resource": {
-    "draft": "DRAFT",
-    "standard": "STANDARD",
-    "highPrecision": "HIGH PRECISION"
-  },
-  "footer": {
-    "brand": "BioHack",
-    "copy": "© 2026 OSG",
-    "privacy": "Privacy",
-    "terms": "Terms",
-    "systemStatus": "System Status"
-  },
-  "modal": {
-    "title": "Upload Sequence File",
-    "description": "Select or drag and drop your .fasta or .txt files.",
-    "dragDrop": "Drag and drop files here",
-    "orSelect": "or select from your computer",
-    "browse": "Browse Local Files",
-    "supported": "SUPPORTED FORMATS: .FASTA, .FA, .FAA, .TXT",
-    "cancel": "Cancel",
-    "fileInputLabel": "Select FASTA file",
-    "ariaLabel": "Upload sequence file"
-  },
-  "safetyModal": {
-    "title": "Safety Analysis Findings",
-    "ariaLabel": "Safety analysis findings",
-    "close": "Close modal",
-    "sections": {
-      "toxicity": "Toxicity Alerts",
-      "allergenicity": "Allergenicity Alerts"
-    },
-    "noIssuesTitle": "No issues detected",
-    "noIssuesDescription": "Sequence passed all standard WHO and EFSA allergenicity screening protocols."
-  },
-  "messages": {
-    "sampleLoaded": "Sample loaded: {{name}}",
-    "fileLoaded": "File loaded: {{name}}",
-    "jobSubmitted": "Job submitted: {{id}}"
-  },
-  "errors": {
-    "dashboardLoad": "Could not load dashboard data. {{detail}}",
-    "uploadRead": "Could not read the file.",
-    "uploadEmpty": "The file is empty.",
-    "fileFormat": "Unsupported file format.",
-    "invalidFasta": "FASTA sequence must start with \">\".",
-    "jobSubmit": "Could not submit job. {{detail}}"
-  }
+    "language":  {
+                     "label":  "Language",
+                     "es":  "ES",
+                     "en":  "EN",
+                     "gl":  "GL"
+                 },
+    "nav":  {
+                "dashboard":  "Dashboard",
+                "analytics":  "Analytics",
+                "protocol":  "Protocol",
+                "registry":  "Registry"
+            },
+    "hero":  {
+                 "kicker":  "LABORATORY WORKSPACE",
+                 "title":  "Biohack Localfold",
+                 "description":  "Prepare your amino acid sequences for folding. Select resource intensity based on your target resolution and pLDDT requirements."
+             },
+    "sequence":  {
+                     "title":  "Input \u0026 Setup",
+                     "api":  "API: {{api}}",
+                     "service":  "Service: {{service}} · {{status}} · v{{version}}",
+                     "serviceNoVersion":  "Service: {{service}} · {{status}}",
+                     "serviceChecking":  "Service: Checking status...",
+                     "useSample":  "Use FASTA sample",
+                     "samplePlaceholder":  "Select a sample",
+                     "filename":  "FASTA filename",
+                     "filenamePlaceholder":  "protein.fasta",
+                     "input":  "Sequence",
+                     "inputPlaceholder":  "\u003eprotein_name\\nMKT...",
+                     "uploadButton":  "Upload file",
+                     "runButton":  "Run Sequence Folding",
+                     "submittingButton":  "Submitting Job..."
+                 },
+    "presets":  {
+                    "title":  "Resource Presets",
+                    "badge":  "RECOMMENDED",
+                    "draft":  {
+                                  "name":  "Fast Draft",
+                                  "subtitle":  "Low GPU Usage",
+                                  "description":  "Quick structural sanity checks. Minimal recycling iterations."
+                              },
+                    "standard":  {
+                                     "name":  "Standard Research",
+                                     "subtitle":  "Balanced GPU Cluster",
+                                     "description":  "Full MSA search with multiple recycling stages. High pLDDT accuracy."
+                                 },
+                    "precision":  {
+                                      "name":  "High Precision",
+                                      "subtitle":  "Dedicated H100 Node",
+                                      "description":  "Maximum recycling. Ideal for complex protein complexes and novel folds."
+                                  }
+                },
+    "jobs":  {
+                 "title":  "Recent Jobs",
+                 "filterAll":  "All Jobs",
+                 "filterRunning":  "Running",
+                 "filterCompleted":  "Completed",
+                 "filtersAria":  "Job filters",
+                 "loading":  "Loading jobs...",
+                 "empty":  "No jobs for this filter.",
+                 "columns":  {
+                                 "jobName":  "Job Name",
+                                 "status":  "Status",
+                                 "timestamp":  "Timestamp",
+                                 "resource":  "Resource",
+                                 "actions":  "Actions"
+                             },
+                 "actions":  {
+                                 "viewResults":  "View Results",
+                                 "inProgress":  "In Progress",
+                                 "details":  "Details"
+                             },
+                 "progressAria":  "Progress for job {{name}}"
+             },
+    "jobLogs":  {
+                    "kicker":  "Active Project",
+                    "jobId":  "Job {{id}}",
+                    "tabs":  {
+                                 "viewer":  "Viewer",
+                                 "logs":  "Logs",
+                                 "extras":  "Extras"
+                             },
+                    "progress":  {
+                                     "loadingTitle":  "Loading job status...",
+                                     "pendingTitle":  "Job queued in CESGA cluster...",
+                                     "runningTitle":  "Calculating structure in CESGA cluster...",
+                                     "completedTitle":  "Execution completed. Outputs available.",
+                                     "failedTitle":  "Execution finished with an error.",
+                                     "cancelledTitle":  "Job was cancelled.",
+                                     "step":  "STEP {{current}}/{{total}} · {{phase}}",
+                                     "phases":  {
+                                                    "init":  "INIT",
+                                                    "queue":  "QUEUE",
+                                                    "msa":  "MSA",
+                                                    "features":  "FEATURES",
+                                                    "folding":  "FOLDING",
+                                                    "complete":  "COMPLETE",
+                                                    "failed":  "FAILED",
+                                                    "cancelled":  "CANCELLED"
+                                                }
+                                 },
+                    "stream":  {
+                                   "title":  "Scientific Job Logs",
+                                   "live":  "Live Stream",
+                                   "snapshot":  "Snapshot",
+                                   "empty":  "No log events yet."
+                               },
+                    "download":  "Download Full Technical Logs",
+                    "errors":  {
+                                   "load":  "Could not load job logs. {{detail}}"
+                               },
+                    "details":  {
+                                    "too_charges":  "Positive vs negative amino acids. Determines net electric charge.",
+                                    "activity":  "Activity",
+                                    "helix":  "Helix",
+                                    "uniprot":  "Uniprot ID",
+                                    "plddt":  "Global pLDDT Avg",
+                                    "meta":  "Molecular Metadata",
+                                    "ramTime":  "Memory GB Hours",
+                                    "strand":  "Strand",
+                                    "unknownMethod":  "Unknown method",
+                                    "mw":  "Molecular Weight",
+                                    "high":  "High \u003e90",
+                                    "cys":  "Cysteine Residues",
+                                    "too_solubility":  "Water solubility estimate. \u003e50 means soluble, \u003c30 implies likely insoluble.",
+                                    "noStructure":  "Structure data is not available yet for this job.",
+                                    "too_mw":  "Total mass in kDa. Essential for lab experiments.",
+                                    "unknownStruct":  "Unknown structure",
+                                    "pae":  "Interactive PAE Heatmap",
+                                    "gpuTime":  "GPU Hours",
+                                    "cpuTime":  "CPU Hours",
+                                    "annotations":  "Annotations \u0026 Known Structures",
+                                    "alertsFound":  "{{count}} Security Alerts Found",
+                                    "proteinCat":  "Protein Catalog Context",
+                                    "too_arom":  "Aromatic rings count. They group in the protein core.",
+                                    "noAlerts":  "No Security Alerts",
+                                    "publicationUnavail":  "Publication unavailable",
+                                    "too_stability":  "Stability based on index. \u003c40 means stable.",
+                                    "instability":  "Instability Index",
+                                    "coil":  "Coil",
+                                    "arom":  "Aromatic Count",
+                                    "category":  "Category",
+                                    "paeUnavail":  "PAE unavailable",
+                                    "hydro":  "Hydrophobicity",
+                                    "too_cys":  "Cysteine count. Critical for disulfide bonds.",
+                                    "export":  "Export",
+                                    "solubility":  "Solubility",
+                                    "source":  "Source",
+                                    "bioInsights":  "Biological Insights",
+                                    "function":  "Function",
+                                    "cpuOnly":  "CPU only",
+                                    "wallTime":  "Wall Time",
+                                    "viewVr":  "View in VR",
+                                    "too_source":  "Indicates whether results are from a catalog or a Synthetic Prediction.",
+                                    "noTags":  "No catalog tags available.",
+                                    "too_hydro":  "Tendency to avoid water. Negative means soluble.",
+                                    "veryLow":  "Very Low \u003c50",
+                                    "noStructs":  "No known structures provided by the protein catalog.",
+                                    "too_instability":  "Estimates tube stability. \u003c40 is the threshold for a stable protein.",
+                                    "cellular":  "Cellular Location",
+                                    "stability":  "Stability",
+                                    "too_plddt":  "AlphaFold confidence measure. \u003e70 indicates reliable folding, \u003e90 high accuracy.",
+                                    "aiDiscovery":  "AI Discovery",
+                                    "secStruct":  "Secondary Structure Breakdown",
+                                    "too_uniprot":  "Universal protein identifier. Allows querying global databases.",
+                                    "charges":  "Net Charges",
+                                    "too_pae":  "Relative positional error. Green/dark areas indicate safe orientation between domains.",
+                                    "confDist":  "Confidence Distribution",
+                                    "viewAr":  "View in AR"
+                                }
+                },
+    "status":  {
+                   "pending":  "Pending",
+                   "running":  "Running",
+                   "completed":  "Completed",
+                   "failed":  "Failed",
+                   "cancelled":  "Cancelled"
+               },
+    "resource":  {
+                     "draft":  "DRAFT",
+                     "standard":  "STANDARD",
+                     "highPrecision":  "HIGH PRECISION"
+                 },
+    "footer":  {
+                   "brand":  "BioHack",
+                   "copy":  "© 2026 OSG",
+                   "privacy":  "Privacy",
+                   "terms":  "Terms",
+                   "systemStatus":  "System Status"
+               },
+    "modal":  {
+                  "title":  "Upload Sequence File",
+                  "description":  "Select or drag and drop your .fasta or .txt files.",
+                  "dragDrop":  "Drag and drop files here",
+                  "orSelect":  "or select from your computer",
+                  "browse":  "Browse Local Files",
+                  "supported":  "SUPPORTED FORMATS: .FASTA, .FA, .FAA, .TXT",
+                  "cancel":  "Cancel",
+                  "fileInputLabel":  "Select FASTA file",
+                  "ariaLabel":  "Upload sequence file"
+              },
+    "safetyModal":  {
+                        "title":  "Safety Analysis Findings",
+                        "ariaLabel":  "Safety analysis findings",
+                        "close":  "Close modal",
+                        "sections":  {
+                                         "toxicity":  "Toxicity Alerts",
+                                         "allergenicity":  "Allergenicity Alerts"
+                                     },
+                        "noIssuesTitle":  "No issues detected",
+                        "noIssuesDescription":  "Sequence passed all standard WHO and EFSA allergenicity screening protocols."
+                    },
+    "messages":  {
+                     "sampleLoaded":  "Sample loaded: {{name}}",
+                     "fileLoaded":  "File loaded: {{name}}",
+                     "jobSubmitted":  "Job submitted: {{id}}"
+                 },
+    "errors":  {
+                   "dashboardLoad":  "Could not load dashboard data. {{detail}}",
+                   "uploadRead":  "Could not read the file.",
+                   "uploadEmpty":  "The file is empty.",
+                   "fileFormat":  "Unsupported file format.",
+                   "invalidFasta":  "FASTA sequence must start with \"\u003e\".",
+                   "jobSubmit":  "Could not submit job. {{detail}}"
+               },
+    "exportModal":  {
+                        "downloadAll":  "Download All Assets (.zip)",
+                        "pdf":  {
+                                    "desc":  "An automatically generated document that includes the protein image, pLDDT chart, and Biological Insights table.",
+                                    "title":  "Export Report (PDF)"
+                                },
+                        "close":  "Close modal",
+                        "cif":  {
+                                    "desc":  "High precision file for complex structures.",
+                                    "title":  "Full Model (mmCIF)"
+                                },
+                        "pdb":  {
+                                    "desc":  "Standard format for 3D visualization.",
+                                    "title":  "Structure (PDB)"
+                                },
+                        "title":  "Download Results",
+                        "json":  {
+                                     "desc":  "Raw pLDDT values and PAE error matrix.",
+                                     "title":  "Confidence Data (JSON)"
+                                 }
+                    }
 }
