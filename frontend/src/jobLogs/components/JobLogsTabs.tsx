@@ -47,18 +47,6 @@ export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: 
         >
           {t("jobLogs.tabs.logs")}
         </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("extras")}
-          className={cn(
-            tabStyles,
-            activeTab === "extras"
-              ? "border-b-2 border-primary text-primary"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          {t("jobLogs.tabs.extras")}
-        </button>
       </nav>
 
       {showMeta ? (
