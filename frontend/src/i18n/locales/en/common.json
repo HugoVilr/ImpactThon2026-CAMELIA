@@ -91,7 +91,11 @@
             "loadingSelection": "Loading selected protein...",
             "loadingJobs": "Loading job history...",
             "empty": "There are no other jobs available for comparison.",
-            "compareAction": "Compare"
+            "compareAction": "Compare",
+                        "showPhantom":  "Show Phantom",
+                        "hidePhantom":  "Hide Phantom",
+                        "phantomToggleAria":  "{{action}} overlay of {{name}}",
+                        "xrStartError":  "Unable to start XR session."
         },
         "progress": {
             "loadingTitle": "Loading job status...",
@@ -182,6 +186,7 @@
             "too_uniprot": "Universal protein identifier. Allows querying global databases.",
             "charges": "Net Charges",
             "too_pae": "Relative positional error. Green/dark areas indicate safe orientation between domains.",
+                                    "paeCellTooltip":  "Residues {{startX}}-{{endX}} vs {{startY}}-{{endY}}: Expected error {{error}} A",
             "confDist": "Confidence Distribution",
             "viewAr": "View in AR"
         }

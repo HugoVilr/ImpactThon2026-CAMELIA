@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Plus, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Button, Card, CardContent } from "../../commons/components/ui";
 import { displayJobName, localeForLanguage, resolveLanguage, resourceKeyForJob, statusTranslationKey } from "../../home/homeUtils";
 import { resolveProteinNameFromOutputs } from "../jobNameResolver";
+import { resolveStructureFile } from "../jobResultsUtils";
 import type { Job } from "../../types/domain";
 import { fetchJobOutputs, fetchJobsList } from "../logsApi";
 import { useJobDetailSnapshot } from "../useJobDetailSnapshot";
 import type { JobDetailSnapshot } from "../types";
-import { ProteinOverviewPanel } from "./ProteinOverviewPanel";
+import { ProteinOverviewPanel, type CompactModuleKey } from "./ProteinOverviewPanel";
 
 type JobCompareTabProps = {
   baseJobId: string;
@@ -23,6 +24,18 @@ const statusClassByValue = {
   FAILED: "bg-red-100 text-red-700",
   CANCELLED: "bg-red-100 text-red-700",
 } as const;
+
+const compactModuleKeys: CompactModuleKey[] = [
+  "header",
+  "viewer",
+  "quality",
+  "biological",
+  "secondary",
+  "metadata",
+  "catalog",
+  "annotations",
+  "resources",
+];
 
 const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): string => {
   if (resolvedNames[job.job_id]) {
@@ -41,6 +54,12 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [leftPhantomEnabled, setLeftPhantomEnabled] = useState(false);
+  const [rightPhantomEnabled, setRightPhantomEnabled] = useState(false);
+  const [hoveredPae, setHoveredPae] = useState<{ row: number; col: number } | null>(null);
+  const [alignedModuleHeights, setAlignedModuleHeights] = useState<Partial<Record<CompactModuleKey, number>>>({});
+  const leftModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
+  const rightModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
   const comparableJobs = useMemo(
     () => jobs.filter((job) => job.job_id !== baseJobId),
     [baseJobId, jobs]
@@ -51,6 +70,40 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   );
   const selectedJob = comparableJobs.find((job) => job.job_id === selectedJobId) ?? null;
   const selectedSnapshot = useJobDetailSnapshot(selectedJobId, selectedJob);
+  const baseStructureData = resolveStructureFile(baseSnapshot.outputs);
+  const selectedStructureData = resolveStructureFile(selectedSnapshot.outputs);
+  const basePhantomLabel =
+    resolveProteinNameFromOutputs(baseSnapshot.outputs) ??
+    (baseSnapshot.job ? resolveJobLabel(baseSnapshot.job, resolvedJobNames) : baseJobId);
+  const selectedPhantomLabel = selectedJob
+    ? resolveProteinNameFromOutputs(selectedSnapshot.outputs) ?? resolveJobLabel(selectedJob, resolvedJobNames)
+    : undefined;
+  
+  const basePaeSize = baseSnapshot.outputs?.structural_data.confidence.pae_matrix?.length ?? 0;
+  const selectedPaeSize = selectedSnapshot.outputs?.structural_data.confidence.pae_matrix?.length ?? 0;
+  const areHeatmapsSameSize = basePaeSize > 0 && selectedPaeSize > 0 && basePaeSize === selectedPaeSize;
+  const syncHoverProps = areHeatmapsSameSize
+    ? {
+        hoveredPae,
+        onPaeHover: (row: number | null, col: number | null) =>
+          setHoveredPae(row !== null && col !== null ? { row, col } : null),
+      }
+    : {};
+
+  const buildModuleRefMap = (side: "left" | "right") =>
+    Object.fromEntries(
+      compactModuleKeys.map((moduleKey) => [
+        moduleKey,
+        (node: HTMLDivElement | null) => {
+          if (side === "left") {
+            leftModuleRefs.current[moduleKey] = node;
+            return;
+          }
+
+          rightModuleRefs.current[moduleKey] = node;
+        },
+      ])
+    ) as Partial<Record<CompactModuleKey, (node: HTMLDivElement | null) => void>>;
 
   useAnimeReveal(sectionRef, {
     selector: "[data-anime='compare-reveal']",
@@ -123,6 +176,11 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   }, [selectedJobId, selectedSnapshot.outputs]);
 
   useEffect(() => {
+    setLeftPhantomEnabled(false);
+    setRightPhantomEnabled(false);
+  }, [selectedJobId]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadJobs = async () => {
@@ -161,6 +219,49 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (!selectedJobId || !selectedJob) {
+      setAlignedModuleHeights({});
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const nextHeights = compactModuleKeys.reduce<Partial<Record<CompactModuleKey, number>>>((accumulator, moduleKey) => {
+        const leftHeight = leftModuleRefs.current[moduleKey]?.offsetHeight ?? 0;
+        const rightHeight = rightModuleRefs.current[moduleKey]?.offsetHeight ?? 0;
+        const maxHeight = Math.max(leftHeight, rightHeight);
+
+        if (maxHeight > 0) {
+          accumulator[moduleKey] = maxHeight;
+        }
+
+        return accumulator;
+      }, {});
+
+      setAlignedModuleHeights((current) => {
+        const changed = compactModuleKeys.some((moduleKey) => current[moduleKey] !== nextHeights[moduleKey]);
+        return changed ? nextHeights : current;
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [
+    baseSnapshot.accounting,
+    baseSnapshot.job,
+    baseSnapshot.outputs,
+    baseSnapshot.proteinDetail,
+    selectedJob,
+    selectedJobId,
+    selectedSnapshot.accounting,
+    selectedSnapshot.errorMessage,
+    selectedSnapshot.isLoading,
+    selectedSnapshot.job,
+    selectedSnapshot.outputs,
+    selectedSnapshot.proteinDetail,
+  ]);
+
   return (
     <div ref={sectionRef} className="space-y-4">
       <div data-anime="compare-reveal" className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]">
@@ -173,6 +274,13 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
             proteinDetail={baseSnapshot.proteinDetail}
             compact
             panelLabel={t("jobLogs.compare.currentProtein")}
+            phantomStructureData={selectedStructureData}
+            phantomEnabled={leftPhantomEnabled}
+            phantomLabel={selectedPhantomLabel}
+            onTogglePhantom={() => setLeftPhantomEnabled((current) => !current)}
+            compactModuleRefs={selectedJob ? buildModuleRefMap("left") : undefined}
+            compactModuleHeights={selectedJob ? alignedModuleHeights : undefined}
+            {...syncHoverProps}
           />
         </div>
 
@@ -202,6 +310,13 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                 proteinDetail={selectedSnapshot.proteinDetail}
                 compact
                 panelLabel={t("jobLogs.compare.comparedProtein")}
+                phantomStructureData={baseStructureData}
+                phantomEnabled={rightPhantomEnabled}
+                phantomLabel={basePhantomLabel}
+                onTogglePhantom={() => setRightPhantomEnabled((current) => !current)}
+                compactModuleRefs={buildModuleRefMap("right")}
+                compactModuleHeights={alignedModuleHeights}
+                {...syncHoverProps}
                 toolbar={
                   <Button type="button" variant="outline" className="gap-2 text-[11px]" onClick={() => setSelectedJobId(null)}>
                     <RefreshCcw className="h-3.5 w-3.5" />

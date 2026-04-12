@@ -91,7 +91,11 @@
             "loadingSelection": "Cargando proteína seleccionada...",
             "loadingJobs": "Cargando historial de traballos...",
             "empty": "Non hai outros traballos dispoñibles para comparar.",
-            "compareAction": "Comparar"
+            "compareAction": "Comparar",
+                        "showPhantom":  "Mostrar fantasma",
+                        "hidePhantom":  "Ocultar fantasma",
+                        "phantomToggleAria":  "{{action}} superposición de {{name}}",
+                        "xrStartError":  "Non se puido iniciar a sesión XR."
         },
         "progress": {
             "loadingTitle": "Cargando estado do job...",
@@ -182,6 +186,7 @@
             "too_uniprot": "Identificador universal da proteÃ­na. Permite consultar funciÃ³ns biolÃ³xicas e investigaciÃ³ns previas en bases de datos mundiais.",
             "charges": "Cargas netas",
             "too_pae": "Erro de posiciÃ³n relativo entre aminoÃ¡cidos. As zonas verdes/escuras indican unha orientaciÃ³n segura entre os diferentes dominios da proteÃ­na.",
+                                    "paeCellTooltip":  "Residuos {{startX}}-{{endX}} vs {{startY}}-{{endY}}: erro esperado de {{error}} A",
             "confDist": "DistribuciÃ³n de confianza",
             "viewAr": "Ver en AR"
         }
