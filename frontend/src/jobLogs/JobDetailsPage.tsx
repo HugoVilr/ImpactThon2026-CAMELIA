@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
 import html2pdf from "html2pdf.js";
 import {
   AlertTriangle,
@@ -8,12 +7,9 @@ import {
   Database,
   Download,
   Dna,
-  Expand,
-  FileDown,
   Info,
   ScanSearch,
   Sparkles,
-  X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAnimePressables, useAnimeReveal } from "../commons/animations";
@@ -26,7 +22,6 @@ import {
   countSafetyAlerts,
   downsamplePaeMatrix,
   formatCompactNumber,
-  formatRuntime,
   resolveConfidenceBuckets,
   resolvePaeCellColor,
   resolvePlddtAverage,
@@ -67,7 +62,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const { t, i18n } = useTranslation();
   const pageRef = useRef<HTMLElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
-  const pdfContentRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<JobDetailsTab>(initialTab);
   const [job, setJob] = useState<JobStatusPayload | null>(null);
   const [outputs, setOutputs] = useState<JobOutputsPayload | null>(null);
@@ -81,10 +75,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const [xrError, setXrError] = useState<string | null>(null);
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [aiReport, setAiReport] = useState<string | null>(null);
-  const [typewriterText, setTypewriterText] = useState("");
-  const [showTypewriter, setShowTypewriter] = useState(false);
-  const [showPdfDownload, setShowPdfDownload] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const activeLanguage = resolveLanguage(i18n.resolvedLanguage ?? i18n.language);
@@ -197,9 +187,13 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
       return;
     }
 
+    let cancelled = false;
+
     const interval = window.setInterval(async () => {
       try {
         const currentStatus = await fetchJobStatus(jobId);
+        if (cancelled) return;
+        
         setJob(currentStatus);
 
         if (currentStatus.status === "COMPLETED") {
@@ -207,6 +201,9 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
             fetchJobOutputs(jobId),
             fetchJobAccounting(jobId),
           ]);
+          
+          if (cancelled) return;
+
           setOutputs(outputsPayload);
           setAccounting(accountingPayload);
 
@@ -219,13 +216,15 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           }
 
           const identifiedProtein = outputsPayload?.protein_metadata?.identified_protein;
-          if (identifiedProtein) {
+          if (identifiedProtein && !cancelled) {
             const detailPayload = await fetchProteinDetail(identifiedProtein);
-            setProteinDetail((detailPayload ?? null) as ProteinCatalogDetail | null);
-          } else {
+            if (!cancelled) {
+              setProteinDetail((detailPayload ?? null) as ProteinCatalogDetail | null);
+            }
+          } else if (!cancelled) {
             setProteinDetail(null);
           }
-        } else {
+        } else if (!cancelled) {
           setLogEntries(buildSyntheticLogs(currentStatus));
         }
       } catch {
@@ -233,7 +232,10 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
       }
     }, 3000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
   }, [job, jobId]);
 
   useEffect(() => {
@@ -262,6 +264,20 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
     }
   };
 
+  const structureData = resolveStructureFile(outputs);
+  const plddtAverage = resolvePlddtAverage(outputs);
+  const confidenceBuckets = resolveConfidenceBuckets(outputs);
+  const bucketMax = Math.max(...confidenceBuckets.map((bucket) => bucket.value), 1);
+  const paeGrid = downsamplePaeMatrix(outputs?.structural_data.confidence.pae_matrix);
+  const paeOriginalSize = outputs?.structural_data.confidence.pae_matrix?.length ?? 1;
+  const paeStep = Math.max(1, Math.ceil(paeOriginalSize / 24));
+  const biologicalData = outputs?.biological_data;
+  const secondaryStructure = biologicalData?.secondary_structure_prediction;
+  const sequenceProperties = biologicalData?.sequence_properties;
+  const proteinMetadata = outputs?.protein_metadata;
+  const safetyAlerts = countSafetyAlerts(outputs);
+  const confidenceTotal = confidenceBuckets.reduce((sum, bucket) => sum + bucket.value, 0);
+
   const handleAiDiscovery = async () => {
     if (isAiGenerating) return;
     setIsAiGenerating(true);
@@ -275,8 +291,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
         solubility_score: biologicalData?.solubility_score,
         stability: biologicalData?.stability_status,
         instability_index: biologicalData?.instability_index,
-        molecular_weight: sequenceProperties?.molecular_weight,
-        isoelectric_point: sequenceProperties?.isoelectric_point,
+        molecular_weight_kda: sequenceProperties?.molecular_weight_kda,
       };
 
       const response = await fetch(`${apiUrl}/api/ai-discovery`, {
@@ -328,15 +343,15 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
       `;
 
       const opt = {
-        margin:       [15, 15],
+        margin:       [15, 15] as [number, number],
         filename:     `Protein_Intelligence_Dossier_${jobId}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
+        image:        { type: 'jpeg' as const, quality: 0.98 },
         html2canvas:  { 
           scale: 3, 
           useCORS: true,
           letterRendering: true
         },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
       };
       
       await html2pdf().set(opt).from(element).save();
@@ -349,17 +364,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
     }
   };
 
-  const handleDownloadPdf = () => {
-    // Ya no se usa individualmente
-  };
 
-  const dashboardContentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (showTypewriter && dashboardContentRef.current) {
-      dashboardContentRef.current.scrollTop = dashboardContentRef.current.scrollHeight;
-    }
-  }, [typewriterText, showTypewriter]);
 
   const effectiveEntries = logEntries.length > 0 ? logEntries : buildSyntheticLogs(job);
   const currentSnapshot = {
@@ -370,19 +375,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
     logEntries,
     rawLogs,
   };
-  const structureData = resolveStructureFile(outputs);
-  const plddtAverage = resolvePlddtAverage(outputs);
-  const confidenceBuckets = resolveConfidenceBuckets(outputs);
-  const bucketMax = Math.max(...confidenceBuckets.map((bucket) => bucket.value), 1);
-  const paeGrid = downsamplePaeMatrix(outputs?.structural_data.confidence.pae_matrix);
-  const paeOriginalSize = outputs?.structural_data.confidence.pae_matrix?.length ?? 1;
-  const paeStep = Math.max(1, Math.ceil(paeOriginalSize / 24));
-  const biologicalData = outputs?.biological_data;
-  const secondaryStructure = biologicalData?.secondary_structure_prediction;
-  const sequenceProperties = biologicalData?.sequence_properties;
-  const proteinMetadata = outputs?.protein_metadata;
-  const safetyAlerts = countSafetyAlerts(outputs);
-  const confidenceTotal = confidenceBuckets.reduce((sum, bucket) => sum + bucket.value, 0);
   const safetyFindings = useMemo<SafetyFinding[]>(() => {
     const toxicityFindings =
       biologicalData?.toxicity_alerts?.map((alert, index) => ({
@@ -898,219 +890,12 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </div>
         ) : null}
 
-        {activeTab === "extras" ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <ScanSearch className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">Protein Catalog Context</p>
-                </div>
-                <div className="grid gap-3 text-sm">
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Category</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.category ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Function</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.function ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Cellular Location</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.cellular_location ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Activity</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <Dna className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">Annotations</p>
-                </div>
-                <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                  <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
-                    {(proteinDetail?.tags ?? []).length > 0 ? (
-                      proteinDetail?.tags?.map((tag) => (
-                        <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
-                          {tag}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {(proteinDetail?.known_structures ?? []).length > 0 ? (
-                      proteinDetail?.known_structures?.map((structure, index) => (
-                        <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
-                            <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
-                          </div>
-                          <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
-                            {structure.publication ?? t("jobLogs.details.publicationUnavail")}
-                            {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : null}
-
-        {activeTab === "compare" ? (
-          <JobCompareTab baseJobId={jobId} baseSnapshot={currentSnapshot} />
-        ) : null}
-
-        {activeTab === "logs" ? (
-          <div className="space-y-6">
-            <JobLogStreamPanel entries={effectiveEntries} isLive={isJobActive(job)} />
-            <JobLogDownloadAction jobId={jobId} rawLogs={rawLogs} entries={effectiveEntries} />
-          </div>
-        ) : null}
-
-        {activeTab === "extras" ? (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <ScanSearch className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">Protein Catalog Context</p>
-                </div>
-                <div className="grid gap-3 text-sm">
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Category</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.category ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Function</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.function ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Cellular Location</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.cellular_location ?? "N/A"}</p>
-                  </div>
-                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Activity</p>
-                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="surface-shadow border-border/50 bg-card/95">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-center gap-3">
-                  <Dna className="h-5 w-5 text-primary" />
-                  <p className="text-lg font-bold text-slate-950">Annotations</p>
-                </div>
-                <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
-                  <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
-                    {(proteinDetail?.tags ?? []).length > 0 ? (
-                      proteinDetail?.tags?.map((tag) => (
-                        <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
-                          {tag}
-                        </Badge>
-                      ))
-                    ) : (
-                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
-                    )}
-                  </div>
-                  <div className="space-y-3">
-                    {(proteinDetail?.known_structures ?? []).length > 0 ? (
-                      proteinDetail?.known_structures?.map((structure, index) => (
-                        <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
-                            <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
-                          </div>
-                          <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
-                            {structure.publication ?? t("jobLogs.details.publicationUnavail")}
-                            {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : null}
-
-        {activeTab !== "viewer" && activeTab !== "compare" && activeTab !== "logs" && activeTab !== "extras" ? (
-          <div className="grid gap-4 rounded-xl border border-border/60 bg-card/95 px-5 py-4 shadow-sm md:grid-cols-4">
-            <div className="flex items-center gap-3">
-              <Cpu className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.cpuTime")}</p>
-                <p className="text-sm font-bold text-slate-900">{formatCompactNumber(accounting?.accounting.cpu_hours, 3)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <BrainCircuit className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.gpuTime")}</p>
-                <p className="text-sm font-bold text-slate-900">{formatCompactNumber(accounting?.accounting.gpu_hours, 3)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Database className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.ramTime")}</p>
-                <p className="text-sm font-bold text-slate-900">{formatCompactNumber(accounting?.accounting.memory_gb_hours, 3)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{t("jobLogs.details.wallTime")}</p>
-                <p className="text-sm font-bold text-slate-900">{formatRuntime(accounting?.accounting.total_wall_time_seconds)}</p>
-              </div>
-            </div>
-          </div>
-        ) : null}
 
         <HomeFooter />
         <StatusBanners errorMessage={errorMessage} successMessage={null} />
 
-        {/* Hidden area for PDF generation */}
-        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
-          <div ref={pdfContentRef} style={{ padding: "40px", width: "800px", color: "#333", backgroundColor: "#fff", fontFamily: "sans-serif" }}>
-            <div style={{ borderBottom: "4px solid #059669", paddingBottom: "20px", marginBottom: "30px" }}>
-              <div style={{ fontSize: "10px", fontWeight: "bold", color: "#059669", letterSpacing: "2px", marginBottom: "5px" }}>IMPACTTHON 2026</div>
-              <h1 style={{ color: "#059669", margin: 0, fontSize: "32px", fontWeight: "800" }}>PROTEIN INTELLIGENCE DOSSIER</h1>
-              <p style={{ margin: "5px 0 0", color: "#666", fontSize: "14px" }}>Job Identification: <span style={{ fontWeight: "bold" }}>{jobId}</span></p>
-            </div>
-            
-            <div className="pdf-markdown-content" style={{ fontSize: "15px", lineHeight: "1.7" }}>
-              <ReactMarkdown>{aiReport || ""}</ReactMarkdown>
-            </div>
 
-            <div style={{ marginTop: "50px", paddingTop: "20px", borderTop: "1px solid #eee", fontSize: "12px", color: "#666" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Generated by CAMELIA Agent (Gemini 2.5 Pro)</span>
-                <span>Page 1 of 1</span>
-              </div>
-              <div style={{ marginTop: "10px", fontSize: "10px", color: "#999", textAlign: "center" }}>
-                CONFIDENTIAL • SCIENTIFIC RESEARCH USE ONLY
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
 
       <SafetyFindingsModal

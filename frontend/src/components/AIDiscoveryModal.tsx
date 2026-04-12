@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import html2pdf from 'html2pdf.js';
 import { X, Download, Beaker } from 'lucide-react';
@@ -20,9 +20,9 @@ export default function AIDiscoveryModal({ isOpen, onClose, markdownContent, isL
     const opt = {
       margin:       15,
       filename:     'Protein_Intelligence_Dossier.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
+      image:        { type: 'jpeg' as const, quality: 0.98 },
       html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     };
     html2pdf().set(opt).from(contentRef.current).save();
   };

@@ -69,6 +69,7 @@
         "actions": {
             "viewResults": "Ver Resultados",
             "inProgress": "En Progreso",
+            "viewLogs": "Ver Registros",
             "details": "Detalles"
         },
         "progressAria": "Progreso del job {{name}}"

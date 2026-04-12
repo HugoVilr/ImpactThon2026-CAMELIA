@@ -311,13 +311,15 @@ export function JobsSection({
                           </div>
                         </div>
                         <Button
+                          asChild
                           type="button"
                           size="sm"
                           variant="outline"
                           className="h-8 w-[var(--jobs-action-button-width)] shrink-0 text-[11px]"
-                          disabled
                         >
-                          {t("jobs.actions.inProgress")}
+                          <Link to={`/jobs/${encodeURIComponent(job.job_id)}/logs`}>
+                            {t("jobs.actions.viewLogs")}
+                          </Link>
                         </Button>
                       </div>
                     ) : job.status === "COMPLETED" ? (
