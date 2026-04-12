@@ -31,10 +31,10 @@ export const resolveConfidenceBuckets = (outputs: JobOutputsPayload | null): Con
   const histogram = outputs?.structural_data.confidence.plddt_histogram ?? {};
 
   return [
-    { key: "low", label: "Very Low", value: histogram.low ?? 0, toneClass: "bg-orange-500" },
-    { key: "medium", label: "Low", value: histogram.medium ?? 0, toneClass: "bg-amber-400" },
-    { key: "high", label: "Confident", value: histogram.high ?? 0, toneClass: "bg-sky-400" },
-    { key: "very_high", label: "Very High", value: histogram.very_high ?? 0, toneClass: "bg-blue-700" },
+    { key: "low", label: "Very Low", value: histogram.low ?? 0, toneClass: "bg-conf-1" },
+    { key: "medium", label: "Low", value: histogram.medium ?? 0, toneClass: "bg-conf-2" },
+    { key: "high", label: "Confident", value: histogram.high ?? 0, toneClass: "bg-conf-3" },
+    { key: "very_high", label: "Very High", value: histogram.very_high ?? 0, toneClass: "bg-conf-4" },
   ];
 };
 
@@ -83,18 +83,18 @@ export const downsamplePaeMatrix = (matrix: number[][] | undefined, targetSize =
 
 export const resolvePaeCellColor = (value: number): string => {
   if (value <= 2) {
-    return "#0f766e";
+    return "var(--pae-1)";
   }
 
   if (value <= 5) {
-    return "#16a34a";
+    return "var(--pae-2)";
   }
 
   if (value <= 10) {
-    return "#eab308";
+    return "var(--pae-3)";
   }
 
-  return "#ea580c";
+  return "var(--pae-4)";
 };
 
 export const formatCompactNumber = (value: number | null | undefined, digits = 1): string => {
