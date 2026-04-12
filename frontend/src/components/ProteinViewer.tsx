@@ -8,7 +8,7 @@ import {
 import "pdbe-molstar/build/pdbe-molstar-light.css";
 
 interface ProteinViewerProps {
-  /** The raw structure file contents as a string */
+  /** The raw structure file contents as a string aaaaa */
   structureData: string | null;
   onReadyChange?: (isReady: boolean) => void;
 }
