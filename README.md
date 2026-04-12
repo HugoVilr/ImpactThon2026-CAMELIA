@@ -180,3 +180,78 @@ Desde `backend/` con Pipenv:
 - `pipenv run start`
 - `pipenv run test`
 - `pipenv run lint`
+
+## Deploy frontend en Google Cloud Run (contenedor Docker)
+
+Prerequisitos:
+
+- `gcloud` instalado y autenticado (`gcloud auth login`)
+- Proyecto de GCP con billing activo
+- Docker funcionando en local
+
+Desde la raíz del repo:
+
+```bash
+PROJECT_ID="tu-project-id"
+REGION="europe-southwest1"
+SERVICE="camelia-frontend"
+REPO="camelia-containers"
+VITE_API_URL="https://api-mock-cesga.onrender.com"
+IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/frontend:$(date +%Y%m%d-%H%M%S)"
+```
+
+```bash
+gcloud config set project "$PROJECT_ID"
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+gcloud artifacts repositories create "$REPO" --repository-format=docker --location="$REGION" || true
+gcloud auth configure-docker "$REGION-docker.pkg.dev"
+```
+
+```bash
+docker build --platform linux/amd64 \
+  -f frontend/Dockerfile \
+  --build-arg VITE_API_URL="$VITE_API_URL" \
+  -t "$IMAGE" \
+  frontend
+
+docker push "$IMAGE"
+```
+
+```bash
+gcloud run deploy "$SERVICE" \
+  --image "$IMAGE" \
+  --platform managed \
+  --region "$REGION" \
+  --allow-unauthenticated \
+  --port 80
+```
+
+Obtener la URL publicada:
+
+```bash
+gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)'
+```
+
+Nota: `VITE_API_URL` se inyecta en build (Vite). Si cambia la API, hay que reconstruir y redeployar la imagen.
+
+## CI/CD con GitHub Actions (develop)
+
+Workflow: `.github/workflows/ci.yml`
+
+- `pull_request` a `develop`: ejecuta tests de frontend y backend.
+- `push` a `develop`: ejecuta tests y, si pasan, despliega frontend a Cloud Run.
+
+### Secrets requeridos en GitHub
+
+Configúralos en `Settings > Secrets and variables > Actions`:
+
+- `GCP_PROJECT_ID` (ej: `impactthon2026`)
+- `GCP_REGION` (ej: `europe-southwest1`)
+- `GCP_FRONTEND_SERVICE` (ej: `camelia-frontend`)
+- `GCP_ARTIFACT_REPOSITORY` (ej: `camelia-containers`)
+- `GCP_SA_KEY` (JSON de Service Account con permisos para Artifact Registry y Cloud Run)
+
+### Variables opcionales en GitHub
+
+- `FRONTEND_VITE_API_URL`: si la defines, se usa como `VITE_API_URL` durante el build.
+  Si no existe, el `Dockerfile` usa su valor por defecto.
