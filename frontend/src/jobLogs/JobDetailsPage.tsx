@@ -446,8 +446,10 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                   className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]"
                   onClick={handleAiDiscovery}
                   disabled={isAiGenerating}
-                  style={isAiGenerating ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                 >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {isAiGenerating ? "Generating..." : "AI Discovery"}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -456,10 +458,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                 >
                   <Download className="h-3.5 w-3.5" />
                   {t("jobLogs.details.export")}
-                </Button>
-                <Button type="button" className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {isAiGenerating ? "Generating..." : "AI Discovery"}
                 </Button>
               </div>
             ) : null}
@@ -925,65 +923,50 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Activity</p>
                     <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
 
+            <Card className="surface-shadow border-border/50 bg-card/95">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-center gap-3">
+                  <Dna className="h-5 w-5 text-primary" />
+                  <p className="text-lg font-bold text-slate-950">Annotations</p>
+                </div>
+                <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                  <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
+                    {(proteinDetail?.tags ?? []).length > 0 ? (
+                      proteinDetail?.tags?.map((tag) => (
+                        <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
+                    )}
+                  </div>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Dna className="h-4 w-4 text-primary" />
-                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.annotations")}</p>
-                    </div>
-                    <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3 h-[calc(100%-28px)]">
-                      <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
-                        {(proteinDetail?.tags ?? []).length > 0 ? (
-                          proteinDetail?.tags?.map((tag) => (
-                            <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
-                              {tag}
-                            </Badge>
-                          ))
-                        ) : (
-                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
-                        )}
-                      </div>
-                      <div className="space-y-3">
-                        {(proteinDetail?.known_structures ?? []).length > 0 ? (
-                          proteinDetail?.known_structures?.map((structure, index) => (
-                            <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
-                                <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
-                              </div>
-                              <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
-                                {structure.publication ?? t("jobLogs.details.publicationUnavail")}
-                                {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
-                              </p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
-                        )}
-                      </div>
-                    </div>
+                    {(proteinDetail?.known_structures ?? []).length > 0 ? (
+                      proteinDetail?.known_structures?.map((structure, index) => (
+                        <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
+                            <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
+                            {structure.publication ?? t("jobLogs.details.publicationUnavail")}
+                            {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
+                    )}
                   </div>
                 </div>
-              </div>
-            </details>
-
-            <div className="grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]">
-              <div className="flex flex-wrap items-center gap-4 text-[12px] text-slate-700">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-4 w-4 text-slate-500" />
-                  <span>CPU: <strong className="font-extrabold text-slate-950">{formatCompactNumber(accounting?.accounting.cpu_hours, 3)} hrs</strong></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BrainCircuit className="h-4 w-4 text-slate-500" />
-                  <span>GPU: <strong className="font-extrabold text-slate-950">{job?.gpus ? `${job.gpus} GPU` : t("jobLogs.details.cpuOnly")}</strong></span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Database className="h-4 w-4 text-slate-500" />
-                  <span>RAM: <strong className="font-extrabold text-slate-950">{job ? `${formatCompactNumber(job.memory_gb, 1)} GB` : "N/A"}</strong></span>
-                </div>
-              </div>
-            </div>
-          </>
+              </CardContent>
+            </Card>
+          </div>
         ) : null}
 
         {activeTab === "compare" ? (
@@ -997,9 +980,78 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </div>
         ) : null}
 
+        {activeTab === "extras" ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="surface-shadow border-border/50 bg-card/95">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-center gap-3">
+                  <ScanSearch className="h-5 w-5 text-primary" />
+                  <p className="text-lg font-bold text-slate-950">Protein Catalog Context</p>
+                </div>
+                <div className="grid gap-3 text-sm">
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Category</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.category ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Function</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.function ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Cellular Location</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.cellular_location ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Activity</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
+            <Card className="surface-shadow border-border/50 bg-card/95">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-center gap-3">
+                  <Dna className="h-5 w-5 text-primary" />
+                  <p className="text-lg font-bold text-slate-950">Annotations</p>
+                </div>
+                <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3">
+                  <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
+                    {(proteinDetail?.tags ?? []).length > 0 ? (
+                      proteinDetail?.tags?.map((tag) => (
+                        <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
+                          {tag}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {(proteinDetail?.known_structures ?? []).length > 0 ? (
+                      proteinDetail?.known_structures?.map((structure, index) => (
+                        <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
+                            <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
+                          </div>
+                          <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
+                            {structure.publication ?? t("jobLogs.details.publicationUnavail")}
+                            {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : null}
 
-        {activeTab !== "viewer" && activeTab !== "compare" ? (
+        {activeTab !== "viewer" && activeTab !== "compare" && activeTab !== "logs" && activeTab !== "extras" ? (
           <div className="grid gap-4 rounded-xl border border-border/60 bg-card/95 px-5 py-4 shadow-sm md:grid-cols-4">
             <div className="flex items-center gap-3">
               <Cpu className="h-4 w-4 text-muted-foreground" />
