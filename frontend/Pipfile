@@ -4,10 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-google-cloud-aiplatform = "*"
-google-genai = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.14"
+python_version = "3.13"

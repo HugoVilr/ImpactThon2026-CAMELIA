@@ -8,6 +8,8 @@ fastapi = "*"
 python-dotenv = "*"
 psycopg = {extras = ["binary"], version = "*"}
 uvicorn = "*"
+google-cloud-aiplatform = "*"
+google-generativeai = "*"
 
 [dev-packages]
 pytest = "*"

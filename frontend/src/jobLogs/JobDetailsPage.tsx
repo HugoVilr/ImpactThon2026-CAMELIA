@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import html2pdf from "html2pdf.js";
 import {
   AlertTriangle,
   BrainCircuit,
@@ -6,9 +8,12 @@ import {
   Database,
   Download,
   Dna,
+  Expand,
+  FileDown,
   Info,
   ScanSearch,
   Sparkles,
+  X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAnimePressables, useAnimeReveal } from "../commons/animations";
@@ -62,6 +67,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const { t, i18n } = useTranslation();
   const pageRef = useRef<HTMLElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
+  const pdfContentRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<JobDetailsTab>(initialTab);
   const [job, setJob] = useState<JobStatusPayload | null>(null);
   const [outputs, setOutputs] = useState<JobOutputsPayload | null>(null);
@@ -74,6 +80,11 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
   const [xrSupport, setXrSupport] = useState<XrSupport>({ ar: false, vr: false });
   const [xrError, setXrError] = useState<string | null>(null);
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiReport, setAiReport] = useState<string | null>(null);
+  const [typewriterText, setTypewriterText] = useState("");
+  const [showTypewriter, setShowTypewriter] = useState(false);
+  const [showPdfDownload, setShowPdfDownload] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const activeLanguage = resolveLanguage(i18n.resolvedLanguage ?? i18n.language);
@@ -251,6 +262,105 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
     }
   };
 
+  const handleAiDiscovery = async () => {
+    if (isAiGenerating) return;
+    setIsAiGenerating(true);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+      
+      const proteinData = {
+        jobId,
+        plddt_avg: plddtAverage,
+        solubility_score: biologicalData?.solubility_score,
+        stability: biologicalData?.stability_status,
+        instability_index: biologicalData?.instability_index,
+        molecular_weight: sequenceProperties?.molecular_weight,
+        isoelectric_point: sequenceProperties?.isoelectric_point,
+      };
+
+      const response = await fetch(`${apiUrl}/api/ai-discovery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ protein_data: proteinData }),
+      });
+
+      if (!response.ok) throw new Error("Failed to generate AI report");
+      
+      const { report } = await response.json();
+      
+      // Crear un elemento temporal con estilos específicos para PDF
+      const element = document.createElement("div");
+      element.style.padding = "40px";
+      element.style.fontFamily = "'Helvetica', 'Arial', sans-serif";
+      element.style.color = "#1e293b";
+      element.style.backgroundColor = "white";
+      element.style.lineHeight = "1.5";
+      
+      // Función para convertir markdown básico a HTML
+      const mdToHtml = (md: string) => {
+        return md
+          .replace(/^# (.*$)/gim, '<h1 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-top: 0; font-size: 24px;">$1</h1>')
+          .replace(/^### (.*$)/gim, '<h3 style="color: #334155; margin-top: 24px; margin-bottom: 12px; font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px;">$1</h3>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #0f172a; font-weight: 800;">$1</strong>')
+          .replace(/^\* (.*$)/gim, '<li style="margin-bottom: 4px;">$1</li>')
+          .replace(/---/g, '<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>')
+          .replace(/\| (.*) \|/g, (match) => {
+             if (match.includes('---')) return '';
+             return `<div style="display: flex; border-bottom: 1px solid #f1f5f9; padding: 8px 0;">${match.split('|').filter(s => s.trim()).map(s => `<span style="flex: 1; font-size: 12px;">${s.trim()}</span>`).join('')}</div>`;
+          })
+          .replace(/\n/g, '<br/>');
+      };
+
+      element.innerHTML = `
+        <div style="max-width: 800px; margin: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <span style="font-size: 10px; font-weight: bold; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px;">CAMELIA Intelligence System</span>
+            <span style="font-size: 10px; color: #94a3b8;">${new Date().toLocaleDateString()}</span>
+          </div>
+          ${mdToHtml(report)}
+          <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+            <p style="font-size: 10px; color: #94a3b8; font-style: italic;">
+              © 2026 CAMELIA Project • Molecular Analysis Report • AI Generated
+            </p>
+          </div>
+        </div>
+      `;
+
+      const opt = {
+        margin:       [15, 15],
+        filename:     `Protein_Intelligence_Dossier_${jobId}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+          scale: 3, 
+          useCORS: true,
+          letterRendering: true
+        },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      await html2pdf().set(opt).from(element).save();
+      setIsAiGenerating(false);
+
+    } catch (error) {
+      console.error("AI Discovery Error:", error);
+      alert("Error generating the AI Dossier. Please try again.");
+      setIsAiGenerating(false);
+    }
+  };
+
+  const handleDownloadPdf = () => {
+    // Ya no se usa individualmente
+  };
+
+  const dashboardContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showTypewriter && dashboardContentRef.current) {
+      dashboardContentRef.current.scrollTop = dashboardContentRef.current.scrollHeight;
+    }
+  }, [typewriterText, showTypewriter]);
+
   const effectiveEntries = logEntries.length > 0 ? logEntries : buildSyntheticLogs(job);
   const currentSnapshot = {
     job,
@@ -331,6 +441,13 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
             {activeTab === "viewer" ? (
               <div className="flex flex-wrap items-center gap-3">
+                <Button 
+                  type="button" 
+                  className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]"
+                  onClick={handleAiDiscovery}
+                  disabled={isAiGenerating}
+                  style={isAiGenerating ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                >
                 <Button
                   type="button"
                   variant="outline"
@@ -342,7 +459,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                 </Button>
                 <Button type="button" className="h-8 gap-2 px-3.5 text-[10px] uppercase tracking-[0.14em]">
                   <Sparkles className="h-3.5 w-3.5" />
-                  {t("jobLogs.details.aiDiscovery")}
+                  {isAiGenerating ? "Generating..." : "AI Discovery"}
                 </Button>
               </div>
             ) : null}
@@ -783,6 +900,103 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
           </div>
         ) : null}
 
+        {activeTab === "extras" ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <Card className="surface-shadow border-border/50 bg-card/95">
+              <CardContent className="space-y-4 p-5">
+                <div className="flex items-center gap-3">
+                  <ScanSearch className="h-5 w-5 text-primary" />
+                  <p className="text-lg font-bold text-slate-950">Protein Catalog Context</p>
+                </div>
+                <div className="grid gap-3 text-sm">
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Category</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.category ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Function</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.function ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Cellular Location</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.cellular_location ?? "N/A"}</p>
+                  </div>
+                  <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Activity</p>
+                    <p className="mt-1 font-semibold text-slate-900">{proteinDetail?.activity ?? "N/A"}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Dna className="h-4 w-4 text-primary" />
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.annotations")}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3 h-[calc(100%-28px)]">
+                      <div className="flex flex-wrap gap-2 mb-3 border-b border-border/60 pb-3">
+                        {(proteinDetail?.tags ?? []).length > 0 ? (
+                          proteinDetail?.tags?.map((tag) => (
+                            <Badge key={tag} variant="muted" className="text-[9px] px-2 py-0.5 uppercase tracking-wider">
+                              {tag}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noTags")}</p>
+                        )}
+                      </div>
+                      <div className="space-y-3">
+                        {(proteinDetail?.known_structures ?? []).length > 0 ? (
+                          proteinDetail?.known_structures?.map((structure, index) => (
+                            <div key={`${structure.pdb_id ?? "structure"}-${index}`} className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[0.85rem] font-bold text-slate-900">{structure.pdb_id ?? t("jobLogs.details.unknownStruct")}</p>
+                                <Badge variant="secondary" className="px-1.5 py-0 text-[8px] uppercase tracking-wider">{structure.method ?? t("jobLogs.details.unknownMethod")}</Badge>
+                              </div>
+                              <p className="text-[11px] font-medium text-slate-500 truncate" title={structure.publication}>
+                                {structure.publication ?? t("jobLogs.details.publicationUnavail")}
+                                {typeof structure.resolution === "number" ? ` · ${formatCompactNumber(structure.resolution, 1)} Å` : ""}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[0.85rem] font-medium text-slate-500">{t("jobLogs.details.noStructs")}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <div className="grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]">
+              <div className="flex flex-wrap items-center gap-4 text-[12px] text-slate-700">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-slate-500" />
+                  <span>CPU: <strong className="font-extrabold text-slate-950">{formatCompactNumber(accounting?.accounting.cpu_hours, 3)} hrs</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BrainCircuit className="h-4 w-4 text-slate-500" />
+                  <span>GPU: <strong className="font-extrabold text-slate-950">{job?.gpus ? `${job.gpus} GPU` : t("jobLogs.details.cpuOnly")}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-slate-500" />
+                  <span>RAM: <strong className="font-extrabold text-slate-950">{job ? `${formatCompactNumber(job.memory_gb, 1)} GB` : "N/A"}</strong></span>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
+
+        {activeTab === "compare" ? (
+          <JobCompareTab baseJobId={jobId} baseSnapshot={currentSnapshot} />
+        ) : null}
+
+        {activeTab === "logs" ? (
+          <div className="space-y-6">
+            <JobLogStreamPanel entries={effectiveEntries} isLive={isJobActive(job)} />
+            <JobLogDownloadAction jobId={jobId} rawLogs={rawLogs} entries={effectiveEntries} />
+          </div>
+        ) : null}
+
 
 
         {activeTab !== "viewer" && activeTab !== "compare" ? (
@@ -820,6 +1034,31 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
         <HomeFooter />
         <StatusBanners errorMessage={errorMessage} successMessage={null} />
+
+        {/* Hidden area for PDF generation */}
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+          <div ref={pdfContentRef} style={{ padding: "40px", width: "800px", color: "#333", backgroundColor: "#fff", fontFamily: "sans-serif" }}>
+            <div style={{ borderBottom: "4px solid #059669", paddingBottom: "20px", marginBottom: "30px" }}>
+              <div style={{ fontSize: "10px", fontWeight: "bold", color: "#059669", letterSpacing: "2px", marginBottom: "5px" }}>IMPACTTHON 2026</div>
+              <h1 style={{ color: "#059669", margin: 0, fontSize: "32px", fontWeight: "800" }}>PROTEIN INTELLIGENCE DOSSIER</h1>
+              <p style={{ margin: "5px 0 0", color: "#666", fontSize: "14px" }}>Job Identification: <span style={{ fontWeight: "bold" }}>{jobId}</span></p>
+            </div>
+            
+            <div className="pdf-markdown-content" style={{ fontSize: "15px", lineHeight: "1.7" }}>
+              <ReactMarkdown>{aiReport || ""}</ReactMarkdown>
+            </div>
+
+            <div style={{ marginTop: "50px", paddingTop: "20px", borderTop: "1px solid #eee", fontSize: "12px", color: "#666" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Generated by CAMELIA Agent (Gemini 2.5 Pro)</span>
+                <span>Page 1 of 1</span>
+              </div>
+              <div style={{ marginTop: "10px", fontSize: "10px", color: "#999", textAlign: "center" }}>
+                CONFIDENTIAL • SCIENTIFIC RESEARCH USE ONLY
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
 
       <SafetyFindingsModal

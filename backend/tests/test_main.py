@@ -5,8 +5,8 @@ import pytest
 from fastapi import HTTPException
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from app import main
-from app.main import EntryCreate, health, post_entry, root
+from backend import main
+from backend.main import EntryCreate, health, post_entry, root
 
 
 def test_health() -> None:
