@@ -145,6 +145,7 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
   const pluginInstanceRef = useRef<PDBeMolstarPluginInstance | null>(null);
   const xrLoopRestoreRef = useRef<(() => void) | null>(null);
   const phantomBlobUrlRef = useRef<string | null>(null);
+  const isPhantomLoadedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -298,6 +299,7 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
       }
 
       revokePhantomBlobUrl();
+      isPhantomLoadedRef.current = false;
 
       if (blobUrl) {
         URL.revokeObjectURL(blobUrl);
@@ -401,13 +403,18 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
     const removePhantom = async () => {
       const currentInstance = pluginInstanceRef.current;
 
+      revokePhantomBlobUrl();
+
+      if (!currentInstance || !isPhantomLoadedRef.current) {
+        return;
+      }
+
       try {
-        await currentInstance?.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+        await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+        isPhantomLoadedRef.current = false;
       } catch {
         // Ignore phantom cleanup issues during overlay changes.
       }
-
-      revokePhantomBlobUrl();
     };
 
     const syncPhantom = async () => {
@@ -435,10 +442,17 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
         }, false);
 
         if (cancelled) {
-          await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+          try {
+            await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+          } catch {
+            // Silently ignore if deletion fails during cancellation.
+          }
+          isPhantomLoadedRef.current = false;
           revokePhantomBlobUrl(phantomBlobUrl);
           return;
         }
+
+        isPhantomLoadedRef.current = true;
 
         await currentInstance.visual?.select?.({
           structureId: PHANTOM_STRUCTURE_ID,
@@ -446,7 +460,12 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
         });
       } catch (phantomError) {
         console.error("Error loading phantom overlay:", phantomError);
-        await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+        try {
+          await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+        } catch {
+          // Silently ignore if deletion fails after a failed load.
+        }
+        isPhantomLoadedRef.current = false;
         revokePhantomBlobUrl(phantomBlobUrl);
       }
     };
