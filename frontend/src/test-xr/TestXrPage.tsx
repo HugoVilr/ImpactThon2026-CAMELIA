@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useAnimePressables, useAnimeReveal } from "../commons/animations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button } from "../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../components/ProteinViewer";
 import { getPresetById } from "../config/presets";
@@ -48,6 +49,7 @@ const parseHttpError = async (response: Response): Promise<string> => {
 };
 
 export function TestXrPage() {
+  const pageRef = useRef<HTMLElement | null>(null);
   const viewerRef = useRef<ProteinViewerHandle>(null);
   const [structureData, setStructureData] = useState<string | null>(null);
   const [viewerReady, setViewerReady] = useState(false);
@@ -212,8 +214,18 @@ export function TestXrPage() {
     }
   };
 
+  useAnimeReveal(pageRef, {
+    selector: ":scope > *",
+    delayStep: 80,
+    duration: 540,
+  });
+
+  useAnimePressables(pageRef, {
+    selector: "button, .anime-pressable, [data-anime='pressable']",
+  });
+
   return (
-    <main className="page-enter mx-auto flex min-h-screen w-full max-w-[1320px] items-center px-4 py-12 md:px-6">
+    <main ref={pageRef} className="mx-auto flex min-h-screen w-full max-w-[1320px] items-center px-4 py-12 md:px-6">
       <Card className="surface-shadow-strong mx-auto w-full max-w-5xl overflow-hidden">
         <CardHeader className="space-y-3 border-b border-border bg-card/90">
           <CardTitle className="font-display text-3xl">Mol* XR Test</CardTitle>

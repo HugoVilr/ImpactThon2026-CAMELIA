@@ -11,13 +11,13 @@ export function HomeFooter() {
       </div>
 
       <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-700">
-        <a href="#" className="transition hover:text-primary">
+        <a href="#" className="anime-pressable transition hover:text-primary">
           {t("footer.privacy")}
         </a>
-        <a href="#" className="transition hover:text-primary">
+        <a href="#" className="anime-pressable transition hover:text-primary">
           {t("footer.terms")}
         </a>
-        <a href="#" className="transition hover:text-primary">
+        <a href="#" className="anime-pressable transition hover:text-primary">
           {t("footer.systemStatus")}
         </a>
       </div>

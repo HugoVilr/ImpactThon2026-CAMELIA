@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SafetyFindingsModal, type SafetyFinding } from "../../commons/components";
+import { useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Badge, Button, Card, CardContent } from "../../commons/components/ui";
 import { ProteinViewer, type ProteinViewerHandle } from "../../components/ProteinViewer";
 import { displayJobName, statusTranslationKey } from "../../home/homeUtils";
@@ -119,6 +120,7 @@ export function ProteinOverviewPanel({
   hoveredPae,
   onPaeHover,
 }: ProteinOverviewPanelProps) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const { t } = useTranslation();
   const viewerRef = useRef<ProteinViewerHandle>(null);
   const [viewerReady, setViewerReady] = useState(false);
@@ -200,6 +202,21 @@ export function ProteinOverviewPanel({
     proteinMetadata?.protein_name?.trim() ||
     proteinMetadata?.identified_protein?.trim() ||
     (job ? displayJobName(job) : jobId);
+  const animationKey = `${jobId}|${compact ? "compact" : "full"}|${panelLabel ?? "panel"}`;
+
+  useAnimeReveal(panelRef, {
+    selector: "[data-anime='overview-reveal']",
+    dependencyKey: animationKey,
+    delayStep: 65,
+    duration: 500,
+    translateY: 12,
+    startScale: 0.996,
+  });
+
+  useAnimePressables(panelRef, {
+    selector: "button, a, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: animationKey,
+  });
   const phantomActionLabel = phantomEnabled
     ? t("jobLogs.compare.hidePhantom")
     : t("jobLogs.compare.showPhantom");
@@ -479,9 +496,12 @@ export function ProteinOverviewPanel({
 
   return (
     <>
-      <div className="space-y-4">
+      <div ref={panelRef} className="space-y-4">
         <div {...getCompactWrapperProps("header")}>
-          <div className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-white/85 px-4 py-4 shadow-[0_14px_34px_rgba(15,23,34,0.06)]">
+          <div
+          data-anime="overview-reveal"
+          className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-white/85 px-4 py-4 shadow-[0_14px_34px_rgba(15,23,34,0.06)]"
+        >
             <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0">
                 {panelLabel ? (
@@ -514,10 +534,13 @@ export function ProteinOverviewPanel({
           </div>
         </div>
 
-        <div className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}>
+        <div
+          data-anime="overview-reveal"
+          className={cn("grid gap-4", compact ? "grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_320px]")}
+        >
           <div {...getCompactWrapperProps("viewer")}>
-            <section className="flex min-w-0 flex-col space-y-4">
-              <Card className="surface-shadow-strong overflow-hidden rounded-2xl border-border/40 bg-white/95">
+            <section data-anime="overview-reveal" className="flex min-w-0 flex-col space-y-4">
+              <Card data-anime="overview-reveal" className="surface-shadow-strong overflow-hidden rounded-2xl border-border/40 bg-white/95">
                 <CardContent className="p-0">
                   <div
                     className={cn(
@@ -597,7 +620,7 @@ export function ProteinOverviewPanel({
               </Card>
 
               {xrError ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <div data-anime="overview-reveal" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                   {xrError}
                 </div>
               ) : null}
@@ -605,8 +628,8 @@ export function ProteinOverviewPanel({
           </div>
 
           <div {...getCompactWrapperProps("quality")}>
-            <aside className="min-w-0">
-              <Card className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
+            <aside data-anime="overview-reveal" className="min-w-0">
+              <Card data-anime="overview-reveal" className="surface-shadow h-full rounded-2xl border-border/40 bg-white/95">
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-start justify-between">
                     <div>
@@ -724,7 +747,6 @@ export function ProteinOverviewPanel({
               {biologicalInsightsCard}
               {secondaryStructureCard}
             </div>
-
             <div className="min-w-0 self-start space-y-4">
               {molecularMetadataCard}
               {proteinCatalogContextCard}
@@ -734,11 +756,8 @@ export function ProteinOverviewPanel({
         )}
 
         <div
-          {...getCompactWrapperProps("resources")}
-          className={cn(
-            "grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]",
-            compact ? "grid-cols-1" : "md:grid-cols-4"
-          )}
+          data-anime="overview-reveal"
+          className={cn("grid gap-4 rounded-2xl border border-border/40 bg-white/95 px-4 py-3 shadow-[0_14px_34px_rgba(15,23,34,0.08)]", compact ? "grid-cols-1" : "md:grid-cols-4")}
         >
           <div className="flex items-center gap-3">
             <Cpu className="h-4 w-4 text-muted-foreground" />

@@ -47,6 +47,60 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* 1. Deuteranopatía & Protanopatía (Red-Green blindness) */
+  html.mode-deuteranopia, html.mode-protanopia {
+    /* Tailwind Blue 600 & Orange 500 */
+    --primary: 221 83% 53%;
+    --ring: 221 83% 53%;
+    --destructive: 24 98% 50%;
+  }
+  html.mode-deuteranopia canvas {
+    filter: url('#daltonize-deuteranopia');
+  }
+  html.mode-protanopia canvas {
+    filter: url('#daltonize-protanopia');
+  }
+
+  /* 2. Tritanopatía (Blue-Yellow blindness) */
+  html.mode-tritanopia {
+    /* Tailwind Rose 600 & Cyan 600 */
+    --primary: 343 79% 46%;
+    --ring: 343 79% 46%;
+    --destructive: 189 94% 43%;
+  }
+  html.mode-tritanopia canvas {
+    filter: url('#daltonize-tritanopia');
+  }
+
+  /* 3. Acromatopsia (Monocromía) */
+  html.mode-achromatopsia {
+    /* Tailwind Slate 700 & Slate 900 */
+    --primary: 215 16% 47%;
+    --ring: 215 16% 47%;
+    --destructive: 222 47% 11%;
+    filter: grayscale(100%);
+  }
+  html.mode-achromatopsia canvas {
+    /* To maintain consistency across the entire UI including the canvas */
+    filter: grayscale(100%) contrast(1.5);
+  }
+
+  /* 4. Pérdida de Contraste (Contrast Loss) */
+  html.mode-contrast_loss {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 0%;
+    /* Extremadamente fuerte para compensar la pérdida visual */
+    filter: contrast(2.5) saturate(1.2);
+  }
+
   a {
     @apply text-inherit no-underline;
   }
@@ -78,41 +132,14 @@
       0 28px 56px rgb(15 23 34 / 16%);
   }
 
-  .page-enter {
-    animation: page-enter 280ms ease-out both;
-  }
-
-  .modal-enter {
-    animation: modal-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  .anime-pressable {
+    touch-action: manipulation;
   }
 
   .job-progress-indeterminate {
     animation: job-progress-indeterminate 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
-}
 
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 @keyframes job-progress-indeterminate {
@@ -122,5 +149,12 @@
 
   to {
     transform: translateX(240%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anime-pressable {
+    transform: none !important;
+    animation: none !important;
   }
 }

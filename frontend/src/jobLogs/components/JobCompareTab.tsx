@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Plus, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useAnimePressables, useAnimeReveal } from "../../commons/animations";
 import { Button, Card, CardContent } from "../../commons/components/ui";
 import { displayJobName, localeForLanguage, resolveLanguage, resourceKeyForJob, statusTranslationKey } from "../../home/homeUtils";
 import { resolveProteinNameFromOutputs } from "../jobNameResolver";
@@ -46,6 +47,7 @@ const resolveJobLabel = (job: Job, resolvedNames: Record<string, string>): strin
 
 export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const { t, i18n } = useTranslation();
+  const sectionRef = useRef<HTMLDivElement | null>(null);
   const locale = localeForLanguage(resolveLanguage(i18n.resolvedLanguage ?? i18n.language));
   const [jobs, setJobs] = useState<Job[]>([]);
   const [resolvedJobNames, setResolvedJobNames] = useState<Record<string, string>>({});
@@ -61,6 +63,10 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const comparableJobs = useMemo(
     () => jobs.filter((job) => job.job_id !== baseJobId),
     [baseJobId, jobs]
+  );
+  const comparableJobsKey = useMemo(
+    () => comparableJobs.map((job) => job.job_id).join("|"),
+    [comparableJobs]
   );
   const selectedJob = comparableJobs.find((job) => job.job_id === selectedJobId) ?? null;
   const selectedSnapshot = useJobDetailSnapshot(selectedJobId, selectedJob);
@@ -98,6 +104,20 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
         },
       ])
     ) as Partial<Record<CompactModuleKey, (node: HTMLDivElement | null) => void>>;
+
+  useAnimeReveal(sectionRef, {
+    selector: "[data-anime='compare-reveal']",
+    dependencyKey: `${selectedJobId ?? "none"}|${comparableJobsKey}`,
+    delayStep: 70,
+    duration: 520,
+    translateY: 12,
+    startScale: 0.996,
+  });
+
+  useAnimePressables(sectionRef, {
+    selector: "button, a, .anime-pressable, [data-anime='pressable']",
+    dependencyKey: `${selectedJobId ?? "none"}|${comparableJobsKey}`,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -243,9 +263,9 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   ]);
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]">
-        <div className="min-w-0">
+    <div ref={sectionRef} className="space-y-4">
+      <div data-anime="compare-reveal" className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)]">
+        <div data-anime="compare-reveal" className="min-w-0">
           <ProteinOverviewPanel
             jobId={baseJobId}
             job={baseSnapshot.job}
@@ -266,17 +286,17 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
 
         <div className="hidden xl:block xl:bg-border/60" />
 
-        <div className="min-w-0">
+        <div data-anime="compare-reveal" className="min-w-0">
           {selectedJobId && selectedJob ? (
             <div className="space-y-4">
               {selectedSnapshot.errorMessage ? (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <div data-anime="compare-reveal" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                   {t(selectedSnapshot.errorMessage.key, selectedSnapshot.errorMessage.params)}
                 </div>
               ) : null}
 
               {selectedSnapshot.isLoading && !selectedSnapshot.job ? (
-                <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <div data-anime="compare-reveal" className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   {t("jobLogs.compare.loadingSelection")}
                 </div>
@@ -306,7 +326,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
               />
             </div>
           ) : (
-            <Card className="surface-shadow rounded-2xl border-border/40 bg-white/95">
+            <Card data-anime="compare-reveal" className="surface-shadow rounded-2xl border-border/40 bg-white/95">
               <CardContent className="space-y-4 p-4">
                 <div className="space-y-2">
                   <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
@@ -338,6 +358,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                   {comparableJobs.map((job) => (
                     <div
                       key={job.job_id}
+                      data-anime="compare-reveal"
                       className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-slate-50/80 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
                     >
                       <div className="min-w-0">

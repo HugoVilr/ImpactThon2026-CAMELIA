@@ -637,7 +637,7 @@ describe("App Home", () => {
     renderApp();
 
     expect(await screen.findByText(/scientific job logs/i)).toBeInTheDocument();
-    expect(await screen.findByText(/proyecto activo/i)).toBeInTheDocument();
+    expect(await screen.findByText(/active project|proyecto activo/i)).toBeInTheDocument();
     expect(screen.queryByText(/entrada de secuencia/i)).not.toBeInTheDocument();
   });
 
@@ -656,7 +656,7 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("button", { name: /visor/i })).toBeInTheDocument();
     expect(await screen.findByText(/global plddt avg/i)).toBeInTheDocument();
-    expect(await screen.findByText(/metadatos moleculares/i)).toBeInTheDocument();
+    expect(await screen.findByText(/molecular metadata|metadatos moleculares/i)).toBeInTheDocument();
   });
 
   it("renders the compare subpage and loads the job history on the right column", async () => {
