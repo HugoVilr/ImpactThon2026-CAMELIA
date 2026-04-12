@@ -440,7 +440,7 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                   disabled={isAiGenerating}
                 >
                   <Sparkles className="h-3.5 w-3.5" />
-                  {isAiGenerating ? "Generating..." : "AI Discovery"}
+                  {isAiGenerating ? t("jobLogs.details.aiGenerating") : t("jobLogs.details.aiDiscovery")}
                 </Button>
                 <Button
                   type="button"

@@ -225,7 +225,7 @@ export function TestXrPage() {
   });
 
   return (
-    <main ref={pageRef} className="mx-auto flex min-h-screen w-full max-w-[1320px] items-center px-4 py-12 md:px-6">
+    <main ref={pageRef} className="mx-auto flex min-h-screen w-full max-w-[1200px] items-center px-4 py-12 md:px-5">
       <Card className="surface-shadow-strong mx-auto w-full max-w-5xl overflow-hidden">
         <CardHeader className="space-y-3 border-b border-border bg-card/90">
           <CardTitle className="font-display text-3xl">Mol* XR Test</CardTitle>

@@ -99,7 +99,7 @@ export const loadDashboard = createAsyncThunk<
   try {
     const [healthRes, jobsRes, samplesRes] = await Promise.all([
       fetch(`${apiUrl}/health`),
-      fetch(`${apiUrl}/jobs/?limit=20`),
+      fetch(`${apiUrl}/jobs/?limit=50`),
       fetch(`${apiUrl}/proteins/samples`),
     ]);
 
