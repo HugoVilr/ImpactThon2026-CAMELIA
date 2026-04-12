@@ -11,13 +11,12 @@ type JobLogsTabsProps = {
 };
 
 const tabStyles = "pb-3 text-[15px] font-bold transition-colors";
-const tabOrder: JobDetailsTab[] = ["viewer", "compare", "logs", "extras"];
+const tabOrder: JobDetailsTab[] = ["viewer", "compare", "logs"];
 
 const tabRefMap = () => ({
   viewer: null as HTMLButtonElement | null,
   compare: null as HTMLButtonElement | null,
   logs: null as HTMLButtonElement | null,
-  extras: null as HTMLButtonElement | null,
 });
 
 export function JobLogsTabs({ jobId, activeTab, onTabChange, showMeta = true }: JobLogsTabsProps) {
