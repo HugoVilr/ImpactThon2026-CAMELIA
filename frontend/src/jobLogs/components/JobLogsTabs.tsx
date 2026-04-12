@@ -10,7 +10,7 @@ type JobLogsTabsProps = {
   showMeta?: boolean;
 };
 
-const tabStyles = "pb-3 text-[15px] font-bold transition-colors";
+const tabStyles = "pb-3 text-[15px] font-bold transition-colors outline-none";
 const tabOrder: JobDetailsTab[] = ["viewer", "compare", "logs"];
 
 const tabRefMap = () => ({

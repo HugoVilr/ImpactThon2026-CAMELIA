@@ -171,29 +171,11 @@ export function useAnimePressables<T extends HTMLElement>(
         animateTo(isHovered ? hoverScale : 1, isHovered ? liftY : 0, 140);
       };
 
-      const onFocus = () => {
-        animate(node, {
-          boxShadow: ["0 0 0 0 rgba(15, 23, 34, 0)", "0 0 0 3px rgba(15, 23, 34, 0.08)"],
-          duration: 170,
-          ease: "outQuad",
-        });
-      };
-
-      const onBlur = () => {
-        animate(node, {
-          boxShadow: "0 0 0 0 rgba(15, 23, 34, 0)",
-          duration: 190,
-          ease: "outQuad",
-        });
-      };
-
       node.addEventListener("pointerenter", onEnter);
       node.addEventListener("pointerleave", onLeave);
       node.addEventListener("pointerdown", onDown);
       node.addEventListener("pointerup", onUp);
       node.addEventListener("pointercancel", onUp);
-      node.addEventListener("focus", onFocus);
-      node.addEventListener("blur", onBlur);
 
       return () => {
         node.removeEventListener("pointerenter", onEnter);
@@ -201,8 +183,6 @@ export function useAnimePressables<T extends HTMLElement>(
         node.removeEventListener("pointerdown", onDown);
         node.removeEventListener("pointerup", onUp);
         node.removeEventListener("pointercancel", onUp);
-        node.removeEventListener("focus", onFocus);
-        node.removeEventListener("blur", onBlur);
       };
     });
 

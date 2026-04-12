@@ -242,39 +242,36 @@ export function ProteinOverviewPanel({
 
         <div className="flex flex-1 flex-col gap-3 text-[13px]">
           <div className="flex items-center justify-between">
-            <div
-              className="flex items-center gap-2"
-              title={t("jobLogs.details.too_solubility")}
-            >
-              <span>{t("jobLogs.details.solubility")}</span>
-              <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
-            </div>
+            <span className="max-w-[70%] cursor-help leading-tight" title={t("jobLogs.details.too_solubility")}>
+              {t("jobLogs.details.solubility")}
+              <span className="ml-1.5 inline-flex items-center align-middle -translate-y-[2px]">
+                <Info className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              </span>
+            </span>
             <span className="text-[1.25rem] font-extrabold text-primary">
               {formatCompactNumber(biologicalData?.solubility_score, 1)}
             </span>
           </div>
 
           <div className="flex items-center justify-between border-t border-border/60 pt-3">
-            <div
-              className="flex items-center gap-2"
-              title={t("jobLogs.details.too_stability")}
-            >
-              <span>{t("jobLogs.details.stability")}</span>
-              <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
-            </div>
+            <span className="max-w-[70%] cursor-help leading-tight" title={t("jobLogs.details.too_stability")}>
+              {t("jobLogs.details.stability")}
+              <span className="ml-1.5 inline-flex items-center align-middle -translate-y-[2px]">
+                <Info className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              </span>
+            </span>
             <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-slate-900">
               {(biologicalData?.stability_status ?? "N/A").toUpperCase()}
             </span>
           </div>
 
           <div className="flex items-center justify-between border-t border-border/60 pt-3">
-            <div
-              className="flex items-center gap-2"
-              title={t("jobLogs.details.too_instability")}
-            >
-              <span>{t("jobLogs.details.instability")}</span>
-              <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
-            </div>
+            <span className="max-w-[70%] cursor-help leading-tight" title={t("jobLogs.details.too_instability")}>
+              {t("jobLogs.details.instability")}
+              <span className="ml-1.5 inline-flex items-center align-middle -translate-y-[8px]">
+                <Info className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              </span>
+            </span>
             <span className="text-[1.25rem] font-extrabold text-slate-950">
               {formatCompactNumber(biologicalData?.instability_index, 1)}
             </span>
@@ -630,9 +627,9 @@ export function ProteinOverviewPanel({
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" title={t("jobLogs.details.too_plddt")}>
                         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.plddt")}</p>
-                        <Info className="h-3.5 w-3.5 text-slate-400" />
+                        <Info className="h-3.5 w-3.5 cursor-help text-slate-400" />
                       </div>
                       <p className="mt-2 font-headline text-[2.2rem] font-extrabold leading-none tracking-[-0.05em] text-slate-950">
                         {plddtAverage === null ? "N/A" : formatCompactNumber(plddtAverage, 1)}
