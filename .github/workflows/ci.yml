@@ -87,7 +87,7 @@ jobs:
           test -n "$REPOSITORY" || (echo "Missing secret GCP_ARTIFACT_REPOSITORY" && exit 1)
 
       - name: Validate GCP service account key secret
-        if: ${{ secrets.GCP_SA_KEY == '' }}
+        if: secrets.GCP_SA_KEY == ''
         run: |
           echo "Missing secret GCP_SA_KEY"
           exit 1
