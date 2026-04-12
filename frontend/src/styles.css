@@ -132,41 +132,14 @@
       0 28px 56px rgb(15 23 34 / 16%);
   }
 
-  .page-enter {
-    animation: page-enter 280ms ease-out both;
-  }
-
-  .modal-enter {
-    animation: modal-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  .anime-pressable {
+    touch-action: manipulation;
   }
 
   .job-progress-indeterminate {
     animation: job-progress-indeterminate 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
-}
 
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes modal-enter {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(0.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 @keyframes job-progress-indeterminate {
@@ -176,5 +149,12 @@
 
   to {
     transform: translateX(240%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anime-pressable {
+    transform: none !important;
+    animation: none !important;
   }
 }
