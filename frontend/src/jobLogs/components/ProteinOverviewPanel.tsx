@@ -662,7 +662,7 @@ export function ProteinOverviewPanel({
                       </div>
 
                       <div className="mt-3 space-y-2">
-                        <div className="h-1.5 rounded-full bg-gradient-to-r from-orange-400 via-amber-400 to-blue-700" />
+                        <div className="conf-gradient h-1.5 rounded-full" />
                         <div className="flex items-center justify-between text-[8px] font-bold uppercase tracking-[0.08em] text-slate-500">
                           <span>{t("jobLogs.details.veryLow")}</span>
                           <span>{t("jobLogs.details.high")}</span>

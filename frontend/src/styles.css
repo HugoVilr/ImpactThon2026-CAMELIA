@@ -26,6 +26,18 @@
     --input: 210 14% 80%;
     --ring: 158 87% 25%;
     --radius: 0.75rem;
+
+    /* Base colors for Confidence / PLDDT */
+    --conf-1: #f97316; /* orange-500 */
+    --conf-2: #fbbf24; /* amber-400 */
+    --conf-3: #38bdf8; /* sky-400 */
+    --conf-4: #1d4ed8; /* blue-700 */
+
+    /* Base colors for PAE */
+    --pae-1: #0f766e; /* teal-700 / <=2 */
+    --pae-2: #16a34a; /* green-600 / <=5 */
+    --pae-3: #eab308; /* yellow-500 / <=10 */
+    --pae-4: #ea580c; /* orange-600 / >10 */
   }
 
   * {
@@ -53,6 +65,16 @@
     --primary: 221 83% 53%;
     --ring: 221 83% 53%;
     --destructive: 24 98% 50%;
+
+    --conf-1: #fb923c;
+    --conf-2: #facc15;
+    --conf-3: #60a5fa;
+    --conf-4: #2563eb;
+
+    --pae-1: #1e40af;
+    --pae-2: #3b82f6;
+    --pae-3: #f59e0b;
+    --pae-4: #b45309;
   }
   html.mode-deuteranopia canvas {
     filter: url('#daltonize-deuteranopia');
@@ -67,6 +89,16 @@
     --primary: 343 79% 46%;
     --ring: 343 79% 46%;
     --destructive: 189 94% 43%;
+
+    --conf-1: #fb7185;
+    --conf-2: #fda4af;
+    --conf-3: #2dd4bf;
+    --conf-4: #0f766e;
+
+    --pae-1: #be123c;
+    --pae-2: #f43f5e;
+    --pae-3: #0891b2;
+    --pae-4: #164e63;
   }
   html.mode-tritanopia canvas {
     filter: url('#daltonize-tritanopia');
@@ -138,6 +170,15 @@
 
   .job-progress-indeterminate {
     animation: job-progress-indeterminate 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .bg-conf-1 { background-color: var(--conf-1); }
+  .bg-conf-2 { background-color: var(--conf-2); }
+  .bg-conf-3 { background-color: var(--conf-3); }
+  .bg-conf-4 { background-color: var(--conf-4); }
+
+  .conf-gradient {
+    background: linear-gradient(to right, var(--conf-1), var(--conf-2), var(--conf-3), var(--conf-4));
   }
 
 }
