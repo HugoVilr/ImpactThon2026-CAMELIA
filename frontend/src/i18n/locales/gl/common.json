@@ -72,6 +72,11 @@
             "viewLogs": "Ver Rexistros",
             "details": "Detalles"
         },
+        "pagination": {
+            "previous": "Anterior",
+            "next": "Seguinte",
+            "pageOf": "Páxina {{current}} de {{total}}"
+        },
         "progressAria": "Progreso do job {{name}}"
     },
     "jobLogs": {
@@ -182,7 +187,8 @@
             "too_function": "DescriciÃ³n detallada do papel biolÃ³xico que desempeÃ±a a molÃ©cula no organismo.",
             "too_cellular": "Compartimento ou estrutura celular onde se localiza habitualmente esta proteÃ­na.",
             "too_activity": "Mecanismo bioquÃ­mico ou reacciÃ³n especÃ­fica que cataliza ou na cal participa.",
-            "aiDiscovery": "Descubrimento IA",
+            "aiDiscovery": "Informe IA",
+            "aiGenerating": "Xerando...",
             "secStruct": "Desglose de estrutura secundaria",
             "too_uniprot": "Identificador universal da proteÃ­na. Permite consultar funciÃ³ns biolÃ³xicas e investigaciÃ³ns previas en bases de datos mundiais.",
             "charges": "Cargas netas",

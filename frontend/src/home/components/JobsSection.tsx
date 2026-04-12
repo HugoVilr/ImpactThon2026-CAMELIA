@@ -4,7 +4,16 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { shouldSkipAnimation, useAnimePressables, useAnimeReveal } from "../../commons/animations";
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../commons/components/ui";
+import {
+  Button,
+  Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../commons/components/ui";
 import { fetchJobOutputs } from "../../jobLogs/logsApi";
 import { resolveProteinNameFromOutputs } from "../../jobLogs/jobNameResolver";
 import { cn } from "../../lib/utils";
@@ -29,6 +38,7 @@ const statusClassByValue = {
 } as const;
 
 const filterOrder: JobFilter[] = ["all", "running", "completed"];
+const JOBS_PER_PAGE = 10;
 
 const filterRefMap = () => ({
   all: null as HTMLButtonElement | null,
@@ -63,7 +73,19 @@ export function JobsSection({
     ready: false,
   });
   const [resolvedJobNames, setResolvedJobNames] = useState<Record<string, string>>({});
-  const rowsAnimationKey = useMemo(() => filteredJobs.map((job) => job.job_id).join("|"), [filteredJobs]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
+  const pagedJobs = useMemo(() => {
+    const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
+    return filteredJobs.slice(startIndex, startIndex + JOBS_PER_PAGE);
+  }, [filteredJobs, currentPage]);
+
+  const rowsAnimationKey = useMemo(() => pagedJobs.map((job) => job.job_id).join("|"), [pagedJobs]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [jobFilter]);
 
   useAnimeReveal(tableBodyRef, {
     selector: ":scope > [data-anime='job-row']",
@@ -258,14 +280,14 @@ export function JobsSection({
           </TableHeader>
 
           <TableBody ref={tableBodyRef}>
-            {filteredJobs.length === 0 ? (
+            {pagedJobs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-8 text-center text-xs text-muted-foreground">
                   {t("jobs.empty")}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredJobs.map((job) => (
+              pagedJobs.map((job) => (
                 <TableRow key={job.job_id} data-anime="job-row">
                   <TableCell className="pl-10">
                     <Link
@@ -349,6 +371,19 @@ export function JobsSection({
           </TableBody>
         </Table>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        labels={{
+          previous: t("jobs.pagination.previous"),
+          next: t("jobs.pagination.next"),
+        }}
+        className="mt-2"
+      >
+        {t("jobs.pagination.pageOf", { current: currentPage, total: totalPages })}
+      </Pagination>
     </section>
   );
 }

@@ -72,6 +72,11 @@
             "viewLogs": "View Logs",
             "details": "Details"
         },
+        "pagination": {
+            "previous": "Previous",
+            "next": "Next",
+            "pageOf": "Page {{current}} of {{total}}"
+        },
         "progressAria": "Progress for job {{name}}"
     },
     "jobLogs": {
@@ -182,7 +187,8 @@
             "too_function": "Detailed description of the biological role the molecule plays in the organism.",
             "too_cellular": "Compartment or cellular structure where this protein is usually located.",
             "too_activity": "Biochemical mechanism or specific reaction it catalyzes or participates in.",
-            "aiDiscovery": "AI Discovery",
+            "aiDiscovery": "AI Report",
+            "aiGenerating": "Generating...",
             "secStruct": "Secondary Structure Breakdown",
             "too_uniprot": "Universal protein identifier. Allows querying global databases.",
             "charges": "Net Charges",
