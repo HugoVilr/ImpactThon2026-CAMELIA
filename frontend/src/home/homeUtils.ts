@@ -1,4 +1,6 @@
 import type { Job, JobStatus, LanguageCode } from "../types/domain";
+import { cleanProteinName } from "../jobLogs/jobNameResolver";
+
 
 export const statusTranslationKey: Record<JobStatus, string> = {
   PENDING: "status.pending",
@@ -31,7 +33,7 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 export const displayJobName = (job: Job): string => {
   const resolvedName = job.display_name?.trim();
   if (resolvedName) {
-    return resolvedName;
+    return cleanProteinName(resolvedName);
   }
 
   const withoutExtension = job.fasta_filename.replace(/\.(fasta|fa|faa|txt)$/i, "").trim();
@@ -39,9 +41,11 @@ export const displayJobName = (job: Job): string => {
     return "sequence";
   }
 
+  const cleanedBase = cleanProteinName(withoutExtension);
   const idSuffix = new RegExp(`([_\\-\\s]?${escapeRegExp(job.job_id)})$`, "i");
-  return withoutExtension.replace(idSuffix, "").trim() || withoutExtension;
+  return cleanedBase.replace(idSuffix, "").trim() || cleanedBase;
 };
+
 
 export const resolveLanguage = (value: string | undefined): LanguageCode => {
   if (value === "en" || value === "es" || value === "gl") {
