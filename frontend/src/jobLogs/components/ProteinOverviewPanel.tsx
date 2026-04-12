@@ -45,6 +45,10 @@ type ProteinOverviewPanelProps = {
   compact?: boolean;
   panelLabel?: string;
   toolbar?: ReactNode;
+  phantomStructureData?: string | null;
+  phantomEnabled?: boolean;
+  phantomLabel?: string;
+  onTogglePhantom?: () => void;
   compactModuleRefs?: Partial<Record<CompactModuleKey, (node: HTMLDivElement | null) => void>>;
   compactModuleHeights?: Partial<Record<CompactModuleKey, number>>;
 };
@@ -104,6 +108,10 @@ export function ProteinOverviewPanel({
   compact = false,
   panelLabel,
   toolbar,
+  phantomStructureData = null,
+  phantomEnabled = false,
+  phantomLabel,
+  onTogglePhantom,
   compactModuleRefs,
   compactModuleHeights,
 }: ProteinOverviewPanelProps) {
@@ -174,6 +182,13 @@ export function ProteinOverviewPanel({
     proteinMetadata?.protein_name?.trim() ||
     proteinMetadata?.identified_protein?.trim() ||
     (job ? displayJobName(job) : jobId);
+  const phantomActionLabel = phantomEnabled
+    ? t("jobLogs.compare.hidePhantom")
+    : t("jobLogs.compare.showPhantom");
+  const phantomToggleLabel = phantomLabel
+    ? t("jobLogs.compare.phantomToggleAria", { action: phantomActionLabel, name: phantomLabel })
+    : phantomActionLabel;
+  const canTogglePhantom = Boolean(structureData && phantomStructureData);
   const getCompactWrapperProps = (moduleKey: CompactModuleKey) => {
     if (!compact) {
       return {};
@@ -494,7 +509,13 @@ export function ProteinOverviewPanel({
                   >
                     {structureData ? (
                       <div className="absolute inset-0 p-3">
-                        <ProteinViewer ref={viewerRef} structureData={structureData} onReadyChange={setViewerReady} />
+                        <ProteinViewer
+                          ref={viewerRef}
+                          structureData={structureData}
+                          phantomStructureData={phantomStructureData}
+                          phantomEnabled={phantomEnabled}
+                          onReadyChange={setViewerReady}
+                        />
                       </div>
                     ) : (
                       <div className="grid h-full place-items-center p-8 text-center text-sm text-muted-foreground">
@@ -503,6 +524,21 @@ export function ProteinOverviewPanel({
                     )}
 
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_0%,transparent_38%,rgba(20,36,29,0.03)_100%)]" />
+
+                    {compact && onTogglePhantom ? (
+                      <div className="absolute left-5 top-5 z-10 flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant={phantomEnabled ? "default" : "outline"}
+                          className="h-8 rounded-xl px-4 text-[10px] font-bold uppercase tracking-[0.1em] shadow-sm"
+                          aria-label={phantomToggleLabel}
+                          disabled={!canTogglePhantom}
+                          onClick={onTogglePhantom}
+                        >
+                          {phantomActionLabel}
+                        </Button>
+                      </div>
+                    ) : null}
 
                     {!compact ? (
                       <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white/96 px-3 py-2 shadow-[0_14px_30px_rgba(15,23,34,0.12)]">

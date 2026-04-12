@@ -28,8 +28,13 @@ vi.mock("./components/ProteinViewer", async () => {
         clearHighlight: () => void;
         focusResidues: (startResidue: number, endResidue: number) => void;
       },
-      { structureData: string | null; onReadyChange?: (isReady: boolean) => void }
-    >(function MockProteinViewer({ structureData, onReadyChange }, ref) {
+      {
+        structureData: string | null;
+        phantomStructureData?: string | null;
+        phantomEnabled?: boolean;
+        onReadyChange?: (isReady: boolean) => void;
+      }
+    >(function MockProteinViewer({ structureData, phantomStructureData, phantomEnabled, onReadyChange }, ref) {
       React.useEffect(() => {
         onReadyChange?.(Boolean(structureData));
       }, [onReadyChange, structureData]);
@@ -43,7 +48,16 @@ vi.mock("./components/ProteinViewer", async () => {
           mockFocusResidues(structureData, startResidue, endResidue),
       }));
 
-      return <div data-structure={structureData ?? "viewer-empty"} data-testid="protein-viewer">{structureData ?? "viewer-empty"}</div>;
+      return (
+        <div
+          data-structure={structureData ?? "viewer-empty"}
+          data-phantom-enabled={phantomEnabled ? "true" : "false"}
+          data-phantom-structure={phantomEnabled ? phantomStructureData ?? "" : ""}
+          data-testid="protein-viewer"
+        >
+          {structureData ?? "viewer-empty"}
+        </div>
+      );
     }),
   };
 });
@@ -664,6 +678,46 @@ describe("App Home", () => {
     expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
   });
 
+  it("renders phantom toggles for both compare viewers once a completed comparison is loaded", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar calmodulin/i }));
+
+    expect(await screen.findAllByRole("button", { name: /mostrar fantasma/i })).toHaveLength(2);
+  });
+
+  it("toggles the compared structure as a phantom overlay in each viewer independently", async () => {
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar calmodulin/i }));
+
+    const [leftToggle, rightToggle] = await screen.findAllByRole("button", { name: /mostrar fantasma/i });
+
+    fireEvent.click(leftToggle);
+
+    let viewers = await screen.findAllByTestId("protein-viewer");
+    expect(viewers[0]).toHaveAttribute("data-phantom-enabled", "true");
+    expect(viewers[0]).toHaveAttribute("data-phantom-structure", "data_demo_calmodulin\n#\n");
+    expect(viewers[1]).toHaveAttribute("data-phantom-enabled", "false");
+
+    fireEvent.click(rightToggle);
+
+    viewers = await screen.findAllByTestId("protein-viewer");
+    expect(viewers[1]).toHaveAttribute("data-phantom-enabled", "true");
+    expect(viewers[1]).toHaveAttribute("data-phantom-structure", "data_demo_ubiquitin\n#\n");
+
+    fireEvent.click(leftToggle);
+    fireEvent.click(rightToggle);
+
+    viewers = await screen.findAllByTestId("protein-viewer");
+    expect(viewers[0]).toHaveAttribute("data-phantom-enabled", "false");
+    expect(viewers[0]).toHaveAttribute("data-phantom-structure", "");
+    expect(viewers[1]).toHaveAttribute("data-phantom-enabled", "false");
+    expect(viewers[1]).toHaveAttribute("data-phantom-structure", "");
+  });
+
   it("uses the identified protein name in the comparison list when it differs from the fasta filename", async () => {
     window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
     renderApp();
@@ -672,6 +726,90 @@ describe("App Home", () => {
 
     expect(await screen.findByRole("heading", { name: /calmodulin/i })).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /cambiar proteína/i })).toBeInTheDocument();
+  });
+
+  it("resets both phantom toggles when switching to a different compared protein", async () => {
+    mockState.jobs.push({
+      job_id: "job_completed_005",
+      status: "COMPLETED",
+      created_at: "2026-04-10T22:15:12.232598",
+      started_at: "2026-04-10T22:16:17.237785",
+      completed_at: "2026-04-10T22:24:10.237785",
+      gpus: 1,
+      cpus: 8,
+      memory_gb: 32,
+      max_runtime_seconds: 3600,
+      fasta_filename: "lysozyme.fasta",
+      error_message: null,
+    });
+    mockState.compareJobOutputs.job_completed_005 = {
+      job_id: "job_completed_005",
+      status: "COMPLETED",
+      protein_metadata: {
+        identified_protein: "lysozyme",
+        uniprot_id: "P61626",
+        pdb_id: "1LYZ",
+        protein_name: "Lysozyme",
+        organism: "Gallus gallus",
+        description: "Antimicrobial enzyme.",
+      },
+      structural_data: {
+        pdb_file: null,
+        cif_file: "data_demo_lysozyme\n#\n",
+        confidence: {
+          plddt_histogram: {
+            low: 4,
+            medium: 11,
+            high: 32,
+            very_high: 27,
+          },
+          pae_matrix: [
+            [2, 4],
+            [4, 2],
+          ],
+        },
+      },
+      biological_data: {
+        solubility_score: 79.1,
+        instability_index: 17.4,
+        stability_status: "stable",
+        toxicity_alerts: [],
+        allergenicity_alerts: [],
+        source: "catalog_prediction",
+      },
+      logs: "[INFO] Lysozyme model complete",
+    };
+    mockState.compareJobAccounting.job_completed_005 = {
+      job_id: "job_completed_005",
+      status: "COMPLETED",
+      accounting: {
+        cpu_hours: 0.007,
+        gpu_hours: 0.001,
+        memory_gb_hours: 0.029,
+        total_wall_time_seconds: 5,
+        cpu_efficiency_percent: 60.8,
+        memory_efficiency_percent: 69.5,
+        gpu_efficiency_percent: 88.4,
+      },
+    };
+
+    window.history.replaceState({}, "", "/jobs/job_completed_003/compare");
+    renderApp();
+
+    fireEvent.click(await screen.findByRole("button", { name: /comparar calmodulin/i }));
+    fireEvent.click((await screen.findAllByRole("button", { name: /mostrar fantasma/i }))[0]);
+
+    let viewers = await screen.findAllByTestId("protein-viewer");
+    expect(viewers[0]).toHaveAttribute("data-phantom-enabled", "true");
+
+    fireEvent.click(await screen.findByRole("button", { name: /cambiar proteína/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /comparar lysozyme/i }));
+
+    await waitFor(() => expect(screen.getAllByTestId("protein-viewer")).toHaveLength(2));
+    viewers = screen.getAllByTestId("protein-viewer");
+    expect(viewers[0]).toHaveAttribute("data-phantom-enabled", "false");
+    expect(viewers[1]).toHaveAttribute("data-phantom-enabled", "false");
+    expect(await screen.findAllByRole("button", { name: /mostrar fantasma/i })).toHaveLength(2);
   });
 
   it("highlights residues in the matching comparison viewer when hovering each compare heatmap", async () => {

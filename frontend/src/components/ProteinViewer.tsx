@@ -10,6 +10,8 @@ import "pdbe-molstar/build/pdbe-molstar-light.css";
 interface ProteinViewerProps {
   /** The raw structure file contents as a string */
   structureData: string | null;
+  phantomStructureData?: string | null;
+  phantomEnabled?: boolean;
   onReadyChange?: (isReady: boolean) => void;
 }
 
@@ -27,6 +29,40 @@ type SubscriptionLike = {
 type PDBeMolstarPluginInstance = {
   render: (target: HTMLElement, options: unknown) => Promise<void>;
   clear?: () => Promise<void> | void;
+  load?: (
+    params: {
+      url: string;
+      format?: "mmcif" | "pdb";
+      isBinary?: boolean;
+      id?: string;
+    },
+    fullLoad?: boolean
+  ) => Promise<void>;
+  deleteStructure?: (structureNumberOrId?: number | string) => Promise<void>;
+  visual?: {
+    highlight?: (params: {
+      data: Array<{ start_residue_number: number; end_residue_number: number }>;
+      structureId?: string;
+    }) => Promise<void> | void;
+    clearHighlight?: () => Promise<void> | void;
+    select?: (params: {
+      data: Array<{
+        start_residue_number?: number;
+        end_residue_number?: number;
+        color?: { r: number; g: number; b: number };
+        opacity?: number;
+      }>;
+      structureId?: string;
+    }) => Promise<void> | void;
+    clearSelection?: (
+      structureNumberOrId?: number | string,
+      options?: { keepOpacity?: boolean }
+    ) => Promise<void> | void;
+    focus?: (
+      selection: Array<{ start_residue_number: number; end_residue_number: number }>,
+      structureNumberOrId?: number | string
+    ) => Promise<void> | void;
+  };
   plugin?: {
     clear?: () => Promise<void> | void;
     animationLoop?: {
@@ -69,6 +105,9 @@ type MolstarWindow = Window & {
 };
 
 const MOLSTAR_DUPLICATE_SYMBOL_WARNING = "already added. Call removeSymbol/removeCustomProps re-adding the symbol.";
+const MAIN_STRUCTURE_ID = "main";
+const PHANTOM_STRUCTURE_ID = "phantom";
+const PHANTOM_OPACITY = 0.3;
 
 let activeMolstarWarningFilters = 0;
 let originalConsoleWarn: typeof console.warn | null = null;
@@ -99,15 +138,36 @@ const installMolstarWarningFilter = (): (() => void) => {
 };
 
 export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>(function ProteinViewer(
-  { structureData, onReadyChange },
+  { structureData, phantomStructureData = null, phantomEnabled = false, onReadyChange },
   ref
 ) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const pluginInstanceRef = useRef<PDBeMolstarPluginInstance | null>(null);
   const xrLoopRestoreRef = useRef<(() => void) | null>(null);
+  const phantomBlobUrlRef = useRef<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+
+  const revokePhantomBlobUrl = (blobUrl?: string | null) => {
+    const targetUrl = blobUrl ?? phantomBlobUrlRef.current;
+
+    if (!targetUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(targetUrl);
+
+    if (phantomBlobUrlRef.current === targetUrl) {
+      phantomBlobUrlRef.current = null;
+    }
+  };
+
+  const resolveStructureFormat = (rawStructureData: string): "mmcif" | "pdb" => (
+    rawStructureData.includes("_audit_conform") || rawStructureData.trim().startsWith("data_")
+      ? "mmcif"
+      : "pdb"
+  );
 
   useEffect(() => {
     onReadyChange?.(isReady);
@@ -115,43 +175,45 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
 
   useImperativeHandle(ref, () => ({
     highlightResidues(startResidue, endResidue) {
-      const instance = pluginInstanceRef.current as any;
+      const instance = pluginInstanceRef.current;
       if (instance && typeof instance.visual?.highlight === "function") {
-        instance.visual.clearHighlight();
-        instance.visual.highlight({
+        void instance.visual.clearHighlight?.();
+        void instance.visual.highlight({
           data: [{
             start_residue_number: startResidue,
             end_residue_number: endResidue
-          }]
+          }],
+          structureId: MAIN_STRUCTURE_ID,
         });
       } else if (instance && typeof instance.visual?.select === "function") {
         // Fallback if highlight is not available for some reason
-        instance.visual.clearSelection();
-        instance.visual.select({
+        void instance.visual.clearSelection?.(MAIN_STRUCTURE_ID);
+        void instance.visual.select({
           data: [{
             start_residue_number: startResidue,
             end_residue_number: endResidue,
             color: { r: 15, g: 118, b: 110 } 
-          }]
+          }],
+          structureId: MAIN_STRUCTURE_ID,
         });
       }
     },
     clearHighlight() {
-      const instance = pluginInstanceRef.current as any;
+      const instance = pluginInstanceRef.current;
       if (instance && typeof instance.visual?.clearHighlight === "function") {
-        instance.visual.clearHighlight();
+        void instance.visual.clearHighlight();
       }
       if (instance && typeof instance.visual?.clearSelection === "function") {
-        instance.visual.clearSelection();
+        void instance.visual.clearSelection(MAIN_STRUCTURE_ID);
       }
     },
     focusResidues(startResidue, endResidue) {
-      const instance = pluginInstanceRef.current as any;
+      const instance = pluginInstanceRef.current;
       if (instance && typeof instance.visual?.focus === "function") {
-        instance.visual.focus([{
+        void instance.visual.focus([{
           start_residue_number: startResidue,
           end_residue_number: endResidue
-        }]);
+        }], MAIN_STRUCTURE_ID);
       }
     },
     async requestXrSession(mode) {
@@ -235,6 +297,8 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
         }
       }
 
+      revokePhantomBlobUrl();
+
       if (blobUrl) {
         URL.revokeObjectURL(blobUrl);
         blobUrl = null;
@@ -277,13 +341,10 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
         const blob = new Blob([structureData], { type: "text/plain" });
         blobUrl = URL.createObjectURL(blob);
 
-        const isCif =
-          structureData.includes("_audit_conform") || structureData.trim().startsWith("data_");
-
         const options = {
           customData: {
             url: blobUrl,
-            format: isCif ? "cif" : "pdb",
+            format: resolveStructureFormat(structureData) === "mmcif" ? "cif" : "pdb",
             binary: false,
           },
           alphafoldView: true,
@@ -333,6 +394,70 @@ export const ProteinViewer = forwardRef<ProteinViewerHandle, ProteinViewerProps>
       void teardown();
     };
   }, [structureData]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const removePhantom = async () => {
+      const currentInstance = pluginInstanceRef.current;
+
+      try {
+        await currentInstance?.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+      } catch {
+        // Ignore phantom cleanup issues during overlay changes.
+      }
+
+      revokePhantomBlobUrl();
+    };
+
+    const syncPhantom = async () => {
+      const currentInstance = pluginInstanceRef.current;
+
+      if (!currentInstance || !isReady) {
+        return;
+      }
+
+      await removePhantom();
+
+      if (!phantomEnabled || !phantomStructureData) {
+        return;
+      }
+
+      const phantomBlobUrl = URL.createObjectURL(new Blob([phantomStructureData], { type: "text/plain" }));
+      phantomBlobUrlRef.current = phantomBlobUrl;
+
+      try {
+        await currentInstance.load?.({
+          url: phantomBlobUrl,
+          format: resolveStructureFormat(phantomStructureData),
+          isBinary: false,
+          id: PHANTOM_STRUCTURE_ID,
+        }, false);
+
+        if (cancelled) {
+          await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+          revokePhantomBlobUrl(phantomBlobUrl);
+          return;
+        }
+
+        await currentInstance.visual?.select?.({
+          structureId: PHANTOM_STRUCTURE_ID,
+          data: [{ opacity: PHANTOM_OPACITY }],
+        });
+      } catch (phantomError) {
+        console.error("Error loading phantom overlay:", phantomError);
+        await currentInstance.deleteStructure?.(PHANTOM_STRUCTURE_ID);
+        revokePhantomBlobUrl(phantomBlobUrl);
+      }
+    };
+
+    void syncPhantom();
+
+    return () => {
+      cancelled = true;
+      void removePhantom();
+    };
+  }, [isReady, phantomEnabled, phantomStructureData, structureData]);
 
   return (
     <div

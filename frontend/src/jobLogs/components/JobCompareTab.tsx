@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent } from "../../commons/components/ui";
 import { displayJobName, localeForLanguage, resolveLanguage, resourceKeyForJob, statusTranslationKey } from "../../home/homeUtils";
 import { resolveProteinNameFromOutputs } from "../jobNameResolver";
+import { resolveStructureFile } from "../jobResultsUtils";
 import type { Job } from "../../types/domain";
 import { fetchJobOutputs, fetchJobsList } from "../logsApi";
 import { useJobDetailSnapshot } from "../useJobDetailSnapshot";
@@ -51,6 +52,8 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [leftPhantomEnabled, setLeftPhantomEnabled] = useState(false);
+  const [rightPhantomEnabled, setRightPhantomEnabled] = useState(false);
   const [alignedModuleHeights, setAlignedModuleHeights] = useState<Partial<Record<CompactModuleKey, number>>>({});
   const leftModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
   const rightModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
@@ -60,6 +63,14 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   );
   const selectedJob = comparableJobs.find((job) => job.job_id === selectedJobId) ?? null;
   const selectedSnapshot = useJobDetailSnapshot(selectedJobId, selectedJob);
+  const baseStructureData = resolveStructureFile(baseSnapshot.outputs);
+  const selectedStructureData = resolveStructureFile(selectedSnapshot.outputs);
+  const basePhantomLabel =
+    resolveProteinNameFromOutputs(baseSnapshot.outputs) ??
+    (baseSnapshot.job ? resolveJobLabel(baseSnapshot.job, resolvedJobNames) : baseJobId);
+  const selectedPhantomLabel = selectedJob
+    ? resolveProteinNameFromOutputs(selectedSnapshot.outputs) ?? resolveJobLabel(selectedJob, resolvedJobNames)
+    : undefined;
   const buildModuleRefMap = (side: "left" | "right") =>
     Object.fromEntries(
       compactModuleKeys.map((moduleKey) => [
@@ -130,6 +141,11 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
           }
     ));
   }, [selectedJobId, selectedSnapshot.outputs]);
+
+  useEffect(() => {
+    setLeftPhantomEnabled(false);
+    setRightPhantomEnabled(false);
+  }, [selectedJobId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -225,6 +241,10 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
             proteinDetail={baseSnapshot.proteinDetail}
             compact
             panelLabel={t("jobLogs.compare.currentProtein")}
+            phantomStructureData={selectedStructureData}
+            phantomEnabled={leftPhantomEnabled}
+            phantomLabel={selectedPhantomLabel}
+            onTogglePhantom={() => setLeftPhantomEnabled((current) => !current)}
             compactModuleRefs={selectedJob ? buildModuleRefMap("left") : undefined}
             compactModuleHeights={selectedJob ? alignedModuleHeights : undefined}
           />
@@ -256,6 +276,10 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                 proteinDetail={selectedSnapshot.proteinDetail}
                 compact
                 panelLabel={t("jobLogs.compare.comparedProtein")}
+                phantomStructureData={baseStructureData}
+                phantomEnabled={rightPhantomEnabled}
+                phantomLabel={basePhantomLabel}
+                onTogglePhantom={() => setRightPhantomEnabled((current) => !current)}
                 compactModuleRefs={buildModuleRefMap("right")}
                 compactModuleHeights={alignedModuleHeights}
                 toolbar={

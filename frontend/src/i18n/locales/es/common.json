@@ -92,6 +92,9 @@
             "loadingJobs": "Cargando historial de jobs...",
             "empty": "No hay otros jobs disponibles para comparar.",
             "compareAction": "Comparar",
+            "showPhantom": "Mostrar fantasma",
+            "hidePhantom": "Ocultar fantasma",
+            "phantomToggleAria": "{{action}} superposición de {{name}}",
             "xrStartError": "No se pudo iniciar la sesión XR."
         },
         "progress": {
