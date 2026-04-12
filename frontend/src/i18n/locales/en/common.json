@@ -78,8 +78,20 @@
         "jobId": "Job {{id}}",
         "tabs": {
             "viewer": "Viewer",
+            "compare": "Compare",
             "logs": "Logs",
             "extras": "Extras"
+        },
+        "compare": {
+            "currentProtein": "Current Protein",
+            "comparedProtein": "Compared Protein",
+            "changeSelection": "Change Protein",
+            "selectTitle": "Protein Comparison",
+            "selectDescription": "Select a completed job to load a second protein side by side.",
+            "loadingSelection": "Loading selected protein...",
+            "loadingJobs": "Loading job history...",
+            "empty": "There are no other jobs available for comparison.",
+            "compareAction": "Compare"
         },
         "progress": {
             "loadingTitle": "Loading job status...",
@@ -161,6 +173,10 @@
             "cellular": "Cellular Location",
             "stability": "Stability",
             "too_plddt": "AlphaFold confidence measure. >70 indicates reliable folding, >90 high accuracy.",
+            "too_category": "Functional classification of the protein based on its structure and domain.",
+            "too_function": "Detailed description of the biological role the molecule plays in the organism.",
+            "too_cellular": "Compartment or cellular structure where this protein is usually located.",
+            "too_activity": "Biochemical mechanism or specific reaction it catalyzes or participates in.",
             "aiDiscovery": "AI Discovery",
             "secStruct": "Secondary Structure Breakdown",
             "too_uniprot": "Universal protein identifier. Allows querying global databases.",

@@ -75,11 +75,23 @@
     },
     "jobLogs": {
         "kicker": "Proyecto Activo",
-        "jobId": "Job {{id}}",
+        "jobId": "Trabajo {{id}}",
         "tabs": {
             "viewer": "Visor",
-            "logs": "Logs",
+            "compare": "Comparar",
+            "logs": "Registros",
             "extras": "Extras"
+        },
+        "compare": {
+            "currentProtein": "Proteína Actual",
+            "comparedProtein": "Proteína Comparada",
+            "changeSelection": "Cambiar Proteína",
+            "selectTitle": "Comparación de Proteínas",
+            "selectDescription": "Selecciona un trabajo completado para cargar una segunda proteína lado a lado.",
+            "loadingSelection": "Cargando proteína seleccionada...",
+            "loadingJobs": "Cargando historial de trabajos...",
+            "empty": "No hay otros trabajos disponibles para comparar.",
+            "compareAction": "Comparar"
         },
         "progress": {
             "loadingTitle": "Cargando estado del job...",
@@ -161,6 +173,10 @@
             "cellular": "Ubicación celular",
             "stability": "Estabilidad",
             "too_plddt": "Medida de confianza de AlphaFold. Un valor >70 indica un plegamiento fiable, mientras que >90 refleja una precisión alta a nivel atómico.",
+            "too_category": "Clasificación funcional de la proteína basada en su estructura y dominio.",
+            "too_function": "Descripción detallada del papel biológico que desempeña la molécula en el organismo.",
+            "too_cellular": "Compartimento o estructura celular donde se localiza habitualmente esta proteína.",
+            "too_activity": "Mecanismo bioquímico o reacción específica que cataliza o en la cual participa.",
             "aiDiscovery": "Descubrimiento IA",
             "secStruct": "Desglose de estructura secundaria",
             "too_uniprot": "Identificador universal de la proteína. Permite consultar funciones biológicas e investigaciones previas en bases de datos mundiales.",
