@@ -54,6 +54,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [leftPhantomEnabled, setLeftPhantomEnabled] = useState(false);
   const [rightPhantomEnabled, setRightPhantomEnabled] = useState(false);
+  const [hoveredPae, setHoveredPae] = useState<{ row: number; col: number } | null>(null);
   const [alignedModuleHeights, setAlignedModuleHeights] = useState<Partial<Record<CompactModuleKey, number>>>({});
   const leftModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
   const rightModuleRefs = useRef<Partial<Record<CompactModuleKey, HTMLDivElement | null>>>({});
@@ -71,6 +72,18 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
   const selectedPhantomLabel = selectedJob
     ? resolveProteinNameFromOutputs(selectedSnapshot.outputs) ?? resolveJobLabel(selectedJob, resolvedJobNames)
     : undefined;
+  
+  const basePaeSize = baseSnapshot.outputs?.structural_data.confidence.pae_matrix?.length ?? 0;
+  const selectedPaeSize = selectedSnapshot.outputs?.structural_data.confidence.pae_matrix?.length ?? 0;
+  const areHeatmapsSameSize = basePaeSize > 0 && selectedPaeSize > 0 && basePaeSize === selectedPaeSize;
+  const syncHoverProps = areHeatmapsSameSize
+    ? {
+        hoveredPae,
+        onPaeHover: (row: number | null, col: number | null) =>
+          setHoveredPae(row !== null && col !== null ? { row, col } : null),
+      }
+    : {};
+
   const buildModuleRefMap = (side: "left" | "right") =>
     Object.fromEntries(
       compactModuleKeys.map((moduleKey) => [
@@ -247,6 +260,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
             onTogglePhantom={() => setLeftPhantomEnabled((current) => !current)}
             compactModuleRefs={selectedJob ? buildModuleRefMap("left") : undefined}
             compactModuleHeights={selectedJob ? alignedModuleHeights : undefined}
+            {...syncHoverProps}
           />
         </div>
 
@@ -282,6 +296,7 @@ export function JobCompareTab({ baseJobId, baseSnapshot }: JobCompareTabProps) {
                 onTogglePhantom={() => setRightPhantomEnabled((current) => !current)}
                 compactModuleRefs={buildModuleRefMap("right")}
                 compactModuleHeights={alignedModuleHeights}
+                {...syncHoverProps}
                 toolbar={
                   <Button type="button" variant="outline" className="gap-2 text-[11px]" onClick={() => setSelectedJobId(null)}>
                     <RefreshCcw className="h-3.5 w-3.5" />

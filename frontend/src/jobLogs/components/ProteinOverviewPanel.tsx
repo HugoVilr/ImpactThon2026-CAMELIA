@@ -51,6 +51,8 @@ type ProteinOverviewPanelProps = {
   onTogglePhantom?: () => void;
   compactModuleRefs?: Partial<Record<CompactModuleKey, (node: HTMLDivElement | null) => void>>;
   compactModuleHeights?: Partial<Record<CompactModuleKey, number>>;
+  hoveredPae?: { row: number; col: number } | null;
+  onPaeHover?: (row: number | null, col: number | null) => void;
 };
 
 export type CompactModuleKey =
@@ -114,6 +116,8 @@ export function ProteinOverviewPanel({
   onTogglePhantom,
   compactModuleRefs,
   compactModuleHeights,
+  hoveredPae,
+  onPaeHover,
 }: ProteinOverviewPanelProps) {
   const { t } = useTranslation();
   const viewerRef = useRef<ProteinViewerHandle>(null);
@@ -163,13 +167,27 @@ export function ProteinOverviewPanel({
     }
   };
 
+  const paeOriginalSize = outputs?.structural_data.confidence.pae_matrix?.length ?? 1;
+  const paeStep = Math.max(1, Math.ceil(paeOriginalSize / 24));
+
+  useEffect(() => {
+    if (hoveredPae === undefined) return;
+
+    if (hoveredPae) {
+      const { row } = hoveredPae;
+      const startX = row * paeStep + 1;
+      const endX = Math.min((row + 1) * paeStep, paeOriginalSize);
+      viewerRef.current?.highlightResidues(startX, endX);
+    } else {
+      viewerRef.current?.clearHighlight();
+    }
+  }, [hoveredPae, paeStep, paeOriginalSize, viewerReady]);
+
   const structureData = resolveStructureFile(outputs);
   const plddtAverage = resolvePlddtAverage(outputs);
   const confidenceBuckets = resolveConfidenceBuckets(outputs);
   const bucketMax = Math.max(...confidenceBuckets.map((bucket) => bucket.value), 1);
   const paeGrid = downsamplePaeMatrix(outputs?.structural_data.confidence.pae_matrix);
-  const paeOriginalSize = outputs?.structural_data.confidence.pae_matrix?.length ?? 1;
-  const paeStep = Math.max(1, Math.ceil(paeOriginalSize / 24));
   const biologicalData = outputs?.biological_data;
   const secondaryStructure = biologicalData?.secondary_structure_prediction;
   const sequenceProperties = biologicalData?.sequence_properties;
@@ -654,7 +672,12 @@ export function ProteinOverviewPanel({
                             return (
                               <div
                                 key={`${rowIndex}-${colIndex}`}
-                                className="relative z-10 min-h-0 min-w-0 origin-center cursor-crosshair transition-all hover:z-20 hover:scale-[1.3] hover:ring-2 hover:ring-white"
+                                className={cn(
+                                  "relative z-10 min-h-0 min-w-0 origin-center cursor-crosshair transition-all",
+                                  hoveredPae?.row === rowIndex && hoveredPae?.col === colIndex
+                                    ? "z-20 scale-[1.3] ring-2 ring-white"
+                                    : "hover:z-20 hover:scale-[1.3] hover:ring-2 hover:ring-white"
+                                )}
                                 style={{ backgroundColor: resolvePaeCellColor(value) }}
                                 title={t("jobLogs.details.paeCellTooltip", {
                                   startX,
@@ -663,8 +686,14 @@ export function ProteinOverviewPanel({
                                   endY,
                                   error: formatCompactNumber(value, 2),
                                 })}
-                                onMouseEnter={() => viewerRef.current?.highlightResidues(startX, endX)}
-                                onMouseLeave={() => viewerRef.current?.clearHighlight()}
+                                onMouseEnter={() => {
+                                  viewerRef.current?.highlightResidues(startX, endX);
+                                  onPaeHover?.(rowIndex, colIndex);
+                                }}
+                                onMouseLeave={() => {
+                                  viewerRef.current?.clearHighlight();
+                                  onPaeHover?.(null, null);
+                                }}
                                 onClick={() => viewerRef.current?.focusResidues(startX, endX)}
                               />
                             );
