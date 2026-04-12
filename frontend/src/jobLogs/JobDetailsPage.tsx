@@ -6,9 +6,7 @@ import {
   Cpu,
   Database,
   Download,
-  Dna,
   Info,
-  ScanSearch,
   Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -784,7 +782,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
                 <div className="grid gap-4 md:grid-cols-2 mt-4">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <ScanSearch className="h-4 w-4 text-primary" />
                       <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.proteinCat")}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -821,7 +818,6 @@ export function JobDetailsPage({ jobId, initialTab = "viewer" }: JobDetailsPageP
 
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <Dna className="h-4 w-4 text-primary" />
                       <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.annotations")}</p>
                     </div>
                     <div className="rounded-xl border border-border/60 bg-slate-50 px-4 py-3 h-[calc(100%-28px)]">

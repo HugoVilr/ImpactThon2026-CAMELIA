@@ -9,7 +9,6 @@ import {
   Expand,
   Info,
   RotateCcw,
-  ScanSearch,
   Search,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -424,9 +423,8 @@ export function ProteinOverviewPanel({
   const proteinCatalogContextCard = (
     <Card className="surface-shadow border-border/50 bg-card/95">
       <CardContent className="space-y-4 p-5">
-        <div className="flex items-center gap-3">
-          <ScanSearch className="h-5 w-5 text-primary" />
-          <p className="text-lg font-bold text-slate-950">{t("jobLogs.details.proteinCat")}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.proteinCat")}</p>
         </div>
         <div className="grid gap-3 text-sm">
           <div className="rounded-lg border border-border/60 bg-secondary/35 p-3">
@@ -453,9 +451,8 @@ export function ProteinOverviewPanel({
   const annotationsCard = (
     <Card className="surface-shadow border-border/50 bg-card/95">
       <CardContent className="space-y-4 p-5">
-        <div className="flex items-center gap-3">
-          <Dna className="h-5 w-5 text-primary" />
-          <p className="text-lg font-bold text-slate-950">{t("jobLogs.details.annotations")}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t("jobLogs.details.annotations")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {(proteinDetail?.tags ?? []).length > 0 ? (
